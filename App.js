@@ -1,26 +1,50 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
-
-
+import { StyleSheet, Text, View,  } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LandingPage from './components/Landing Page/LandingPage';
+import { LinearGradient } from 'expo-linear-gradient';
+import SigninPage from './components/Sign In page/SigninPage';
 export default function App() {
 
+  const Stack = createNativeStackNavigator();
   return (
-    <View style={styles.container} >
-      <Text>Open up App.js to starddsdsdsft wodsdsrkidsdng on your app!</Text>
+    <>
+ 
+      <NavigationContainer>
+        <Stack.Navigator >
+          {/* <Stack.Screen
+            name = 'landingpage'
+            component={LandingPage}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          /> */}
+          <Stack.Screen
+            name = 'SigninPage'
+            component={SigninPage}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          />
+       
+        </Stack.Navigator>
+      </NavigationContainer>  
 
-      <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#913939',
     alignItems: 'center',
     justifyContent: 'center',
-  },
+  }
+  
+
  
   
 });
