@@ -3,6 +3,10 @@ import { StyleSheet, Text, View, TouchableWithoutFeedback, TouchableOpacity  } f
 import { LinearGradient } from 'expo-linear-gradient';
 
 const LandingPage =({navigation})=>{
+
+    const signinPageButton =()=>{
+      navigation.navigate('SigninPage')
+    }
     return(
         <>
         
@@ -16,11 +20,11 @@ const LandingPage =({navigation})=>{
           >
           <View style={styles.container}>
             {/* textpage */}
-            <Text style={styles.text1}> By tapping ‘Sign in’ you agree to our{' '}
+            <Text style={styles.text1}>By tapping ‘Sign in’ you agree to our{' '}
               <TouchableWithoutFeedback >
                 <Text style={styles.linkText}>Terms</Text>
               </TouchableWithoutFeedback>
-                . Learn how we process your data in our{' '}
+                .                      Learn how we process your data in our{' '}
               <TouchableWithoutFeedback >
                 <Text style={styles.linkText}>Privacy Policy</Text>
               </TouchableWithoutFeedback>{' '}
@@ -35,7 +39,7 @@ const LandingPage =({navigation})=>{
                     <Text  style={{color: "#92A3FD", fontSize: 11,}}>CREATE ACCOUNT</Text>
             </TouchableOpacity>
             {/* sign in button */}
-            <TouchableOpacity style={styles.SignInButton}>
+            <TouchableOpacity onPress={signinPageButton} style={styles.SignInButton}>
                     <Text  style={{color: "white", fontSize: 11,}}>SIGN IN</Text>
             </TouchableOpacity>
 
@@ -60,7 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     marginBottom: 40,
-    width: 270
+    width: 270,
+    textAlign: "center"
   },
   text1:{
     color: "white",
