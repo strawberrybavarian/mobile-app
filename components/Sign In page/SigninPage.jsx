@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
   },
   text1: {
     fontSize: 40,
+
   },
   title: {
     fontSize: 12,

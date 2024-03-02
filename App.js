@@ -6,13 +6,20 @@ import LandingPage from './components/Landing Page/LandingPage';
 import { LinearGradient } from 'expo-linear-gradient';
 import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
-
+import {useFonts} from 'expo-font';
 export default function App() {
 
   const Stack = createNativeStackNavigator();
+  const [fontsLoaded] = useFonts ({
+    'Poppins' : require('./assets/fonts/Poppins.ttf'),
+    'Poppins-SemiBold' : require('./assets/fonts/Poppins-SemiBold.ttf')
+  })
+  if (!fontsLoaded){
+    return undefined
+  }
   return (
     <>
- 
+
       <NavigationContainer>
         <Stack.Navigator initialRouteName="myprofilepage" >
           <Stack.Screen

@@ -5,6 +5,8 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
 import NavigationBar from '../Navigation/NavigationBar';
 
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 
 const MyProfile = ({ navigation }) => {
@@ -21,7 +23,7 @@ const MyProfile = ({ navigation }) => {
           <Text style={styles.title}>My Profile</Text>
         </View>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <FontAwesome5 name="ellipsis-h" size={15} />
+          <FontAwesome5  name="ellipsis-h" size={15} />
         </TouchableOpacity>
 
       </View>
@@ -61,13 +63,13 @@ const MyProfile = ({ navigation }) => {
     {/* Settings Container */}
       <View style={styles.container3}>
         <View style={styles.settings}>
-        <Text> Settings</Text>
+        <Text style={{ fontFamily: 'Poppins', fontSize: 14}}> Settings</Text>
             <View style={styles.settingContainer}>
 
                 <TouchableOpacity style={styles.settingItem}>
                     <View style={styles.container31}> 
-                        <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Language</Text>
+                        <FontAwesome name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Language</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -75,7 +77,7 @@ const MyProfile = ({ navigation }) => {
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Location</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -83,7 +85,7 @@ const MyProfile = ({ navigation }) => {
                 <TouchableOpacity style={styles.settingItem}>
                     <View style={styles.container31}> 
                         <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Other</Text>
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Other</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -101,7 +103,7 @@ const MyProfile = ({ navigation }) => {
                 <TouchableOpacity style={styles.settingItem4}>
                     <View style={styles.container314}> 
                         <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>About Us</Text>
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>About Us</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -109,73 +111,25 @@ const MyProfile = ({ navigation }) => {
                 <TouchableOpacity style={styles.settingItem4}>
                 <View style={styles.container314}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Customer Service</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
+                        <Text>Invite Other</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
+                        <Text>Logout</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
-                <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
+                
 
                 
 
@@ -195,18 +149,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 10,
-    marginTop: 35,
+    padding: 15,
+    marginTop: 30,
+  },
+  title:{
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 20,
   },
   con1: {
-    marginBottom: 1,
   },
   container2: {
-    marginTop: 10,
+    marginTop: -10,
     flexDirection: "row",
     height: 50,
     padding: 10,
+    marginLeft: 5,
+    marginRight: 5,
     alignItems: "center",
+    marginBottom: 10, 
   },
   container21: {
     flex: 1,
@@ -227,13 +187,14 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "white",
-    fontSize: 12,
+    fontSize: 9,
+    fontFamily: 'Poppins',
   },
   textJoin:{
     fontSize: 9,
   },
   container3: {
-    marginTop: 15,
+  
     padding: 10,
     alignItems: "center",
     flex: 1,
@@ -256,7 +217,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   settingContainer: {
-    padding: 10,
+    padding: 2,
     flex: 1, 
   },
   container31: {
