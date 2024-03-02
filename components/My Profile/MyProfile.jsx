@@ -1,8 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
+import NavigationBar from '../Navigation/NavigationBar';
+
+
 
 const MyProfile = ({ navigation }) => {
 
@@ -12,7 +15,7 @@ const MyProfile = ({ navigation }) => {
 
   return (
     <>
-    
+      <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.con1}>
           <Text style={styles.title}>My Profile</Text>
@@ -52,20 +55,23 @@ const MyProfile = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-
+            
+    
+  
     {/* Settings Container */}
       <View style={styles.container3}>
         <View style={styles.settings}>
-        <Text style={{}}> Settings</Text>
+        <Text> Settings</Text>
             <View style={styles.settingContainer}>
+
                 <TouchableOpacity style={styles.settingItem}>
                     <View style={styles.container31}> 
                         <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
                         <Text>Language</Text>
                     </View>
-                    
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
+
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
@@ -73,12 +79,21 @@ const MyProfile = ({ navigation }) => {
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
+
+                <TouchableOpacity style={styles.settingItem}>
+                    <View style={styles.container31}> 
+                        <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Other</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                
             </View>
         </View>
       </View>
     
-    {/* Others Container */}
-      <View style={styles.container4}>
+    {/* Others Container  */}
+       <View style={styles.container4}>
         <View style={styles.settings4}>
         <Text style={{}}> Others</Text>
             <View style={styles.settingContainer4}>
@@ -98,26 +113,77 @@ const MyProfile = ({ navigation }) => {
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
-
-                <TouchableOpacity style={styles.settingItem4}>
-                <View style={styles.container314}> 
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
+                        <Text>Location</Text>
+                    </View>
+                    <Entypo name="chevron-thin-right" size={11} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.settingItem}>
+                <View style={styles.container31}> 
                         <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
                         <Text>Location</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.settingItem4}>
-                <View style={styles.container314}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Location</Text>
-                    </View>
-                    <Entypo name="chevron-thin-right" size={11} />
-                </TouchableOpacity>
+                
 
-            </View>
-        </View>
+            </View> 
+         </View> 
       </View>
+      </ScrollView>
+      <NavigationBar></NavigationBar>
     </>
   )
 }
@@ -170,10 +236,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     padding: 10,
     alignItems: "center",
+    flex: 1,
   },
   settings: {
     width: "98%",
-    height: 125,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     shadowColor: "#1D242A12",
@@ -187,49 +253,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    padding: 5,
   },
-  settingContainer:{
+  settingContainer: {
     padding: 10,
+    flex: 1, 
   },
-  container31:{
+  container31: {
     flexDirection: "row",
     alignItems: 'center',
-   
   },
-//   container 4
+
+//   Container 4
   container4: {
     padding: 10,
     alignItems: "center",
   },
   settings4: {
     width: "98%",
-    height: 190,
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     shadowColor: "#1D242A12",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 40,
-    elevation: 40,
+
     padding: 20,
   },
   settingItem4: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    padding: 5,
   },
-  settingContainer4:{
+  settingContainer4: {
     padding: 10,
+    flex: 1,
   },
-  container314:{
+  container314: {
     flexDirection: "row",
     alignItems: 'center',
-   
-  }
+  },
 
-
-
+  scrollContainer: {
+    flexGrow: 1,
+  },
 
 });
