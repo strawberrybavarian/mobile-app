@@ -68,24 +68,24 @@ const MyProfile = ({ navigation }) => {
 
                 <TouchableOpacity style={styles.settingItem}>
                     <View style={styles.container31}> 
-                        <FontAwesome name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Language</Text>
+                        <FontAwesome name="globe" size={14} style={{textAlign:'center', alignItems:'center', justifyContent: 'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12, color: '#888888'}}>Language</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Location</Text>
+                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12, color: '#888888' }}>Location</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem}>
                     <View style={styles.container31}> 
-                        <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Other</Text>
+                        <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12, color: '#888888'}}>Other</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -102,30 +102,30 @@ const MyProfile = ({ navigation }) => {
 
                 <TouchableOpacity style={styles.settingItem4}>
                     <View style={styles.container314}> 
-                        <Entypo name="globe" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>About Us</Text>
+                        <FontAwesome name="exclamation-circle" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888' }}>About Us</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem4}>
                 <View style={styles.container314}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text style={{ fontFamily: 'Poppins', fontSize: 12}}>Customer Service</Text>
+                        <FontAwesome5 name="headphones" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888'}}>Customer Service</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Invite Other</Text>
+                        <FontAwesome5 name="envelope-open-text" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888'}}>Invite Other</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.settingItem}>
                 <View style={styles.container31}> 
-                        <Entypo name="map" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5,}} />
-                        <Text>Logout</Text>
+                        <FontAwesome name="sign-out" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#EB3800'}} />
+                        <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888'}} >Logout</Text>
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   },
   textJoin:{
     fontSize: 9,
+    fontFamily: 'Poppins',
   },
   container3: {
   
@@ -221,14 +222,17 @@ const styles = StyleSheet.create({
     flex: 1, 
   },
   container31: {
+    flex: 1,
     flexDirection: "row",
     alignItems: 'center',
+    justifyContent: 'flex-start'
   },
 
 //   Container 4
   container4: {
     padding: 10,
     alignItems: "center",
+    flex: 1,
   },
   settings4: {
     width: "98%",
@@ -238,7 +242,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 40,
-
+    elevation: 40,
     padding: 20,
   },
   settingItem4: {
@@ -248,12 +252,14 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   settingContainer4: {
-    padding: 10,
-    flex: 1,
+    padding: 2,
+    flex: 1, 
   },
   container314: {
+    flex: 1,
     flexDirection: "row",
     alignItems: 'center',
+    justifyContent: 'flex-start'
   },
 
   scrollContainer: {
