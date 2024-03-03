@@ -54,8 +54,11 @@ const DoctorSpecialty = ({ navigation }) => {
           style={{ width: 42, height: 42, borderRadius: 50 }}
         />
         <View style={styles.container21}>
-          <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 13,}}>Analyn Santos</Text>
           <View style={styles.container211}>
+            <Text style={{fontFamily: 'Poppins', fontSize: 9,}}>Welcome!</Text>
+          </View>
+          <View style={styles.container211}>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 13,}}>Analyn Santos</Text>
           </View>
         </View>
 
