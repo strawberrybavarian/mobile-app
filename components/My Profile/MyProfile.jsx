@@ -11,8 +11,8 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const MyProfile = ({ navigation }) => {
 
-  const signinPageButton = () => {
-    navigation.navigate('')
+  const logoutButton = () => {
+    navigation.navigate('landingpage')
   }
 
   return (
@@ -122,12 +122,12 @@ const MyProfile = ({ navigation }) => {
                     </View>
                     <Entypo name="chevron-thin-right" size={11} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.settingItem}>
+                <TouchableOpacity style={styles.settingItem} onPress={logoutButton}>
                 <View style={styles.container31}> 
                         <FontAwesome name="sign-out" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#EB3800'}} />
                         <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888'}} >Logout</Text>
                     </View>
-                    <Entypo name="chevron-thin-right" size={11} />
+                
                 </TouchableOpacity>
                 
 

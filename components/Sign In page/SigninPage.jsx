@@ -32,13 +32,12 @@ const SigninPage = ({ navigation }) => {
           <Text style={styles.title}>Create Account</Text>
         </View>
       </View>
-      <View style={[styles.textcon]}>
+      <View style={styles.textcon}>
           <Text style={styles.text1}>Sign In to Your</Text>
-          <Text style={styles.text1}>Accounts</Text>
+          <Text style={styles.text1}>Account</Text>
         </View>
       <View style={styles.con2}>
         <TextInput style={styles.input} placeholder="Email" />
-
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
@@ -93,17 +92,16 @@ const styles = StyleSheet.create({
     marginTop: 35,
   },
   con1: {
-    marginBottom: 1,
+    
   },
+
   textcon:{
-    padding: 10,
-    marginTop: 10,
-
-
+    paddingLeft: 10,
+    marginTop: 20,
   },
   con2: {
     flexDirection: "column",
-    marginTop: 40,
+    marginTop: 25,
     paddingLeft: 10,
     paddingRight: 10,
   },
@@ -112,13 +110,17 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   text1: {
-    fontSize: 40,
 
+    fontSize: 35,
+    fontFamily: 'Poppins-SemiBold',
+    lineHeight: 45,
   },
   title: {
     fontSize: 12,
-    fontWeight: "bold",
+
     color: "#92A3FD",
+    fontFamily: 'Poppins-SemiBold',
+    
   },
 
   input: {
@@ -128,21 +130,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     marginVertical: 10,
     paddingLeft: 10,
-    fontSize: 12,
+    fontSize: 10,
+    fontFamily: 'Poppins',
   },
   passwordContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     width: "100%",
     borderRadius: 12,
     backgroundColor: "#d9d9d9",
     marginVertical: 10,
     paddingLeft: 10,
+   
   },
   passwordInput: {
     flex: 1,
     height: 40,
-    fontSize: 12,
+    fontSize: 10,
+    fontFamily: 'Poppins'
   },
   eyeIconContainer: {
     padding: 10,
@@ -152,10 +158,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 11,
     textAlign: "center",
+    marginTop: 1,
+    fontFamily: 'Poppins',
   },
   linkText:{
     textAlign: "center",
     marginTop:10,
     fontSize: 9,
+    fontFamily: 'Poppins',
   },
 });

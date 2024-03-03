@@ -1,14 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View,  } from 'react-native';
+import { StyleSheet, StatusBar} from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LandingPage from './components/Landing Page/LandingPage';
-import { LinearGradient } from 'expo-linear-gradient';
+import {useFonts} from 'expo-font';
+
 import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
-import {useFonts} from 'expo-font';
-export default function App() {
+import LandingPage from './components/Landing Page/LandingPage';
+import DoctorSpecialty from './components/Doctor Specialty/DoctorSpecialty';
 
+
+export default function App() {
   const Stack = createNativeStackNavigator();
   const [fontsLoaded] = useFonts ({
     'Poppins' : require('./assets/fonts/Poppins.ttf'),
@@ -19,9 +20,9 @@ export default function App() {
   }
   return (
     <>
-
+      <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="myprofilepage" >
+        <Stack.Navigator initialRouteName="doctorspecialty" >
           <Stack.Screen
             name = 'landingpage'
             component={LandingPage}
@@ -41,6 +42,14 @@ export default function App() {
           <Stack.Screen
             name = 'myprofilepage'
             component={MyProfile}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name = 'doctorspecialty'
+            component={DoctorSpecialty}
             options={{
               title: 'Welcome',
               headerShown: false
