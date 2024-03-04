@@ -7,6 +7,10 @@ const LandingPage =({navigation})=>{
     const signinPageButton =()=>{
       navigation.navigate('SigninPage')
     }
+
+    const createAccountPageButton =()=>{
+      navigation.navigate('createaccount')
+    }
     return(
         <>
         
@@ -35,12 +39,12 @@ const LandingPage =({navigation})=>{
                 .
             </Text>
             {/* create account button */}
-            <TouchableOpacity style={styles.CreateButton}>
-                    <Text  style={{color: "#92A3FD", fontSize: 11, fontFamily: 'Poppins', marginTop: 1}}>CREATE ACCOUNT</Text>
+            <TouchableOpacity onPress={createAccountPageButton} style={styles.CreateButton}>
+                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>CREATE ACCOUNT</Text>
             </TouchableOpacity>
             {/* sign in button */}
             <TouchableOpacity onPress={signinPageButton} style={styles.SignInButton}>
-                    <Text  style={{color: "white", fontSize: 11, fontFamily: 'Poppins', marginTop: 1}}>SIGN IN</Text>
+                    <Text  style={{color: "white", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN IN</Text>
             </TouchableOpacity>
 
             <TouchableWithoutFeedback>
@@ -63,14 +67,14 @@ const styles = StyleSheet.create({
     flex: 1, 
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginBottom: 40,
+    marginBottom: 70,
     width: 270,
     textAlign: "center"
   },
   text1:{
     color: "white",
     textAlign: "center",
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: 'Poppins',
   },
   linkText: {
@@ -79,8 +83,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold'
   },
   CreateButton: {
-    width: 250,
-    height: 35,
+    width: 300,
+    height: 45,
     backgroundColor: "#FFFFFF",
     borderRadius: 40,
     alignItems: 'center',
@@ -88,8 +92,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   SignInButton: {
-    width: 250,
-    height: 35,
+    width: 300,
+    height: 45,
     borderColor: "#FFFFFF",
     borderRadius: 40,
     borderWidth: 1,
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
   },
   TroubleSigningIn: {
     marginTop: 10,
-    fontSize: 9,
+    fontSize: 12,
     color: 'white',
     fontFamily: 'Poppins-SemiBold'
   },

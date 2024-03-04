@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, Picker, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
-
-const HealthRiskAssessmentForm = () => {
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+const HealthRiskAssessmentForm = ({navigation}) => {
   const [smoking, setSmoking] = useState('');
   const [physicalActivity, setPhysicalActivity] = useState('');
   const [sleepHours, setSleepHours] = useState('');
@@ -28,6 +28,8 @@ const HealthRiskAssessmentForm = () => {
       allergies,
       recentSneezingCoughing,
     });
+
+    navigation.navigate('doctorspecialty')
   };
 
   const screenHeight = Dimensions.get('window').height;
@@ -39,18 +41,18 @@ const HealthRiskAssessmentForm = () => {
 
         {/* Question 1 */}
         <View style={styles.questionContainer}>
-          <Text>1. Do you smoke or use tobacco products?</Text>
-          <Picker
-            selectedValue={smoking}
-            onValueChange={(value) => setSmoking(value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select" value="" />
-            <Picker.Item label="Yes, regularly" value="Yes, regularly" />
-            <Picker.Item label="Yes, occasionally" value="Yes, occasionally" />
-            <Picker.Item label="No" value="No" />
-          </Picker>
-        </View>
+      <Text>1. Do you smoke or use tobacco products?</Text>
+      <Picker
+        selectedValue={smoking}
+        onValueChange={(value) => setSmoking(value)}
+        style={styles.picker}
+      >
+        <Picker.Item label="Select" value="" />
+        <Picker.Item label="Yes, regularly" value="Yes, regularly" />
+        <Picker.Item label="Yes, occasionally" value="Yes, occasionally" />
+        <Picker.Item label="No" value="No" />
+      </Picker>
+    </View>
 
         {/* Question 2 */}
         <View style={styles.questionContainer}>
@@ -215,6 +217,7 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 30,
   },
   header: {
     fontSize: 20,

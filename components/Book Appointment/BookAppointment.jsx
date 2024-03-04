@@ -49,7 +49,7 @@ const BookAppointment = ({ navigation }) => {
 
   const handleNext = () => {
     if (selectedDate && selectedHour) {
-      navigation.navigate('Appointment', { date: selectedDate, hour: selectedHour });
+      navigation.navigate('healthassess', { date: selectedDate, hour: selectedHour });
     } else {
       // Show an alert or error message
     }
@@ -74,6 +74,12 @@ const BookAppointment = ({ navigation }) => {
 
   const backButton = () => {
     navigation.navigate('searchappointment')
+  }
+
+ 
+
+  const nextButton = () => {
+    navigation.navigate('healthassess')
   }
   return (
     <>
@@ -149,7 +155,7 @@ const BookAppointment = ({ navigation }) => {
 
       <TouchableOpacity 
         style={styles.nextButton} 
-        onPress={handleNext}
+        onPress={nextButton}
       >
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>

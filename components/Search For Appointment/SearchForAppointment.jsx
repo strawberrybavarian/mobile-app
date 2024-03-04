@@ -130,7 +130,7 @@ const SearchForAppointment = ({navigation}) => {
         <NavigationBar/>
       </View>
 
-      <View style={{marginTop:120}}>
+      <View style={{marginTop:140}}>
    
       </View>
     </>
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     
   },
   container: {
-    marginTop: 60,
+    marginTop: 40,
     padding: 10,
     flex: 1,
  
@@ -245,9 +245,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
 
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 50,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
     elevation: 2,
     alignSelf: 'center',
   },

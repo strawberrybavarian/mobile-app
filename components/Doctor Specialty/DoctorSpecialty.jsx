@@ -20,6 +20,14 @@ const specialtiesData =
   { id: 6, name: 'Skin & Dermatology', image: require('../../assets/pictures/Dermatology.png') },
   { id: 7, name: 'Brain & Nerves', image: require('../../assets/pictures/Brain.png') },
   { id: 8, name: 'Stomach, Digestion &  Gastroenterology', image: require('../../assets/pictures/Stomach.png') },
+  { id: 1, name: 'Primary Care & General Medicine', image: require('../../assets/pictures/Stethoscope.png') },
+  { id: 2, name: "OB-GYN's & Women's Health", image: require('../../assets/pictures/FemaleReproductive.png') },
+  { id: 3, name: 'Pediatrics', image: require('../../assets/pictures/Pedia.png') }, 
+  { id: 4, name: 'Heart & Cardiology', image: require('../../assets/pictures/Heart.png') },
+  { id: 5, name: 'Eye & Vision', image: require('../../assets/pictures/Eye.png') },
+  { id: 6, name: 'Skin & Dermatology', image: require('../../assets/pictures/Dermatology.png') },
+  { id: 7, name: 'Brain & Nerves', image: require('../../assets/pictures/Brain.png') },
+  { id: 8, name: 'Stomach, Digestion &  Gastroenterology', image: require('../../assets/pictures/Stomach.png') },
 
 ];
 

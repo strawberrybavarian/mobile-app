@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   TextInput,
+  Alert
 } from "react-native";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -13,13 +14,20 @@ import { useState, useEffect } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 const SigninPage = ({ navigation }) => {
   const [isPasswordVisible, setPasswordVisibility] = useState(true);
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const togglePasswordVisibility = () => {
     setPasswordVisibility(!isPasswordVisible);
   };
 
   const doctorSpecialty = () => {
-    navigation.navigate('doctorspecialty')
+    
+    if (email === '' || password === '' ) {
+      Alert.alert('Please fill in all fields.');
+    }
+    else{
+      navigation.navigate('doctorspecialty')
+    }
   }
   return (
     <>
@@ -36,17 +44,21 @@ const SigninPage = ({ navigation }) => {
           <Text style={styles.title}>Create Account</Text>
         </View>
       </View>
+
       <View style={styles.textcon}>
           <Text style={styles.text1}>Sign In to Your</Text>
           <Text style={styles.text1}>Account</Text>
-        </View>
+      </View>
+
       <View style={styles.con2}>
-        <TextInput style={styles.input} placeholder="Email" />
+        <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} />
+        
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
             placeholder="Password"
             secureTextEntry={isPasswordVisible}
+            value={password} onChangeText={setPassword}
           />
           <View style={styles.eyeIconContainer}>
             <TouchableWithoutFeedback onPress={togglePasswordVisibility}>
@@ -64,9 +76,10 @@ const SigninPage = ({ navigation }) => {
           colors={["#92A3FD", "#9DCEFF"]}
           style={{
             width: "100%",
-            height: 35,
+            height: 45,
             borderRadius: 40,
             marginTop: 10, 
+      
           }}
         >
           <TouchableOpacity
@@ -77,7 +90,6 @@ const SigninPage = ({ navigation }) => {
           </TouchableOpacity>
         </LinearGradient>
 
-       
         <TouchableWithoutFeedback style={{}}>
                 <Text style={styles.linkText}>Forgot the Password?</Text>
         </TouchableWithoutFeedback>
@@ -93,22 +105,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 10,
-    marginTop: 35,
+    paddingHorizontal: 30,
+    marginTop: 55,
   },
   con1: {
     
   },
 
   textcon:{
-    paddingLeft: 10,
-    marginTop: 20,
+    paddingLeft: 30,
+    marginTop: 50,
   },
   con2: {
     flexDirection: "column",
     marginTop: 25,
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingLeft: 30,
+    paddingRight: 30,
   },
   con3: {
     alignItems: "center",
@@ -116,12 +128,12 @@ const styles = StyleSheet.create({
   },
   text1: {
 
-    fontSize: 35,
+    fontSize: 45,
     fontFamily: 'Poppins-SemiBold',
-    lineHeight: 45,
+    lineHeight: 55,
   },
   title: {
-    fontSize: 12,
+    fontSize: 15,
 
     color: "#92A3FD",
     fontFamily: 'Poppins-SemiBold',
@@ -129,13 +141,13 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    height: 40,
+    height: 50,
     width: "100%",
     borderRadius: 12,
     backgroundColor: "#d9d9d9",
     marginVertical: 10,
     paddingLeft: 10,
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: 'Poppins',
   },
   passwordContainer: {
@@ -143,7 +155,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: "#d9d9d9",
     marginVertical: 10,
     paddingLeft: 10,
@@ -151,8 +163,8 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    height: 40,
-    fontSize: 10,
+    height: 50,
+    fontSize: 13,
     fontFamily: 'Poppins'
   },
   eyeIconContainer: {
@@ -161,7 +173,7 @@ const styles = StyleSheet.create({
 
   textButton: {
     color: "white",
-    fontSize: 11,
+    fontSize: 15,
     textAlign: "center",
     marginTop: 1,
     fontFamily: 'Poppins',

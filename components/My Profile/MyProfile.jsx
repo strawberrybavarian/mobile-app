@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, Alert, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -12,8 +12,13 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 const MyProfile = ({ navigation }) => {
 
   const logoutButton = () => {
-    navigation.navigate('landingpage')
-  }
+    const shouldLogout = window.confirm('Are you sure you want to log out?');
+    if(shouldLogout){
+      navigation.navigate('landingpage')
+    }
+  };
+
+
   const profileFormEdit = () => {
     navigation.navigate('profileform')
   }
@@ -104,7 +109,7 @@ const MyProfile = ({ navigation }) => {
             <View style={styles.settingContainer4}>
 
                 <TouchableOpacity style={styles.settingItem4}>
-                    <View style={styles.container314}> 
+                    <View style={styles.container31}> 
                         <FontAwesome name="exclamation-circle" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
                         <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888' }}>About Us</Text>
                     </View>
@@ -112,7 +117,7 @@ const MyProfile = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem4}>
-                <View style={styles.container314}> 
+                <View style={styles.container31}> 
                         <FontAwesome5 name="headphones" size={14} style={{textAlign:'center', alignItems:'center',  marginRight: 5, color: '#92A3FD'}} />
                         <Text style={{ fontFamily: 'Poppins', fontSize: 12,color: '#888888'}}>Customer Service</Text>
                     </View>
@@ -226,6 +231,8 @@ const styles = StyleSheet.create({
   },
   container31: {
     flex: 1,
+    paddingTop: 10,
+    
     flexDirection: "row",
     alignItems: 'center',
     justifyContent: 'flex-start'
