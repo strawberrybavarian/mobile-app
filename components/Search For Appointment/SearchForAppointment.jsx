@@ -110,8 +110,6 @@ const SearchForAppointment = () => {
           {uniqueSpecialties.map((specialty) => renderSpecialtyOval(specialty))}
         </View>
       </View>
-      </ScrollView>
-      
       <View style={styles.appointmentBox}>
         <FlatList
           data={filteredAppointments}
@@ -158,7 +156,8 @@ const styles = StyleSheet.create({
   },
   allSearch: {
     flexDirection: "row",
-    alignItems: "center",
+  alignItems: "center",
+  marginBottom: 16, // Add margin bottom
   },
   searchInputContainer: {
     flexDirection: 'row',
@@ -175,9 +174,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   filterContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 16,
   },
   specialtyOvalContainer: {
     flexDirection: "row",
@@ -200,28 +199,31 @@ const styles = StyleSheet.create({
   selectedText: {
     color: 'white',
   },
-  appointmentBox: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    overflow: "hidden",
-  },
   appointmentItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    backgroundColor: '#f9f5ff',
+    width: '100%',
+    height: 120,
+    borderRadius: 20,
+    shadowColor: "#000",
+    flexDirection:'row',
+    alignItems: 'center',
+    shadowOffset: {width: 0, height: 2, },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+    marginBottom:8
   },
   doctorImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 16,
+    marginLeft: 16,
+    alignItems: 'center'
   },
   textContainer: {
     flex: 1,
     flexDirection: "column",
+    marginLeft: 15
   },
   doctorName: {
     fontSize: 18,
