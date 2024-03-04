@@ -7,6 +7,9 @@ import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
 import LandingPage from './components/Landing Page/LandingPage';
 import DoctorSpecialty from './components/Doctor Specialty/DoctorSpecialty';
+import SearchForAppointment from './components/Search For Appointment/SearchForAppointment';
+import BookAppointment from './components/Book Appointment/BookAppointment';
+import ProfileForm from './components/Profile Form/ProfileForm';
 
 
 export default function App() {
@@ -50,6 +53,30 @@ export default function App() {
           <Stack.Screen
             name = 'doctorspecialty'
             component={DoctorSpecialty}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name = 'searchappointment'
+            component={SearchForAppointment}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name = 'bookappointment'
+            component={BookAppointment}
+            options={{
+              title: 'Welcome',
+              headerShown: false
+            }}
+          />
+          <Stack.Screen
+            name = 'profileform'
+            component={ProfileForm}
             options={{
               title: 'Welcome',
               headerShown: false
