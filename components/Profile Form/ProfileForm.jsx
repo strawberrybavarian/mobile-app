@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Picker, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
+import { ScrollView } from 'react-native-web';
+import Entypo from "@expo/vector-icons/Entypo";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   <View style={styles.inputContainer}>
@@ -14,7 +17,7 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   </View>
 );
 
-const ProfileForm = () => {
+const ProfileForm = ({navigation}) => {
   const [fullName, setFullName] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [email, setEmail] = useState('');
@@ -28,7 +31,6 @@ const ProfileForm = () => {
     console.log('Email:', email);
     console.log('Phone Number:', phoneNumber);
     console.log('Gender:', gender);
-    // Handle saving profile data (e.g., send data to server or update local storage)
   };
 
   const handleDateChange = (date) => {
@@ -38,13 +40,24 @@ const ProfileForm = () => {
 
   return (
     <>
+    <ScrollView>
+
+    
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.arrowButton}>
-          <Text style={styles.arrowText}>&lt;</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Fill Profile</Text>
+      <TouchableOpacity
+              style={styles.arrowButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Entypo name="chevron-thin-left" size={14} />
+            </TouchableOpacity>
+            <View style={{justifyContent:'center', width:"83%"}}>
+            <Text style={styles.title}>Fill Profile</Text>
       </View>
+         
+      </View>
+
+      
 
       {/* Profile Picture */}
       <Image
@@ -106,22 +119,37 @@ const ProfileForm = () => {
         <Text style={styles.pickerLabel}>Select Gender</Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
-        <Text style={styles.buttonText}>Continue</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={styles.button}>
+          <LinearGradient
+            start={{ x: 1, y: 0 }}
+            end={{ x: 0, y: 2 }}
+            colors={["#92A3FD", "#9DCEFF"]}
+            style={{
+              width: "100%",
+              height: 40,
+              borderRadius: 40,
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+            <Text style={styles.buttonText}>Continue</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+  
     </View>
+    </ScrollView>
     </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 20,
     padding: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+
   },
   arrowButton: {
     padding: 10,
@@ -133,7 +161,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: 20,
+    textAlign: 'center',
+   
   },
   profilePicture: {
     width: 100,
@@ -141,6 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignSelf: 'center',
     marginBottom: 20,
+    marginTop: 20,
   },
   inputContainer: {
     position: 'relative',
@@ -150,6 +180,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     position: 'absolute',
     top: 8,
+    marginBottom: 5,
     left: 14,
     zIndex: 1,
     color: 'gray',
@@ -161,7 +192,8 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 15,
-    padding: 8,
+    paddingLeft: 18,
+    paddingTop: 15,
   },
   calendarContainer: {
     alignItems: 'center',
@@ -182,6 +214,9 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     backgroundColor: 'transparent',
     zIndex: 1,
+    paddingLeft: 13,
+    paddingTop: 15,
+    paddingRight: 15,
   },
   pickerLabel: {
     fontSize: 12,
@@ -194,10 +229,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   button: {
-    backgroundColor: '#9dceff',
-    borderRadius: 15,
-    padding: 15,
-    alignItems: 'center',
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "",
   },
   buttonText: {
     color: 'white',

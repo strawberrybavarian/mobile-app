@@ -17,6 +17,10 @@ const SigninPage = ({ navigation }) => {
   const togglePasswordVisibility = () => {
     setPasswordVisibility(!isPasswordVisible);
   };
+
+  const doctorSpecialty = () => {
+    navigation.navigate('doctorspecialty')
+  }
   return (
     <>
       {/* Header */}
@@ -67,6 +71,7 @@ const SigninPage = ({ navigation }) => {
         >
           <TouchableOpacity
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            onPress={doctorSpecialty}
           >
             <Text style={styles.textButton}>SIGN IN</Text>
           </TouchableOpacity>

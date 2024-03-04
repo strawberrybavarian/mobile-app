@@ -25,64 +25,14 @@ export default function App() {
     <>
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="searchappointment" >
-          <Stack.Screen
-            name = 'landingpage'
-            component={LandingPage}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'SigninPage'
-            component={SigninPage}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'myprofilepage'
-            component={MyProfile}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'doctorspecialty'
-            component={DoctorSpecialty}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'searchappointment'
-            component={SearchForAppointment}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'bookappointment'
-            component={BookAppointment}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-          <Stack.Screen
-            name = 'profileform'
-            component={ProfileForm}
-            options={{
-              title: 'Welcome',
-              headerShown: false
-            }}
-          />
-       
+      <Stack.Navigator initialRouteName="searchappointment" screenOptions={{ headerShown: false }}>
+          <Stack.Screen name='landingpage' component={LandingPage} />
+          <Stack.Screen name='SigninPage' component={SigninPage} />
+          <Stack.Screen name='myprofilepage' component={MyProfile} />
+          <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
+          <Stack.Screen name='searchappointment' component={SearchForAppointment} />
+          <Stack.Screen name='bookappointment' component={BookAppointment} />
+          <Stack.Screen name='profileform' component={ProfileForm} />
         </Stack.Navigator>
       </NavigationContainer>  
 

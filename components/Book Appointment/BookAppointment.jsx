@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../assets/pictures/Doc.png';
-
+import NavigationBar from '../Navigation/NavigationBar';
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
   const totalStars = 5;
   const filledStars = Math.floor(rating);
@@ -72,6 +72,7 @@ const BookAppointment = ({ navigation }) => {
   }, []);
 
   return (
+    <>
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.arrowButton}>
@@ -143,6 +144,8 @@ const BookAppointment = ({ navigation }) => {
         <Text style={styles.nextButtonText}>Next</Text>
       </TouchableOpacity>
     </ScrollView>
+                <NavigationBar/>
+    </>
   );
 };
 

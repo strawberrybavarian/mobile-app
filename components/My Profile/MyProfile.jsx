@@ -14,6 +14,9 @@ const MyProfile = ({ navigation }) => {
   const logoutButton = () => {
     navigation.navigate('landingpage')
   }
+  const profileFormEdit = () => {
+    navigation.navigate('profileform')
+  }
 
   return (
     <>
@@ -41,7 +44,7 @@ const MyProfile = ({ navigation }) => {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.editButton}>
+        <TouchableOpacity style={styles.editButton} onPress={profileFormEdit}>
           <LinearGradient
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 2 }}
