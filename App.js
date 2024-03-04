@@ -13,6 +13,7 @@ import SearchForAppointment from './components/Search For Appointment/SearchForA
 import BookAppointment from './components/Book Appointment/BookAppointment';
 import ProfileForm from './components/Profile Form/ProfileForm';
 import CreateAccount from './components/Create Account/CreateAccount';
+import HealthRiskAssessmentForm from './components/Health Assessment Form/HealthRiskAssessmentForm';
 
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           <Stack.Screen name='myprofilepage' component={MyProfile} />
           <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />
+          <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} />
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
