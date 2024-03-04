@@ -34,7 +34,27 @@ const Doctors =()=>{
         <Image
         style={[styles.filter1]}
         contentFit="cover"
-        source={require("../assets/doc.png")}/> 
+        source={require("../assets/Doc.png")}/> 
+        </TouchableOpacity>
+       </View>
+       <View style={{flexDirection:'row', alignItems:'center'}}>
+       <TouchableOpacity style={styles.box1}>
+        <Text style={styles.buttonText}>Dr. Ana Santos </Text>
+        <Text style={styles.buttonText1}>NeuroSurgeon/Apex </Text>
+        <Image
+        style={[styles.filter1]}
+        contentFit="cover"
+        source={require("../assets/Doc.png")}/> 
+        </TouchableOpacity>
+       </View>
+       <View style={{flexDirection:'row', alignItems:'center'}}>
+       <TouchableOpacity style={styles.box1}>
+        <Text style={styles.buttonText}>Dr. Ana Santos </Text>
+        <Text style={styles.buttonText1}>NeuroSurgeon/Apex </Text>
+        <Image
+        style={[styles.filter1]}
+        contentFit="cover"
+        source={require("../assets/Doc.png")}/> 
         </TouchableOpacity>
        </View>
       </>
