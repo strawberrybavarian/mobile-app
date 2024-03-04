@@ -2,6 +2,8 @@ import { StyleSheet, StatusBar} from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {useFonts} from 'expo-font';
+import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
+
 
 import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
@@ -10,6 +12,7 @@ import DoctorSpecialty from './components/Doctor Specialty/DoctorSpecialty';
 import SearchForAppointment from './components/Search For Appointment/SearchForAppointment';
 import BookAppointment from './components/Book Appointment/BookAppointment';
 import ProfileForm from './components/Profile Form/ProfileForm';
+import CreateAccount from './components/Create Account/CreateAccount';
 
 
 export default function App() {
@@ -33,6 +36,7 @@ export default function App() {
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
+          <Stack.Screen name='createaccount' component={CreateAccount}/>
         </Stack.Navigator>
       </NavigationContainer>  
 
