@@ -18,6 +18,7 @@ import BookAppointment from './components/Book Appointment/BookAppointment';
 import ProfileForm from './components/Profile Form/ProfileForm';
 import CreateAccount from './components/Create Account/CreateAccount';
 import HealthRiskAssessmentForm from './components/Health Assessment Form/HealthRiskAssessmentForm';
+import Upcoming from './components/Doctors/Upcoming';
 
 
 export default function App() {
@@ -50,7 +51,7 @@ export default function App() {
 
       <BottomTab.Navigator>
           <BottomTab.Screen name="Home" component={Home} />
-          <BottomTab.Screen name="Appointment" component={Appointment} />
+          <BottomTab.Screen name="Appointment" component={Upcoming} />
           <BottomTab.Screen name="Doctors" component={Doctors} options={{title: 'Doctor',
                 headerShown: false}}/>
           <BottomTab.Screen name="Profile" component={Profile} />
