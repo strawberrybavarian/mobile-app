@@ -4,7 +4,8 @@ import { View, TextInput, FlatList, Text, StyleSheet, TouchableOpacity, Image } 
 // Import doctor images from assets
 import doctorImage1 from '../../assets/pictures/Doc.png';
 import magnify from '../../assets/pictures/magni.png';
-
+import { ScrollView } from "react-native-web";
+import NavigationBar from '../Navigation/NavigationBar';
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
   const totalStars = 5;
   const filledStars = Math.floor(rating);
@@ -82,6 +83,7 @@ const SearchForAppointment = () => {
   );
 
   return (
+    <>
     <View style={styles.container}>
       <View style={styles.allSearch}>
         <TouchableOpacity style={styles.arrowButton}>
@@ -100,13 +102,16 @@ const SearchForAppointment = () => {
           />
         </View>
       </View>
-      <View style={styles.filterContainer}>
+      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+      <View style={styles.filterContainer} horizontal={true}>
         <View style={styles.specialtyOvalContainer}>
           {renderSpecialtyOval("All")}
           {renderSpecialtyOval("General")}
           {uniqueSpecialties.map((specialty) => renderSpecialtyOval(specialty))}
         </View>
       </View>
+      </ScrollView>
+      
       <View style={styles.appointmentBox}>
         <FlatList
           data={filteredAppointments}
@@ -114,14 +119,28 @@ const SearchForAppointment = () => {
           keyExtractor={(item) => item.id}
         />
       </View>
+    
     </View>
+    <View style={styles.navcontainer}>
+    <NavigationBar/>
+      </View>
+   </>
   );
 };
 
 const styles = StyleSheet.create({
+
+  navcontainer:{
+    position: 'absolute',
+  bottom: 0,
+  width: '100%',
+  backgroundColor: 'yellow',
+    
+    
+  },
   container: {
-    flex: 1,
-    padding: 16,
+
+    padding: 10,
   },
   searchInput: {
     flex: 1,

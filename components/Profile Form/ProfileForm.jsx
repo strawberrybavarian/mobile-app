@@ -37,6 +37,7 @@ const ProfileForm = () => {
   };
 
   return (
+    <>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.arrowButton}>
@@ -109,6 +110,7 @@ const ProfileForm = () => {
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
     </View>
+    </>
   );
 };
 

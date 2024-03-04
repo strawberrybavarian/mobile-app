@@ -25,7 +25,7 @@ export default function App() {
     <>
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="doctorspecialty" >
+        <Stack.Navigator initialRouteName="searchappointment" >
           <Stack.Screen
             name = 'landingpage'
             component={LandingPage}

@@ -45,9 +45,7 @@ const DoctorSpecialty = ({ navigation }) => {
   return (
     <>
       <ScrollView style={styles.scrollContainer} >
-        
 
-       
       <View style={styles.container2}>
         <Image
           source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
@@ -67,33 +65,32 @@ const DoctorSpecialty = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-    <View style={styles.con3}>
-        <View style={styles.searchContainer}>
-            <FontAwesome5 name="search" style={{marginRight: 5, color: '#DDDADA'}}/>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search Specialty"
-              value={search}
-              onChangeText={handleSearch}
-            />
-          <View style={styles.filterContainer}>
-          <Text style={{color: '#DDDADA'}}> | </Text>
-            <TouchableWithoutFeedback >
-                
-              <FontAwesome5
-                name="filter"
-                size={12}
-                style={{marginTop: 3, color:'#92A3FD'}}
+      <View style={styles.con3}>
+          <View style={styles.searchContainer}>
+              <FontAwesome5 name="search" style={{marginRight: 5, color: '#DDDADA'}}/>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search Specialty"
+                value={search}
+                onChangeText={handleSearch}
               />
-            </TouchableWithoutFeedback>
+            <View style={styles.filterContainer}>
+            <Text style={{color: '#DDDADA'}}> | </Text>
+              <TouchableWithoutFeedback >
+                  
+                <FontAwesome5
+                  name="filter"
+                  size={12}
+                  style={{marginTop: 3, color:'#92A3FD'}}
+                />
+              </TouchableWithoutFeedback>
+            </View>
           </View>
-        </View>
-    </View>
+      </View>
 
 
         <View style={styles.container4}>
             <Text style={{marginLeft:3, fontFamily:'Poppins-SemiBold'}}>Doctor Specialty</Text>
-            
             <View style={styles.container41}>
             {filteredSpecialties.map((specialty, index) => (
               <TouchableOpacity key={specialty.id} style={styles.specialtyButton}>
@@ -103,25 +100,9 @@ const DoctorSpecialty = ({ navigation }) => {
                 </View>
               </TouchableOpacity>
             ))}
-            </View>
-       
-
-
-
-
-
-
-
-
-
-
-
-            
-
-            <View style={[styles.container41,{paddingBottom:50}]}></View>
-            
         </View>
-        
+            <View style={[styles.container41,{paddingBottom:50}]}></View> 
+        </View> 
       </ScrollView>
     
       <NavigationBar/>

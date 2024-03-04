@@ -96,19 +96,11 @@ const NavigationBar = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: 40,
-    width: 270,
-    textAlign: "center"
-  },
+
   NavContainer: {
-    position: 'absolute',
-  alignItems: "center",
-  width: '100%',
-  bottom: 0,
+    position: 'relative',
+    width: '100%',
+    bottom: 0,
   },
   NavBar: {
     flexDirection: 'row',
