@@ -28,7 +28,7 @@ export default function App() {
     <>
       <StatusBar hidden={true}/>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="searchappointment" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="bookappointment" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='myprofilepage' component={MyProfile} />

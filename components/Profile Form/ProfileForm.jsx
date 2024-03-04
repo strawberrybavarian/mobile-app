@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Picker, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
-import { ScrollView } from 'react-native-web';
+import RNPickerSelect from 'react-native-picker-select';
 import Entypo from "@expo/vector-icons/Entypo";
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -17,13 +17,13 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   </View>
 );
 
-const ProfileForm = ({navigation}) => {
+const ProfileForm = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false); // Add this line
 
   const handleSaveProfile = () => {
     console.log('Full Name:', fullName);
@@ -39,87 +39,82 @@ const ProfileForm = ({navigation}) => {
   };
 
   return (
-    <>
     <ScrollView>
-
-    
-    <View style={styles.container}>
-      <View style={styles.header}>
-      <TouchableOpacity
-              style={styles.arrowButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Entypo name="chevron-thin-left" size={14} />
-            </TouchableOpacity>
-            <View style={{justifyContent:'center', width:"83%"}}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.arrowButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Entypo name="chevron-thin-left" size={14} />
+          </TouchableOpacity>
+          <View style={{ justifyContent: 'center', width: "83%" }}>
             <Text style={styles.title}>Fill Profile</Text>
-      </View>
-         
-      </View>
+          </View>
+        </View>
 
-      
-
-      {/* Profile Picture */}
-      <Image
-        style={styles.profilePicture}
-        source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}  // Replace with your profile picture link
-      />
-
-      <OvalLabelTextInput label="Full Name" value={fullName} onChangeText={setFullName} />
-
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-        <OvalLabelTextInput
-          label="Date of Birth"
-          value={selectedDate ? selectedDate.toDateString() : ''}
-          onTouch={() => setShowDatePicker(true)}
+        {/* Profile Picture */}
+        <Image
+          style={styles.profilePicture}
+          source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}  // Replace with your profile picture link
         />
-      </TouchableOpacity>
 
-      {showDatePicker && (
-        <View style={styles.calendarContainer}>
-          <Text style={styles.subtitle}>Select a Date</Text>
-          <CalendarPicker 
-            onDateChange={handleDateChange} 
-            selectedDayColor="#92a3fd"
-            selectedDayTextColor="white"
-            todayBackgroundColor="transparent"
-            todayTextStyle={{ color: '#000' }}
-            textStyle={{ color: '#000' }}
-            customDatesStyles={[
-              {
-                date: selectedDate,
-                style: { backgroundColor: '#92a3fd' },
-                textStyle: { color: 'white' },
-              },
+        <OvalLabelTextInput label="Full Name" value={fullName} onChangeText={setFullName} />
+
+        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <OvalLabelTextInput
+            label="Date of Birth"
+            value={selectedDate ? selectedDate.toDateString() : ''}
+            onTouch={() => setShowDatePicker(true)}
+          />
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <View style={styles.calendarContainer}>
+            <Text style={styles.subtitle}>Select a Date</Text>
+            <CalendarPicker
+              onDateChange={handleDateChange}
+              selectedDayColor="#92a3fd"
+              selectedDayTextColor="white"
+              todayBackgroundColor="transparent"
+              todayTextStyle={{ color: '#000' }}
+              textStyle={{ color: '#000' }}
+              customDatesStyles={[
+                {
+                  date: selectedDate,
+                  style: { backgroundColor: '#92a3fd' },
+                  textStyle: { color: 'white' },
+                },
+              ]}
+              dayShape="square"
+              width={300}
+              height={300}
+              hideDayNames={true}
+            />
+          </View>
+        )}
+
+        <OvalLabelTextInput label="Email" value={email} onChangeText={setEmail} />
+
+        <OvalLabelTextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} />
+
+        <View style={styles.pickerContainer}>
+          <RNPickerSelect
+            placeholder={{ label: 'Select Gender', value: null }}
+            onValueChange={(value) => setGender(value)}
+            items={[
+              { label: 'Male', value: 'male' },
+              { label: 'Female', value: 'female' },
+              { label: 'Other', value: 'other' },
             ]}
-            dayShape="square"
-            width={300}
-            height={300}
-            hideDayNames={true}
+            style={{
+              inputIOS: styles.picker,
+              inputAndroid: styles.picker,
+            }}
           />
         </View>
-      )}
 
-      <OvalLabelTextInput label="Email" value={email} onChangeText={setEmail} />
-
-      <OvalLabelTextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} />
-
-      <View style={styles.pickerContainer}>
-        <Picker
-          style={styles.picker}
-          selectedValue={gender}
-          onValueChange={(itemValue) => setGender(itemValue)}
-          prompt="Gender"
-        >
-          <Picker.Item label="" value="" />
-          <Picker.Item label="Male" value="male" />
-          <Picker.Item label="Female" value="female" />
-          <Picker.Item label="Other" value="other" />
-        </Picker>
-        <Text style={styles.pickerLabel}>Select Gender</Text>
-      </View>
-
-      <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
           <LinearGradient
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 2 }}
@@ -134,10 +129,9 @@ const ProfileForm = ({navigation}) => {
             <Text style={styles.buttonText}>Continue</Text>
           </LinearGradient>
         </TouchableOpacity>
-  
-    </View>
+
+      </View>
     </ScrollView>
-    </>
   );
 };
 

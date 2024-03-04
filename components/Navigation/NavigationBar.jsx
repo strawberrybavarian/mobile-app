@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Pressable, Animated, View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation, useIsFocused,  } from '@react-navigation/native';
+import { useNavigation, useRoute, } from '@react-navigation/native';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -8,7 +8,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const NavigationBar = () => {
   const navigation = useNavigation();
-
+  const route = useRoute();
 
   const [scaleAnim1] = useState(new Animated.Value(1));
   const [scaleAnim2] = useState(new Animated.Value(1));
@@ -33,19 +33,8 @@ const NavigationBar = () => {
     }).start();
   };
 
-  const profilePage = () => {
- 
-    navigation.navigate('myprofilepage');
-  };
-
-  const homePage = () => {
- 
-    navigation.navigate('doctorspecialty');
-  };
-
-  const doctorPage = () => {
-
-    navigation.navigate('searchappointment');
+  const navigateTo = (routeName) => {
+    navigation.navigate(routeName);
   };
 
 
@@ -54,52 +43,107 @@ const NavigationBar = () => {
       <View style={styles.NavContainer}>
         <View style={styles.NavBar}>
           <Pressable
-            onPress={homePage}
-            onPressIn={handlePressIn(scaleAnim1, 'home')}
+            onPress={() => navigateTo('doctorspecialty')}
+            onPressIn={handlePressIn(scaleAnim1)}
             onPressOut={handlePressOut(scaleAnim1)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim1 }] }}>
               <View style={styles.IconBehavior}>
-                <Entypo style={{ color: activeButton === 'home'  ? '#92A3FD' : '#98A3B3' }} name="home" size={20} />
-                <Text style={[styles.texts, { color: activeButton === 'home'  ? '#92A3FD' : '#98A3B3', fontFamily: 'Poppins', marginBottom: 2 }]}>Home</Text>
+                <Entypo 
+                  style={{ color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3' }} 
+                  name="home"
+                  size={20}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
+                    },
+                  ]}
+                >
+                  Home
+                </Text>
               </View>
             </Animated.View>
           </Pressable>
 
           <Pressable
-            onPressIn={handlePressIn(scaleAnim2, 'appointment')}
+        
+            onPressIn={handlePressIn(scaleAnim2)}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
               <View style={styles.IconBehavior}>
-                <FontAwesome6 style={{ color: activeButton === 'appointment' ? '#92A3FD' : '#98A3B3' }} name="calendar-alt" size={19} />
-                <Text style={[styles.texts, { color: activeButton === 'appointment' ? '#92A3FD' : '#98A3B3', fontFamily: 'Poppins' }]}>Appointment</Text>
+                <FontAwesome6
+                  style={{ color: activeButton ? '#92A3FD' : '#98A3B3' }}
+                  name="calendar-alt"
+                  size={19}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {
+                      color: activeButton ? '#92A3FD' : '#98A3B3',
+                      fontFamily: 'Poppins',
+                    },
+                  ]}
+                >
+                  Appointment
+                </Text>
               </View>
             </Animated.View>
           </Pressable>
 
           <Pressable
-            onPress={doctorPage}
-            onPressIn={handlePressIn(scaleAnim3, 'doctors')}
+            onPress={() => navigateTo('searchappointment')}
+            onPressIn={handlePressIn(scaleAnim3)}
             onPressOut={handlePressOut(scaleAnim3)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
               <View style={styles.IconBehavior}>
-                <FontAwesome style={{ color: activeButton === 'doctors' ? '#92A3FD' : '#98A3B3' }} name="user-md" size={20} />
-                <Text style={[styles.texts, { color: activeButton === 'doctors'  ? '#92A3FD' : '#98A3B3', fontFamily: 'Poppins' }]}>Doctors</Text>
+                <FontAwesome
+                  style={{ color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3' }}
+                  name="user-md"
+                  size={20}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {
+                      color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3',
+                      fontFamily: 'Poppins',
+                    },
+                  ]}
+                >
+                  Doctors
+                </Text>
               </View>
             </Animated.View>
           </Pressable>
 
           <Pressable
-            onPress={profilePage}
-            onPressIn={handlePressIn(scaleAnim4, 'profile')}
+            onPress={() => navigateTo('myprofilepage')}
+            onPressIn={handlePressIn(scaleAnim4)}
             onPressOut={handlePressOut(scaleAnim4)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim4 }] }}>
               <View style={styles.IconBehavior}>
-                <FontAwesome style={{ color: activeButton === 'profile'  ? '#92A3FD' : '#98A3B3' }} name="user" size={20} />
-                <Text style={[styles.texts, { color: activeButton === 'profile' ? '#92A3FD' : '#98A3B3', fontFamily: 'Poppins' }]}>Profile</Text>
+                <FontAwesome6
+                  style={{ color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3' }}
+                  name="user"
+                  size={20}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {
+                      color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3',
+                      fontFamily: 'Poppins',
+                    },
+                  ]}
+                >
+                  Profile
+                </Text>
               </View>
             </Animated.View>
           </Pressable>

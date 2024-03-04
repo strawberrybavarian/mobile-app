@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'rea
 import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../assets/pictures/Doc.png';
 import NavigationBar from '../Navigation/NavigationBar';
+import Entypo from "@expo/vector-icons/Entypo";
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
   const totalStars = 5;
   const filledStars = Math.floor(rating);
@@ -71,15 +72,24 @@ const BookAppointment = ({ navigation }) => {
     return acc;
   }, []);
 
+  const backButton = () => {
+    navigation.navigate('searchappointment')
+  }
   return (
     <>
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.arrowButton}>
-          <Text style={styles.arrowText}>&lt;</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Book Appointment</Text>
-      </View>
+
+    <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.arrowButton}
+            onPress={backButton}
+          >
+            <Entypo name="chevron-thin-left" size={14} />
+          </TouchableOpacity>
+          <View style={{ justifyContent: 'center', width: "83%" }}>
+            <Text style={styles.title}>Fill Profile</Text>
+          </View>
+    </View>
 
       <DoctorCard
         doctorName="DRA Analyn Santos"
@@ -158,9 +168,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 30,
+
   },
   arrowButton: {
-    padding: 8,
+    padding: 10,
   },
   arrowText: {
     fontSize: 20,
@@ -168,10 +180,10 @@ const styles = StyleSheet.create({
     color: "#9dceff"
   },
   title: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: 8,
-    
+    textAlign: 'center',
+   
   },
   subtitle: {
     fontSize: 14,
@@ -240,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#cfe2f3',
     padding: 16,
     borderRadius: 10,
-    marginBottom: 16,
+    marginTop: 26,
   },
   doctorCardImage: {
     width: 80,

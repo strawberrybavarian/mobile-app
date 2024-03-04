@@ -38,8 +38,8 @@ const DoctorSpecialty = ({ navigation }) => {
   );
 
 
-  const logoutButton = () => {
-    navigation.navigate('landingpage')
+  const appointmentButton = () => {
+    navigation.navigate('searchappointment')
   }
 
   return (
@@ -56,7 +56,7 @@ const DoctorSpecialty = ({ navigation }) => {
             <Text style={{fontFamily: 'Poppins', fontSize: 9,}}>Welcome!</Text>
           </View>
           <View style={styles.container211}>
-            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 13,}}>Analyn Santos</Text>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 15,}}>Analyn Santos</Text>
           </View>
         </View>
 
@@ -93,7 +93,7 @@ const DoctorSpecialty = ({ navigation }) => {
             <Text style={{marginLeft:3, fontFamily:'Poppins-SemiBold'}}>Doctor Specialty</Text>
             <View style={styles.container41}>
             {filteredSpecialties.map((specialty, index) => (
-              <TouchableOpacity key={specialty.id} style={styles.specialtyButton}>
+              <TouchableOpacity onPress={appointmentButton} key={specialty.id} style={styles.specialtyButton}>
                 <View style={styles.container42}>
                 <Image source={specialty.image} style={styles.images} />
                   <Text style={styles.buttonText}>{specialty.name}</Text>
@@ -150,11 +150,11 @@ const styles = StyleSheet.create({
   },
   textButton: {
     color: "white",
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: 'Poppins',
   },
   textJoin:{
-    fontSize: 9,
+    fontSize: 12,
     fontFamily: 'Poppins',
   },
 
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
 
   buttonText:{
     fontFamily:"Poppins",
-    fontSize:9,
+    fontSize: 12,
     bottom: 0,
     textAlign: 'center',
     paddingLeft: 15,
