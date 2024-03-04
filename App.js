@@ -3,8 +3,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {useFonts} from 'expo-font';
 import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
-
+import Home from './components/Doctors/Home';
+import Appointment from './components/Doctors/Appointment';
+import Doctors from './components/Doctors/Doctors';
+import Profile from './components/Doctors/Profile';
 import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
 import LandingPage from './components/Landing Page/LandingPage';
@@ -17,6 +21,9 @@ import HealthRiskAssessmentForm from './components/Health Assessment Form/Health
 
 
 export default function App() {
+  
+  const BottomTab = createMaterialBottomTabNavigator();
+
   const Stack = createNativeStackNavigator();
   const [fontsLoaded] = useFonts ({
     'Poppins' : require('./assets/fonts/Poppins.ttf'),
@@ -40,6 +47,14 @@ export default function App() {
           <Stack.Screen name='profileform' component={ProfileForm} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
         </Stack.Navigator>
+
+      <BottomTab.Navigator>
+          <BottomTab.Screen name="Home" component={Home} />
+          <BottomTab.Screen name="Appointment" component={Appointment} />
+          <BottomTab.Screen name="Doctors" component={Doctors} options={{title: 'Doctor',
+                headerShown: false}}/>
+          <BottomTab.Screen name="Profile" component={Profile} />
+        </BottomTab.Navigator>
       </NavigationContainer>  
 
     </>
