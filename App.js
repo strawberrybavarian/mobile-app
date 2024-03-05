@@ -7,7 +7,6 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 
 import Home from './components/Doctors/Home';
 import Appointment from './components/Doctors/Appointment';
-import Doctors from './components/Doctors/Doctors';
 import Profile from './components/Doctors/Profile';
 import SigninPage from './components/Sign In page/SigninPage';
 import MyProfile from './components/My Profile/MyProfile';
@@ -23,7 +22,6 @@ import Upcoming from './components/Doctors/Upcoming';
 
 export default function App() {
   
-  const BottomTab = createMaterialBottomTabNavigator();
 
   const Stack = createNativeStackNavigator();
   const [fontsLoaded] = useFonts ({
@@ -37,7 +35,7 @@ export default function App() {
     <>
       <StatusBar hidden={true}/>
       <NavigationContainer>
-      <Stack.Navigator initialRouteName="searchappointment" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="upcoming" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='myprofilepage' component={MyProfile} />
@@ -47,15 +45,8 @@ export default function App() {
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
-        </Stack.Navigator>
-
-      <BottomTab.Navigator>
-          <BottomTab.Screen name="Home" component={Home} />
-          <BottomTab.Screen name="Appointment" component={Upcoming} />
-          <BottomTab.Screen name="Doctors" component={Doctors} options={{title: 'Doctor',
-                headerShown: false}}/>
-          <BottomTab.Screen name="Profile" component={Profile} />
-        </BottomTab.Navigator>
+          <Stack.Screen name='upcoming' component={Upcoming}/>
+        </Stack.Navigator>   
       </NavigationContainer>  
 
     </>

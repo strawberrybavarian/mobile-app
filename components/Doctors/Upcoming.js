@@ -1,8 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TextInput, Button } from 'react-native';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import NavigationBar from '../Navigation/NavigationBar';
+import Home from './Home';
 
+import Profile from './Profile';
 
 const Upcoming = () => {
+
+  const Stack = createNativeStackNavigator();
+  const BottomTab = createMaterialBottomTabNavigator();
   const handleCancelBooking = () => {
     alert('Booking Cancelled!');
   };
@@ -12,17 +21,24 @@ const Upcoming = () => {
   };
   return (
     <>
+
+<BottomTab.Navigator>
+          <BottomTab.Screen name="Home" component={Home} />
+          <BottomTab.Screen name="Appointment" component={Upcoming} />
+      
+          <BottomTab.Screen name="Profile" component={Profile} />
+   </BottomTab.Navigator>
      <View style={styles.container}>
       <Text style={styles.title}> My Appointment </Text>
       <Image
           style={styles.magni}
           contentFit="cover"
-          source={require("../assets/magni.png")}
+          source={require("../../assets/pictures/magni.png")}
         />
          <Image
           style={[styles.filter]}
           contentFit="cover"
-          source={require("../assets/filter.png")}
+          source={require("../../assets/pictures/filter.png")}
         /> 
     </View>
 
@@ -30,7 +46,7 @@ const Upcoming = () => {
     <Image
         style={[styles.filter1]}
         contentFit="cover"
-        source={require("../assets/Doc.png")}/> 
+        source={require("../../assets/pictures/Doc.png")}/> 
       <Text style={styles.doctorName}>Dr. Ana Santos</Text>
       <Text style={styles.specialization}>Neurosurgeon</Text>
       <Text style={styles.dateTime}>Date: February 28, 2024 | Time: 10:00 AM</Text>
@@ -39,6 +55,12 @@ const Upcoming = () => {
         <Button title="Reschedule" color="blue" onPress={() => handleReschedule()} />
       </View>
     </View>
+
+
+
+   <NavigationBar/>
+  
+
     </>
     
   );

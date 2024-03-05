@@ -68,14 +68,14 @@ const NavigationBar = () => {
           </Pressable>
 
           <Pressable
-        
+            onPress={() => navigateTo('upcoming')}
             onPressIn={handlePressIn(scaleAnim2)}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome6
-                  style={{ color: activeButton ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3' }}
                   name="calendar-alt"
                   size={19}
                 />
@@ -83,7 +83,7 @@ const NavigationBar = () => {
                   style={[
                     styles.texts,
                     {
-                      color: activeButton ? '#92A3FD' : '#98A3B3',
+                      color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
                       fontFamily: 'Poppins',
                     },
                   ]}
