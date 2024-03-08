@@ -143,9 +143,6 @@ const styles = StyleSheet.create({
   position: 'absolute',
   bottom: 0,
   width: '100%',
-
-    
-    
   },
   container: {
     marginTop: 40,

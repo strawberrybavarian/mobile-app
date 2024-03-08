@@ -29,7 +29,7 @@ const HealthRiskAssessmentForm = ({navigation}) => {
       recentSneezingCoughing,
     });
 
-    navigation.navigate('doctorspecialty')
+    navigation.navigate('upcoming')
   };
 
   const screenHeight = Dimensions.get('window').height;

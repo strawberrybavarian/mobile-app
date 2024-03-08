@@ -4,6 +4,7 @@ import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../assets/pictures/Doc.png';
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
   const totalStars = 5;
   const filledStars = Math.floor(rating);
@@ -27,10 +28,11 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
     <View style={styles.doctorCardContent}>
       <Text style={styles.doctorCardName}>{doctorName}</Text>
       <Text style={styles.doctorCardSpecialty}>{specialty}</Text>
-      <View style={styles.doctorCardRating}>
-        <StarRating rating={rating} starSize={20} starColor="#FFD700" />
-        <Text style={styles.doctorCardRatingText}>{rating.toFixed(1)}</Text>
+      <View style={{flexDirection: 'row'}}>
+      <FontAwesome5 name="thumbtack" size={12} style={styles.Icon} />
+        <Text style={styles.doctorCardSpecialty1}>NU Hospital</Text>
       </View>
+      
     </View>
   </View>
 );
@@ -98,7 +100,7 @@ const BookAppointment = ({ navigation }) => {
     </View>
 
       <DoctorCard
-        doctorName="DRA Analyn Santos"
+        doctorName="Dr. Analyn Santos"
         specialty="Cardiologist"
         rating={4.5}
         image={doctorImage1}
@@ -112,15 +114,15 @@ const BookAppointment = ({ navigation }) => {
           selectedDayTextColor="white"
           todayBackgroundColor="transparent"
           todayTextStyle={{ color: '#000' }}
-          textStyle={{ color: '#000' }}
+          textStyle={{ color: '#000', fontFamily:'Poppins' }}
           customDatesStyles={[
             {
               date: selectedDate,
-              style: { backgroundColor: '#92a3fd' },
+              style: { backgroundColor: 'red' },
               textStyle: { color: 'white' },
             },
           ]}
-          dayShape="square"
+          dayShape="circle"
           width={300}
           height={300}
           hideDayNames={true}
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily:'Poppins-SemiBold',
     textAlign: 'center',
    
   },
@@ -195,11 +197,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 16,
     marginBottom: 8,
-    fontWeight: "bold"
+    marginLeft: 5,
+    fontFamily: 'Poppins-SemiBold'
   },
   calendarContainer: {
-    backgroundColor: '#cfe2f3',
-    borderRadius: 10,
+    backgroundColor: 'rgba(146, 163, 253, 0.10)',
+    borderRadius: 20,
     padding: 10,
     marginTop: 10,
     width: '100%',
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: '#9dceff',
-    borderRadius: 10,
+    borderRadius: 20,
     alignItems: "center",
     flexDirection: "row",
     borderStyle: "solid",
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
   },
   nextButton: {
     backgroundColor: '#9dceff',
-    borderRadius: 10,
+    borderRadius: 20,
     paddingVertical: 12,
     alignItems: 'center',
     marginTop: 10,
@@ -255,9 +258,9 @@ const styles = StyleSheet.create({
   // DoctorCard styles
   doctorCardContainer: {
     flexDirection: 'row',
-    backgroundColor: '#cfe2f3',
+    backgroundColor: 'rgba(146, 163, 253, 0.10)',
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 20,
     marginTop: 26,
   },
   doctorCardImage: {
@@ -267,15 +270,30 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   doctorCardContent: {
-    flex: 1,
+
+    justifyContent: 'center'
   },
   doctorCardName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontFamily: 'Poppins-SemiBold'
+  },
+  Icon:{
+    width: 20,
+    
+    justifyContent:'flex-start',
+    marginTop: 2,
+    color: '#666',
   },
   doctorCardSpecialty: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#666',
+    fontFamily: 'Poppins'
+  },
+  doctorCardSpecialty1: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'Poppins',
+    marginLeft: 3,
   },
   doctorCardRating: {
     flexDirection: 'row',

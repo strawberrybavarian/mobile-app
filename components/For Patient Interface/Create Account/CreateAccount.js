@@ -89,7 +89,7 @@ const CreateAccount = ({navigation}) => {
             style={styles.passwordInput}
             placeholder="Confirm Password"
             secureTextEntry={showPassword}
-            value={confirmPassword} onChangeText={setPassword}
+            value={confirmPassword} onChangeText={setConfirmPassword}
           />
           <View style={styles.eyeIconContainer}>
             <TouchableWithoutFeedback onPress={handleTogglePasswordVisibility}>
