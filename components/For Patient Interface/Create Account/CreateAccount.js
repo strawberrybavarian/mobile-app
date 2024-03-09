@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableWithoutFeedback,TouchableOpacity, SafeAreaView } from 'react-native';
-import { MaterialCommunityIcons } from 'react-native-vector-icons';
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { LinearGradient } from "expo-linear-gradient";
-const CreateAccount = ({navigation}) => {
+import { View, Text, Platform, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Picker } from '@react-native-picker/picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
+const CreateAccount = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('');
 
   const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword); 
+    setShowPassword(!showPassword);
   };
 
   const handleSignUp = () => {
-    navigation.navigate('SigninPage');
-
+    // Validation logic here
     if (username === '' || email === '' || password === '' || confirmPassword === '') {
       alert('Please fill in all fields.');
       return;
@@ -26,208 +28,208 @@ const CreateAccount = ({navigation}) => {
       alert('Passwords do not match.');
       return;
     }
+
+    // Only navigate if validation passes
+    navigation.navigate('SigninPage');
   };
 
   return (
-
-    <>
-    <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+    <KeyboardAwareScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      enableOnAndroid
+      extraHeight={Platform.OS === 'android' ? -20 : 0} // Adjust based on your UI
+    >
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <FontAwesome5 name="chevron-left" size={15} />
         </TouchableOpacity>
-
         <View style={styles.con1}>
           <Text style={styles.title}>Sign In</Text>
         </View>
-    </View>
+      </View>
 
-    <View style={styles.textcon}>
-          <Text style={styles.text1}>Create Your</Text>
-          <Text style={styles.text1}>Account</Text>
-    </View>
+      <View style={styles.textcon}>
+        <Text style={styles.text1}>Create Your</Text>
+        <Text style={styles.text1}>Account</Text>
+      </View>
 
-    <SafeAreaView style={styles.container1}>
-     
+      <View style={styles.container1}>
         <TextInput
           style={styles.textInput}
           placeholder="Username"
           value={username}
           onChangeText={setUsername}
         />
-
- 
         <TextInput
           style={styles.textInput}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
         />
-  
-
-      <View style={styles.passwordContainer}>
+        <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
             placeholder="Password"
             secureTextEntry={showPassword}
-            value={password} onChangeText={setPassword}
+            value={password}
+            onChangeText={setPassword}
           />
-          <View style={styles.eyeIconContainer}>
-            <TouchableWithoutFeedback onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5
-                name={showPassword ? "eye-slash" : "eye"}
-                size={15}
-              />
-            </TouchableWithoutFeedback>
-          </View>
-      </View>
-
-      <View style={styles.passwordContainer}>
+          <TouchableOpacity onPress={handleTogglePasswordVisibility} style={styles.eyeIconContainer}>
+            <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
             placeholder="Confirm Password"
             secureTextEntry={showPassword}
-            value={confirmPassword} onChangeText={setConfirmPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
-          <View style={styles.eyeIconContainer}>
-            <TouchableWithoutFeedback onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5
-                name={showPassword ? "eye-slash" : "eye"}
-                size={15}
-              />
-            </TouchableWithoutFeedback>
-          </View>
-      </View>
+          <TouchableOpacity onPress={handleTogglePasswordVisibility} style={styles.eyeIconContainer}>
+            <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
+          </TouchableOpacity>
+        </View>
 
-      <LinearGradient
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={role}
+            onValueChange={(value) => setRole(value)}
+            style={styles.picker}
+          >
+            <Picker.Item style={styles.pickerItem} label="Select your role" value="" />
+            <Picker.Item style={styles.pickerItem} label="Doctor" value="Doctor" />
+            <Picker.Item style={styles.pickerItem} label="Patient" value="Patient" />
+          </Picker>
+        </View>
+
+        <LinearGradient
           start={{ x: 1, y: 0 }}
           end={{ x: 0, y: 2 }}
-          colors={["#92A3FD", "#9DCEFF"]}
+          colors={['#92A3FD', '#9DCEFF']}
           style={{
-            width: "100%",
+            width: '100%',
             height: 45,
             borderRadius: 40,
-            marginTop: 10,  
+            marginTop: 10,
           }}
         >
           <TouchableOpacity
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
             onPress={handleSignUp}
           >
             <Text style={styles.textButton}>SIGN IN</Text>
           </TouchableOpacity>
         </LinearGradient>
-    </SafeAreaView>
-    </>
+      </View>
+
+      <View style={styles.logoContainer}>
+        <Image source={require('../../../assets/pictures/Medisinapp Logo 1.png')} style={styles.logo} />
+      </View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   title: {
     fontSize: 15,
-
-    color: "#92A3FD",
+    color: '#92A3FD',
     fontFamily: 'Poppins-SemiBold',
-    
   },
-
   passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
     borderRadius: 10,
-    backgroundColor: "#d9d9d9",
+    backgroundColor: '#d9d9d9',
     marginVertical: 10,
-    paddingLeft: 10,
-   
   },
   passwordInput: {
     flex: 1,
     height: 50,
-    fontSize: 12,
-    fontFamily: 'Poppins'
+    fontSize: 14,
+    fontFamily: 'Poppins',
+    left: 10,
+    top: 2,
   },
   eyeIconContainer: {
     padding: 10,
   },
-  textcon:{
+  textcon: {
     paddingLeft: 30,
     marginTop: 50,
   },
   textButton: {
-    color: "white",
+    color: 'white',
     fontSize: 15,
-    textAlign: "center",
+    textAlign: 'center',
     marginTop: 1,
     fontFamily: 'Poppins',
   },
   text1: {
-
     fontSize: 45,
     fontFamily: 'Poppins-SemiBold',
     lineHeight: 55,
   },
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 30,
     marginTop: 55,
   },
-  con2: {
-    flexDirection: "column",
-    marginTop: 25,
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
   container1: {
-    flexDirection: "column",
+    flexDirection: 'column',
     marginTop: 25,
     paddingLeft: 30,
     paddingRight: 30,
   },
-  titleText: {
-    fontSize: 45,
-
-    marginBottom: 20,
-    padding: 10,
-    fontFamily: 'Poppins-SemiBold'
-  },
-  inputContainer: {
-    marginBottom: 10,
-    width:'100%',
-  },
   textInput: {
     height: 50,
-    width: "100%",
+    width: '100%',
     borderRadius: 10,
-    backgroundColor: "#d9d9d9",
+    backgroundColor: '#d9d9d9',
     marginVertical: 10,
     paddingLeft: 10,
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: 'Poppins',
   },
-  iconContainer: {
-    position: 'absolute',
-    right: 10,
-    top: 15,
-    
+  pickerContainer: {
+    height: 50,
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#d9d9d9',
+    marginVertical: 10,
+    fontSize: 13,
+    fontFamily: 'Poppins',
   },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    padding: 15,
-    backgroundColor: '#007bff',
-    borderRadius: 5,
-    width:'90%',
-    alignItems: 'center'
+  picker: {
+    flex: 1,
+    height: 50,
+    fontSize: 15,
+    fontFamily: 'Poppins',
+    right: 4,
+    bottom: 2,
+  },
+  pickerItem: {
+    fontFamily: 'Poppins',
+    fontSize: 15,
+  },
+  logo: {
+    width: 150,
+    height: 100,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });
-
 
 export default CreateAccount;

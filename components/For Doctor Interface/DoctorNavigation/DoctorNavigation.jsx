@@ -6,10 +6,10 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-const NavigationBar = () => {
+const DoctorNavigation = () => {
   const navigation = useNavigation();
   const route = useRoute();
-
+  console.log(route);
   const [scaleAnim1] = useState(new Animated.Value(1));
   const [scaleAnim2] = useState(new Animated.Value(1));
   const [scaleAnim3] = useState(new Animated.Value(1));
@@ -68,7 +68,7 @@ const NavigationBar = () => {
           </Pressable>
 
           <Pressable
-            onPress={() => navigateTo('upcoming')}
+            onPress={() => navigateTo('doctorappointment')}
             onPressIn={handlePressIn(scaleAnim2)}
             onPressOut={handlePressOut(scaleAnim2)}
           >
@@ -115,38 +115,13 @@ const NavigationBar = () => {
                     },
                   ]}
                 >
-                  Doctors
-                </Text>
-              </View>
-            </Animated.View>
-          </Pressable>
-
-          <Pressable
-            onPress={() => navigateTo('myprofilepage')}
-            onPressIn={handlePressIn(scaleAnim4)}
-            onPressOut={handlePressOut(scaleAnim4)}
-          >
-            <Animated.View style={{ transform: [{ scale: scaleAnim4 }] }}>
-              <View style={styles.IconBehavior}>
-                <FontAwesome6
-                  style={{ color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3' }}
-                  name="user"
-                  size={30}
-                />
-                <Text
-                  style={[
-                    styles.texts,
-                    {
-                      color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3',
-                      fontFamily: 'Poppins', fontSize: 9,
-                    },
-                  ]}
-                >
                   Profile
                 </Text>
               </View>
             </Animated.View>
           </Pressable>
+
+         
         </View>
       </View>
     </>
@@ -184,4 +159,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NavigationBar;
+export default DoctorNavigation;

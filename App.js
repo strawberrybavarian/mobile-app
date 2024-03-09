@@ -5,20 +5,18 @@ import {useFonts} from 'expo-font';
 import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 
-import Home from './components/Doctors/Home';
-import Appointment from './components/Doctors/Appointment';
-import Profile from './components/Doctors/Profile';
-import SigninPage from './components/Sign In page/SigninPage';
-import MyProfile from './components/My Profile/MyProfile';
-import LandingPage from './components/Landing Page/LandingPage';
-import DoctorSpecialty from './components/Doctor Specialty/DoctorSpecialty';
-import SearchForAppointment from './components/Search For Appointment/SearchForAppointment';
-import BookAppointment from './components/Book Appointment/BookAppointment';
-import ProfileForm from './components/Profile Form/ProfileForm';
-import CreateAccount from './components/Create Account/CreateAccount';
-import HealthRiskAssessmentForm from './components/Health Assessment Form/HealthRiskAssessmentForm';
-import Upcoming from './components/Doctors/Upcoming';
-
+import SigninPage from './components/For Patient Interface/Sign In page/SigninPage'
+import MyProfile from './components/For Patient Interface/My Profile/MyProfile'
+import LandingPage from './components/For Patient Interface/Landing Page/LandingPage';
+import DoctorSpecialty from './components/For Patient Interface/Doctor Specialty/DoctorSpecialty';
+import SearchForAppointment from './components/For Patient Interface/Search For Appointment/SearchForAppointment';
+import BookAppointment from './components/For Patient Interface/Book Appointment/BookAppointment';
+import ProfileForm from './components/For Patient Interface/Profile Form/ProfileForm';
+import CreateAccount from './components/For Patient Interface/Create Account/CreateAccount';
+import HealthRiskAssessmentForm from './components/For Patient Interface/Health Assessment Form/HealthRiskAssessmentForm';
+import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
+//Doctors
+import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment'
 
 export default function App() {
   
@@ -35,17 +33,22 @@ export default function App() {
     <>
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="bookappointment" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="doctorappointment" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
+          <Stack.Screen name='createaccount' component={CreateAccount}/>
+
+          {/* Patient */}
           <Stack.Screen name='myprofilepage' component={MyProfile} />
           <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />
           <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} />
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
-          <Stack.Screen name='createaccount' component={CreateAccount}/>
           <Stack.Screen name='upcoming' component={Upcoming}/>
+
+          {/* Doctors */}
+          <Stack.Screen name='doctorappointment' component={DoctorAppointment}/>
         </Stack.Navigator>   
       </NavigationContainer>  
 

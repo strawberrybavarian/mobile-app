@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
-import doctorImage1 from '../../assets/pictures/Doc.png';
+import doctorImage1 from '../../../assets/pictures/Doc.png'
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";

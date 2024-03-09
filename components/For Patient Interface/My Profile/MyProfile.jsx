@@ -12,10 +12,21 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 const MyProfile = ({ navigation }) => {
 
   const logoutButton = () => {
-    const shouldLogout = window.confirm('Are you sure you want to log out?');
-    if(shouldLogout){
-      navigation.navigate('landingpage')
-    }
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          onPress: () => navigation.navigate('landingpage'),
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
 

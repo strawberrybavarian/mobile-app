@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableWithoutFeedback, TouchableOpacity  } from 'react-native';
+import { StyleSheet, Text, View, TouchableWithoutFeedback, TouchableOpacity, Image  } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const LandingPage =({navigation})=>{
@@ -13,7 +13,7 @@ const LandingPage =({navigation})=>{
     }
     return(
         <>
-        
+          
           <LinearGradient
            style={{
             flex: 1,
@@ -22,13 +22,17 @@ const LandingPage =({navigation})=>{
           }}
           colors={['#92A3FD', '#9DCEFF']}
           >
+
+          <View style={styles.logoContainer}>
+            <Image source={require('../../../assets/pictures/Medisinapp Logo 2.png')} style={styles.logo}/>
+          </View>
           <View style={styles.container}>
             {/* textpage */}
-            <Text style={styles.text1}>By tapping ‘Sign in’ you agree to our{' '}
+            <Text style={styles.text1}>By tapping ‘Sign in’ you agree to our {''}
               <TouchableWithoutFeedback >
-                <Text style={styles.linkText}>Terms</Text>
+                <Text style={styles.linkText}>Terms.</Text>
               </TouchableWithoutFeedback>
-                .                      Learn how we process your data in our{' '}
+                 {' '}Learn how we process your data in our {''}
               <TouchableWithoutFeedback >
                 <Text style={styles.linkText}>Privacy Policy</Text>
               </TouchableWithoutFeedback>{' '}
@@ -107,7 +111,22 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Poppins-SemiBold'
   },
+  logo:{
+    width: 350,
+    height: 350,
+
+  },
+
+  logoContainer: {
+    paddingTop: 250,
+    width: '100%',
+
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignSelf: 'center', 
   
+
+  },
 
  
   

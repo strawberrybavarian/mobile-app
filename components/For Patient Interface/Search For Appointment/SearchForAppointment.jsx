@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, TextInput, FlatList, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
-import doctorImage1 from '../../assets/pictures/Doc.png';
-import magnify from '../../assets/pictures/magni.png';
+import doctorImage1 from '../../../assets/pictures/Doc.png';
+import magnify from '../../../assets/pictures/magni.png';
 import NavigationBar from '../Navigation/NavigationBar';
 
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {

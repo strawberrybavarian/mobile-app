@@ -29,19 +29,19 @@ const Upcoming = () => {
       <Image
           style={styles.magni}
           contentFit="cover"
-          source={require("../../assets/pictures/magni.png")}
+      
         />
          <Image
           style={[styles.filter]}
           contentFit="cover"
-          source={require("../../assets/pictures/filter.png")}
+        
         /> 
     </View>
 
     <View style={styles.cont}>
         
       <View style={styles.container1}>
-          <Image style={styles.filter1} contentFit="cover" source={require("../../assets/pictures/Doc.png")}/> 
+          <Image style={styles.filter1} contentFit="cover" source={require("../../../assets/pictures/Doc.png")}/> 
             <View>
               <View style={{marginTop: 5}}>
                 <Text style={styles.doctorName}>Dr. Ana Santos</Text>
@@ -52,9 +52,7 @@ const Upcoming = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-              
-              
-              <Text style={styles.dateTime}>Date: February 28, 2024 | Time: 10:00 AM</Text>
+                <Text style={styles.dateTime}>Date: February 28, 2024 | Time: 10:00 AM</Text>
             </View>
       </View>
 
@@ -131,12 +129,9 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#ffffff',
     width: '100%',
-  
     borderRadius: 20,
     padding: 20,
-   
     marginBottom: 12,
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
