@@ -15,8 +15,15 @@ import ProfileForm from './components/For Patient Interface/Profile Form/Profile
 import CreateAccount from './components/For Patient Interface/Create Account/CreateAccount';
 import HealthRiskAssessmentForm from './components/For Patient Interface/Health Assessment Form/HealthRiskAssessmentForm';
 import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
+import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
+
 //Doctors
+
 import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment'
+import DoctorHome from './components/For Doctor Interface/DoctorHome/DoctorHome';
+import DoctorMain from './components/For Doctor Interface/DoctorMain/DoctorMain';
+import DoctorProfile from './components/For Doctor Interface/Doctor Profile/DoctorProfile';
+import DoctorNotification from './components/For Doctor Interface/DoctorNotification/DoctorNotification';
 
 export default function App() {
   
@@ -31,9 +38,10 @@ export default function App() {
   }
   return (
     <>
+    
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="doctorappointment" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="aboutdoctor" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
@@ -46,9 +54,14 @@ export default function App() {
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
           <Stack.Screen name='upcoming' component={Upcoming}/>
+          <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
 
           {/* Doctors */}
-          <Stack.Screen name='doctorappointment' component={DoctorAppointment}/>
+          
+          
+          <Stack.Screen name='doctormain' component={DoctorMain}/>
+          <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
+          <Stack.Screen name='doctornotification' component={DoctorNotification}/>
         </Stack.Navigator>   
       </NavigationContainer>  
 

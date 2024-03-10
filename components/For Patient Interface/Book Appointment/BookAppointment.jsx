@@ -5,22 +5,6 @@ import doctorImage1 from '../../../assets/pictures/Doc.png'
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
-  const totalStars = 5;
-  const filledStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 !== 0;
-
-  return (
-    <View style={{ flexDirection: "row" }}>
-      {[...Array(filledStars)].map((_, index) => (
-        <Text key={index} style={{ fontSize: starSize, color: starColor }}>★</Text>
-      ))}
-      {hasHalfStar && (
-        <Text style={{ fontSize: starSize, color: starColor }}>☆</Text>
-      )}
-    </View>
-  );
-};
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>
@@ -40,23 +24,18 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
 const BookAppointment = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
-
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
-
   const handleHourSelect = (hour) => {
     setSelectedHour(hour);
   };
-
   const handleNext = () => {
     if (selectedDate && selectedHour) {
       navigation.navigate('healthassess', { date: selectedDate, hour: selectedHour });
     } else {
-      // Show an alert or error message
     }
   };
-
   const formatHour = (hour) => {
     let period = hour >= 12 ? 'PM' : 'AM';
     if (hour > 12) {
@@ -66,14 +45,12 @@ const BookAppointment = ({ navigation }) => {
     }
     return `${hour}:00 ${period}`;
   };
-
   const groupedHours = [6, 7, 8, 12, 13, 14].reduce((acc, hour, index, array) => {
     if (index % 3 === 0) {
       acc.push(array.slice(index, index + 3));
     }
     return acc;
   }, []);
-
   const backButton = () => {
     navigation.navigate('searchappointment')
   }

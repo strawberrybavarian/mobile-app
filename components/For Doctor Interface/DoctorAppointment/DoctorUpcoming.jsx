@@ -1,13 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
+
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TouchableWithoutFeedback, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, TouchableWithoutFeedback, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Entypo from "@expo/vector-icons/Entypo";
-import { DoctorSpecialtyStyles, UpcomingStyles } from '../DoctorStyleSheet/DoctorCSS';
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import DoctorNavigation from "../DoctorNavigation/DoctorNavigation"
+import { UpcomingStyles } from '../DoctorStyleSheet/DoctorCSS';
+
 //For Searching
 const patientData = [
     { id: 'P001', name: 'Yasmin Asistido', specialization: 'Patient', status: 'Upcoming' },
@@ -18,7 +15,7 @@ const patientData = [
   ];
 
 
-const DoctorUpcoming = ({ navigation }) => {
+const DoctorUpcoming = ({ showBanner }) => {
     const [search, setSearch] = useState('');
   
     const handleSearch = (query) => {
@@ -31,8 +28,12 @@ const DoctorUpcoming = ({ navigation }) => {
   
     return (
       <>
-
-      
+       {showBanner && (
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>5</Text>
+        </View>
+      )}
+          
             <View style={styles.searchContainer}>
               <FontAwesome5 name="search" style={{ marginRight: 5, color: '#DDDADA' }} />
               <TextInput
@@ -56,7 +57,7 @@ const DoctorUpcoming = ({ navigation }) => {
             {filteredPatients.map((patient) => (
               <View key={patient.id} style={UpcomingStyles.cont}>
                 <View style={{ flexDirection: 'row' }}>
-                  {/* Use appropriate image for the patient */}
+                  {/* Image */}
                   <Image style={UpcomingStyles.filter1} contentFit="cover" source={require("../../../assets/pictures/Doc.png")} />
   
                   <View>
@@ -65,16 +66,12 @@ const DoctorUpcoming = ({ navigation }) => {
                     <View style={UpcomingStyles.statusContainer}>
                       <Text style={UpcomingStyles.specialization}>{patient.specialization} | </Text>
                       <Text style={UpcomingStyles.status}>{patient.status}</Text>
-                      
-                      
                     </View>
-                    <Text style={UpcomingStyles.specialization}>March 10, 2024 | 5:00 PM </Text>
-                    
+                    <Text style={UpcomingStyles.specialization}>March 10, 2024 | 5:00 PM </Text> 
                   </View>
                 </View>
   
                 <View style={UpcomingStyles.buttonsContainer}>
-                
                     <LinearGradient
                         start={{ x: 1, y: 0 }}
                         end={{ x: 0, y: 2 }}
@@ -106,10 +103,11 @@ const DoctorUpcoming = ({ navigation }) => {
                 </View>
               </View>
             ))}
+          
   
      
   
-     
+      
       </>
     );
   };
@@ -138,6 +136,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 15,
     marginTop: 30,
+  },
+
+  banner: {
+    backgroundColor: '#FF5733', // Adjust the color as needed
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  bannerText: {
+    color: 'white',
+    fontSize: 18,
+    fontFamily: 'Poppins',
+    fontWeight: 'bold',
   },
 
   container2: {

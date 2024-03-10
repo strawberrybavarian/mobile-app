@@ -24,7 +24,7 @@ const LandingPage =({navigation})=>{
           >
 
           <View style={styles.logoContainer}>
-            <Image source={require('../../../assets/pictures/Medisinapp Logo 2.png')} style={styles.logo}/>
+            <Image source={require('../../../assets/pictures/RxpressCare.png')} style={styles.logo}/>
           </View>
           <View style={styles.container}>
             {/* textpage */}
@@ -112,13 +112,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold'
   },
   logo:{
-    width: 350,
-    height: 350,
+    width: 600,
+    height: 600,
 
   },
 
   logoContainer: {
-    paddingTop: 250,
+    paddingTop: 110,
     width: '100%',
 
     flexDirection: 'row',

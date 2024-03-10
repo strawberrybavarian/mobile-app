@@ -1,22 +1,23 @@
+// DoctorNavigation.jsx
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Pressable, Animated, View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute, } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
-const DoctorNavigation = () => {
+const DoctorNavigation = ({ activeTab, onTabChange }) => {
   const navigation = useNavigation();
   const route = useRoute();
   console.log(route);
+
   const [scaleAnim1] = useState(new Animated.Value(1));
   const [scaleAnim2] = useState(new Animated.Value(1));
   const [scaleAnim3] = useState(new Animated.Value(1));
   const [scaleAnim4] = useState(new Animated.Value(1));
   const [activeButton, setActiveButton] = useState(null);
 
-  
   //Animations:
   const handlePressIn = (scaleAnim, buttonName) => () => {
     setActiveButton(buttonName);
@@ -25,7 +26,10 @@ const DoctorNavigation = () => {
       toValue: 1.2,
       useNativeDriver: true,
     }).start();
+
+    onTabChange(buttonName);
   };
+
   const handlePressOut = (scaleAnim) => () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
@@ -37,27 +41,28 @@ const DoctorNavigation = () => {
     navigation.navigate(routeName);
   };
 
-
   return (
     <>
       <View style={styles.NavContainer}>
         <View style={styles.NavBar}>
           <Pressable
-            onPress={() => navigateTo('doctorspecialty')}
-            onPressIn={handlePressIn(scaleAnim1)}
+            onPressIn={handlePressIn(scaleAnim1, 'Home')}
             onPressOut={handlePressOut(scaleAnim1)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim1 }] }}>
               <View style={styles.IconBehavior}>
-                <Entypo 
-                  style={{ color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3' }} 
+                <Entypo
+                  style={{ color: activeTab === 'Home' ? '#92A3FD' : '#98A3B3' }}
                   name="home"
                   size={30}
                 />
                 <Text
                   style={[
                     styles.texts,
-                    {color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
+                    {
+                      color: activeTab === 'Home' ? '#92A3FD' : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      marginBottom: 2,
                     },
                   ]}
                 >
@@ -68,14 +73,13 @@ const DoctorNavigation = () => {
           </Pressable>
 
           <Pressable
-            onPress={() => navigateTo('doctorappointment')}
-            onPressIn={handlePressIn(scaleAnim2)}
+            onPressIn={handlePressIn(scaleAnim2, 'Appointment')}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome6
-                  style={{ color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Appointment' ? '#92A3FD' : '#98A3B3' }}
                   name="calendar-alt"
                   size={30}
                 />
@@ -83,7 +87,9 @@ const DoctorNavigation = () => {
                   style={[
                     styles.texts,
                     {
-                      color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
+                      color: activeTab === 'Appointment' ? '#92A3FD' : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      marginBottom: 2,
                       fontFamily: 'Poppins',
                     },
                   ]}
@@ -94,15 +100,14 @@ const DoctorNavigation = () => {
             </Animated.View>
           </Pressable>
 
-          <Pressable
-            onPress={() => navigateTo('searchappointment')}
-            onPressIn={handlePressIn(scaleAnim3)}
+          <Pressable 
+            onPressIn={handlePressIn(scaleAnim3, 'Profile')}
             onPressOut={handlePressOut(scaleAnim3)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome
-                  style={{ color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Profile' ? '#92A3FD' : '#98A3B3' }}
                   name="user-md"
                   size={30}
                 />
@@ -110,7 +115,7 @@ const DoctorNavigation = () => {
                   style={[
                     styles.texts,
                     {
-                      color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3',
+                      color: activeTab === 'Profile' ? '#92A3FD' : '#98A3B3',
                       fontFamily: 'Poppins',
                     },
                   ]}
@@ -121,7 +126,7 @@ const DoctorNavigation = () => {
             </Animated.View>
           </Pressable>
 
-         
+
         </View>
       </View>
     </>
@@ -141,11 +146,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    elevation: 50,
+    overflow: 'hidden',
+    elevation: 5,
     shadowOffset: { width: 0, height: 50 },
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowColor: 'black',
+    shadowOpacity: 0.20, 
+    shadowRadius: 20, 
     borderWidth: 2,
     borderColor: '#f0eeeea2',
   },

@@ -4,6 +4,8 @@ import Entypo from "@expo/vector-icons/Entypo";
 import doctorImage1 from '../../../assets/pictures/Doc.png';
 import magnify from '../../../assets/pictures/magni.png';
 import NavigationBar from '../Navigation/NavigationBar';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
 
 const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
   const totalStars = 5;
@@ -37,7 +39,7 @@ const SearchForAppointment = ({navigation}) => {
   const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const bookAppointmentButton = () => {
-    navigation.navigate('bookappointment')
+    navigation.navigate('aboutdoctor')
   }
   useEffect(() => {
     const filteredData = appointments.filter((item) =>
@@ -76,9 +78,15 @@ const SearchForAppointment = ({navigation}) => {
         <Text style={styles.doctorName}>{item.doctor}</Text>
         <Text style={styles.specialty}>{item.specialty}</Text>
         <View style={styles.ratingContainer}>
-          <StarRating rating={item.rating} starSize={20} starColor="#FFD700" />
-          <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+       
+         <View style={DoctorHomeStyles.container211}>
+                  <Text style={{fontFamily: 'Poppins', fontSize: 12 }}> 
+                  <FontAwesome name="circle" size={12} style={{color:'green'}} />  Active Now | </Text>
+                  <Text style={{fontSize: 12, fontFamily: 'Poppins'}}>National U Hospital</Text>
+          </View> 
         </View>
+
+      
       </View>
     </TouchableOpacity>
   );

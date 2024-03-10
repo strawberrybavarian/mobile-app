@@ -11,7 +11,7 @@ import DoctorNavigation from "../DoctorNavigation/DoctorNavigation"
 //For Searching
 const patientData = [
     { id: 'P012', name: 'Nymphia Wind', specialization: 'Banana', status: 'Accepted' },
-    { id: 'P002', name: 'La Grande Dame', specialization: 'Patient', status: 'Accepted' },
+    
     ,
   ];
 
@@ -29,6 +29,7 @@ const DoctorAcceptedPatient = ({ navigation }) => {
   
     return (
       <>
+      
 
       
             <View style={styles.searchContainer}>
@@ -75,14 +76,14 @@ const DoctorAcceptedPatient = ({ navigation }) => {
                 
                     
                     {/* Accept */}
-                    <TouchableOpacity style={UpcomingStyles.button2}>
-                            <Text style={{color: 'green', fontFamily: 'Poppins-SemiBold'}}>Send Lab Result</Text>
+                    <TouchableOpacity style={UpcomingStyles.button3}>
+                            <Text style={{color: '#fd9217', fontFamily: 'Poppins-SemiBold'}}>Send Lab Result</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={UpcomingStyles.button2}>
-                            <Text style={{color: 'green', fontFamily: 'Poppins-SemiBold'}}>Send Rx</Text>
+                    <TouchableOpacity style={UpcomingStyles.button4}>
+                            <Text style={{color: '#1767fd', fontFamily: 'Poppins-SemiBold'}}>Send Rx</Text>
                     </TouchableOpacity>
                     {/* Cancel */}
-                    <TouchableOpacity style={UpcomingStyles.button3}>
+                    <TouchableOpacity style={UpcomingStyles.button2}>
                             <Text style={{color: 'green', fontFamily: 'Poppins-SemiBold'}}>Complete</Text>
                     </TouchableOpacity>
                 </View>

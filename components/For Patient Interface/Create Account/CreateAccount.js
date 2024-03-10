@@ -123,9 +123,7 @@ const CreateAccount = ({ navigation }) => {
         </LinearGradient>
       </View>
 
-      <View style={styles.logoContainer}>
-        <Image source={require('../../../assets/pictures/Medisinapp Logo 1.png')} style={styles.logo} />
-      </View>
+    
     </KeyboardAwareScrollView>
   );
 };

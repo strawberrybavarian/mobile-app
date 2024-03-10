@@ -29,18 +29,19 @@ const SigninPage = ({ navigation }) => {
   };
 
   const doctorSpecialty = () => {
-    if ((email === '' || password === '') && role === 'Patient') {
-      Alert.alert('Please fill in all fields.');
-    } else if ((email === '' || password === '') && role === 'Doctor') {
-      Alert.alert('Please fill in all fields.');
+    if ((email.length < 8 || password.length < 8) || role === '') {
+      alert('Your email or password is less than 8 characters.');
+    } else if ((email.length >= 8 && password.length >= 8) && role === '') {
+      alert('Please select a role.');
     } else {
       if (role === 'Patient') {
         navigation.navigate('doctorspecialty');
       } else if (role === 'Doctor') {
-        navigation.navigate('doctorappointment');
+        navigation.navigate('doctormain');
       }
     }
   };
+  
   
 
 
@@ -148,12 +149,7 @@ const SigninPage = ({ navigation }) => {
         </View>
    
 
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../../../assets/pictures/Medisinapp Logo 1.png')}
-          style={styles.logo}
-        />
-      </View>
+      
     </>
     </KeyboardAvoidingView>
   );
