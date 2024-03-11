@@ -72,7 +72,7 @@ const BookAppointment = ({ navigation }) => {
             <Entypo name="chevron-thin-left" size={14} />
           </TouchableOpacity>
           <View style={{ justifyContent: 'center', width: "83%" }}>
-            <Text style={styles.title}>Fill Profile</Text>
+            <Text style={styles.title}>Book Appointment</Text>
           </View>
     </View>
 
