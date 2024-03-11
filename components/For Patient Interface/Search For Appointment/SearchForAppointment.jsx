@@ -7,29 +7,14 @@ import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
 
-const StarRating = ({ rating, starSize = 16, starColor = "#FFD700" }) => {
-  const totalStars = 5;
-  const filledStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 !== 0;
-  return (
-    <View style={{ flexDirection: "row" }}>
-      {[...Array(filledStars)].map((_, index) => (
-        <Text key={index} style={{ fontSize: starSize, color: starColor }}>★</Text>
-      ))}
-      {hasHalfStar && (
-        <Text style={{ fontSize: starSize, color: starColor }}>☆</Text>
-      )}
-    </View>
-  );
-};
 
 const dummyAppointments = [
   { id: "1", doctor: "Dr. Analyn Santos", specialty: "Cardiologist", rating: 4.5, image: doctorImage1 },
   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-  { id: "4", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-  { id: "5", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-  { id: "6", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
+  { id: "4", doctor: "Dr. Jennie Kim", specialty: "Neurologist", rating: 4.5, image: doctorImage1 },
+  { id: "5", doctor: "Dr. Vice Ganda", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
+  { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
 ];
 
 const SearchForAppointment = ({navigation}) => {
@@ -85,16 +70,13 @@ const SearchForAppointment = ({navigation}) => {
                   <Text style={{fontSize: 12, fontFamily: 'Poppins'}}>National U Hospital</Text>
           </View> 
         </View>
-
-      
       </View>
     </TouchableOpacity>
   );
 
   return (
     <>
-     
-        <View style={styles.container}>
+
           <View style={styles.allSearch}>
             <View style={styles.arrowCont}>
               <TouchableOpacity style={styles.arrowButton}>
@@ -105,25 +87,27 @@ const SearchForAppointment = ({navigation}) => {
               <Image source={magnify} style={styles.magnifyIcon}/>
               <TextInput
                 style={[styles.searchInput]}
-                placeholder="Search"
+                placeholder="Search your Doctor"
                 value={searchText}
                 onChangeText={(text) => setSearchText(text)}
               />
             </View>
           </View>
+
+
+
           <View style={styles.filterContainer}>
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            
-              <View style={styles.specialtyOvalContainer}>
-                {renderSpecialtyOval("All")}
-                {renderSpecialtyOval("General")}
-                {uniqueSpecialties.map((specialty) => renderSpecialtyOval(specialty))}
-              </View>
-           
-          </ScrollView>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{width: "100%",}}>
+                <View style={styles.specialtyOvalContainer}>
+                  {renderSpecialtyOval("All")}
+                  {renderSpecialtyOval("General")}
+                  {uniqueSpecialties.map((specialty) => renderSpecialtyOval(specialty))}
+                </View>
+            </ScrollView>
           </View>
 
-          
+
+        <View style={styles.container}>
           <View style={styles.appointmentBox}>
             <FlatList
               data={filteredAppointments}
@@ -138,7 +122,7 @@ const SearchForAppointment = ({navigation}) => {
         <NavigationBar/>
       </View>
 
-      <View style={{marginTop:140}}>
+      <View style={{marginTop:70}}>
    
       </View>
     </>
@@ -148,24 +132,27 @@ const SearchForAppointment = ({navigation}) => {
 const styles = StyleSheet.create({
 
   navcontainer:{
-  position: 'absolute',
-  bottom: 0,
-  width: '100%',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
   container: {
-    marginTop: 40,
-    padding: 10,
+  
+
     flex: 1,
  
   },
   searchInput: {
-    alignItems:"center",
-    justifyContent: 'center',
-    fontSize: 12,
+ 
+    fontSize: 15,
+    height: 50,
     fontFamily: 'Poppins',
-    top:4,
-    width: '100%'
-    
+    width: "100%",
+    top: 1,
+    backgroundColor: 'rgba(182, 178, 178, 0.288)',
+    overflow: 'hidden',
+    paddingLeft: 10,
+    paddingRight: 50,
   },
   arrowButton: {
      
@@ -183,40 +170,42 @@ const styles = StyleSheet.create({
     color: "#9dceff",
   },
   allSearch: {
-    width: '100%',
-    alignItems:'flex',
+
+
     flexDirection: "row",
-    justifyContent: 'flex-start',
-    overflow: 'hidden',
+    padding: 20,
+    marginTop: 40,
    
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 40,
-    backgroundColor: "#e7e6e6",
+    justifyContent: 'center',
     marginLeft: 12,
     width:"90%",
-   padding: 12,
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     borderRadius: 14,
-    
+    overflow: 'hidden',
   },
   magnifyIcon: {
     width: 20,
     height: 20,
+    marginLeft: 55,
     marginRight: 10,
-  },
-  filterContainer: {
-    marginTop: 20,
-    marginBottom: 10,
-      justifyContent: "space-between",
+
+ 
     
   },
+  filterContainer: {
+    marginBottom: 10,
+   
+    justifyContent: "space-between",
+  },
   specialtyOvalContainer: {
-    position: 'relative',
     flexDirection: "row",
-    alignItems: "flex-start",
-    width: "100%",
+    paddingRight: 20, // Add paddingRight here
+    overflow: 'visible',
   },
   specialtyOval: {
     borderRadius: 15,
@@ -226,7 +215,8 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     paddingBottom: 3,
     paddingTop: 3,
-    marginRight: 10,
+
+    marginLeft: 10,
     
    
   },

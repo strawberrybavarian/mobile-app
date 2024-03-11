@@ -26,7 +26,7 @@ const AboutDoctor = () => {
     <>
         <ScrollView style={AboutDoctorStyle.scrollContainer}>
             {/* Header */}
-            <View style={DoctorNotificationStyle.header}>
+            <View style={AboutDoctorStyle.header}>
                 <TouchableOpacity
                     style={DoctorNotificationStyle.arrowButton}
                     onPress={backButton}>

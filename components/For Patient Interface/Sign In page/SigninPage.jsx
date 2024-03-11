@@ -1,59 +1,85 @@
-import { StatusBar } from "expo-status-bar";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
-  TouchableWithoutFeedback,
   TouchableOpacity,
   TextInput,
-  Alert,
-  Image,
-  ScrollView,
+  TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Alert,
 } from "react-native";
-
-import { Picker } from '@react-native-picker/picker';
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import PickerSelect from 'react-native-picker-select';
 
 const SigninPage = ({ navigation }) => {
-  const [isPasswordVisible, setPasswordVisibility] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [roleError, setRoleError] = useState("");
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisibility(!isPasswordVisible);
+  
+  const seePassword = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
+  //For Realtime Validations
+  const validateEmail = (text) => {
+    if (!text || text.length < 8) {
+      setEmailError("Email must be at least 8 characters");
+    } else {
+      setEmailError("");
+    }
+    setEmail(text);
+  };
+
+  const validatePassword = (text) => {
+    if (!text || text.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+    } else {
+      setPasswordError("");
+    }
+    setPassword(text);
+  };
+
+  const validateRole = (value) => {
+    if (!value) {
+      setRoleError("Please select a role");
+    } else {
+      setRoleError("");
+    }
+    setRole(value);
   };
 
   const doctorSpecialty = () => {
-    if ((email.length < 8 || password.length < 8) || role === '') {
-      alert('Your email or password is less than 8 characters.');
-    } else if ((email.length >= 8 && password.length >= 8) && role === '') {
-      alert('Please select a role.');
-    } else {
-      if (role === 'Patient') {
-        navigation.navigate('doctorspecialty');
-      } else if (role === 'Doctor') {
-        navigation.navigate('doctormain');
+
+      console.log(email,password,role)
+      if (role === "Patient" && email.length >= 8 && password.length >= 8) {
+        navigation.navigate("doctorspecialty");
+      } else if (role === "Doctor" && email.length >= 8 && password.length >= 8) {
+        navigation.navigate("doctormain");
       }
+   else {
+      Alert.alert("Validation Error", "Please check the input fields", [
+        { text: "OK" },
+      ]);
     }
   };
-  
-  
-
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200} // Adjust this value based on your UI
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
     >
-    <>
-      {/* Header */}
-      
+      <>
+        {/* Header */}
         <View style={{ flex: 1 }}>
           <View style={styles.container}>
             <TouchableOpacity
@@ -72,57 +98,64 @@ const SigninPage = ({ navigation }) => {
             <Text style={styles.text1}>Account</Text>
           </View>
 
+          {/* Email Text Input */}
           <View style={styles.con2}>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Email"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={validateEmail}
               />
             </View>
+            {emailError ? (
+                <Text style={styles.errorMessage}>{emailError}</Text>
+            ) : null}
+
+
+           {/* Password Text Input */}
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Password"
-                secureTextEntry={isPasswordVisible}
+                secureTextEntry={passwordVisible}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={validatePassword}
               />
+             
               <View style={styles.eyeIconContainer}>
-                <TouchableWithoutFeedback onPress={togglePasswordVisibility}>
+                <TouchableWithoutFeedback onPress={seePassword}>
                   <FontAwesome5
-                    name={isPasswordVisible ? "eye-slash" : "eye"}
+                    name={passwordVisible ? "eye-slash" : "eye"}
                     size={15}
                   />
                 </TouchableWithoutFeedback>
               </View>
             </View>
+            {passwordError ? (
+                <Text style={styles.errorMessage}>{passwordError}</Text>
+              ) : null}
 
+            {/* Role Picker */}
             <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={role}
-                onValueChange={(value) => setRole(value)}
-                style={styles.picker}
-              >
-                <Picker.Item
-                  style={styles.pickerItem}
-                  label="Select your role"
-                  value=""
-                />
-                <Picker.Item
-                  style={styles.pickerItem}
-                  label="Doctor"
-                  value="Doctor"
-                />
-                <Picker.Item
-                  style={styles.pickerItem}
-                  label="Patient"
-                  value="Patient"
-                />
-              </Picker>
-            </View>
+              <PickerSelect
+                  placeholder={{ label: 'Select Role', value: null }}
+                  onValueChange={validateRole}
+                  items={[
+                  { label: 'Patient', value: 'Patient' },
+                  { label: 'Doctor', value: 'Doctor' },
 
+                ]}
+                style={{
+                  inputIOS: styles.pickerItem,
+                  inputAndroid: styles.pickerItem,
+                }}
+                />
+              
+            </View>
+            {roleError ? (
+                <Text style={styles.errorMessage}>{roleError}</Text>
+            ) : null}
             <LinearGradient
               start={{ x: 1, y: 0 }}
               end={{ x: 0, y: 2 }}
@@ -147,10 +180,7 @@ const SigninPage = ({ navigation }) => {
             </TouchableWithoutFeedback>
           </View>
         </View>
-   
-
-      
-    </>
+      </>
     </KeyboardAvoidingView>
   );
 };
@@ -176,23 +206,23 @@ const styles = StyleSheet.create({
   },
   text1: {
     fontSize: 45,
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: "Poppins-SemiBold",
     lineHeight: 55,
   },
   title: {
     fontSize: 15,
     color: "#92A3FD",
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: "Poppins-SemiBold",
   },
   inputContainer: {
     height: 50,
     width: "100%",
     borderRadius: 12,
     backgroundColor: "#d9d9d9",
-    marginVertical: 10,
-    paddingLeft: 10,
+    marginVertical: 50,
+    paddingLeft: 0,
     fontSize: 13,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
   },
   pickerContainer: {
     height: 50,
@@ -202,19 +232,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     marginVertical: 10,
     fontSize: 13,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
+    alignItems: "center",
+    justifyContent: "center",
   },
   picker: {
     flex: 1,
     height: 50,
     fontSize: 15,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
     right: 4,
     bottom: 2,
+    marginLeft: 10,
   },
   pickerItem: {
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
     fontSize: 15,
+    paddingLeft: 10,
   },
   passwordContainer: {
     flexDirection: "row",
@@ -229,8 +263,8 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: 14,
-    fontFamily: 'Poppins',
-    left: 10,
+    fontFamily: "Poppins",
+    paddingLeft: 10,
     top: 2,
   },
   eyeIconContainer: {
@@ -241,27 +275,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: "center",
     marginTop: 1,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
   },
   linkText: {
     textAlign: "center",
     marginTop: 20,
     fontSize: 12,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
   },
   logo: {
     width: 150,
     height: 100,
   },
   logoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position:'absolute',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-  
+  },
+  errorMessage: {
+    color: "red",
+    fontSize: 12,
+    marginLeft: 5,
+   
+    fontFamily: "Poppins",
   },
 });
 

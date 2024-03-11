@@ -42,7 +42,6 @@ const DoctorProfile = () => {
         <View style={DoctorProfileStyles.settings}>
         <Text style={{ fontFamily: 'Poppins', fontSize: 14}}> Doctor Administration</Text>
             <View style={DoctorProfileStyles.settingContainer}>
-
                 <TouchableOpacity style={DoctorProfileStyles.settingItem}>
                     <View style={DoctorProfileStyles.container31}> 
                         <FontAwesome name="globe" size={18} style={DoctorProfileStyles.iconStyle} />
@@ -106,10 +105,6 @@ const DoctorProfile = () => {
                             <Text style={DoctorProfileStyles.textProfile} >Logout</Text>
                     </View>
                 </TouchableOpacity>
-                
-
-                
-
             </View> 
          </View> 
       </View>

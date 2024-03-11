@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 80,
     justifyContent: 'space-evenly',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#ffffff',
     elevation: 50,
     shadowOffset: { width: 0, height: 50 },
@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   IconBehavior: {
     flexDirection: 'column',
     alignItems: 'center',
+    marginTop: 7,
   },
   texts: {
     fontSize: 9,

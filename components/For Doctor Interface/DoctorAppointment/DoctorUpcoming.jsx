@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
 
   banner: {
-    backgroundColor: '#FF5733', // Adjust the color as needed
+    backgroundColor: '#FF5733', 
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,

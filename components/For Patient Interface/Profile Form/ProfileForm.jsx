@@ -137,7 +137,7 @@ const ProfileForm = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
+    marginTop: 30,
     padding: 16,
   },
   header: {

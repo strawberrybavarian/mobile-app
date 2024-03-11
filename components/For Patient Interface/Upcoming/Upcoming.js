@@ -1,45 +1,70 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TextInput, Button, TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { View, Text, StyleSheet, Image, TextInput, Button, TouchableOpacity, TouchableWithoutFeedback, Alert} from 'react-native';
 import NavigationBar from '../Navigation/NavigationBar';
-import Home from './Home';
-
-import Profile from './Profile';
 import { LinearGradient } from "expo-linear-gradient";
+import { AboutDoctorStyle } from '../PatientStyleSheet/PatientCSS';
+import { DoctorNotificationStyle } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS';
+import Entypo from "@expo/vector-icons/Entypo";
+const Upcoming = ({navigation}) => {
 
-const Upcoming = () => {
 
-  const Stack = createNativeStackNavigator();
-  const BottomTab = createMaterialBottomTabNavigator();
   const handleCancelBooking = () => {
-    alert('Booking Cancelled!');
+    Alert.alert(
+      'Cancel Booking',
+      'Are you sure you want to cancel this booking?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            // Perform cancellation logic here
+            alert('Booking Cancelled!');
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
   
   const handleReschedule = () => {
-    alert('Appointment Rescheduled!');
+    Alert.alert(
+      'Reschedule Appointment',
+      'Are you sure you want to reschedule this appointment?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => {
+            // Perform rescheduling logic here
+            alert('Appointment Rescheduled!');
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
   return (
     <>
 
-    <View style={{padding: 10}}>
-    <View style={styles.container}>
-      <Text style={styles.title}> My Appointment </Text>
-      <Image
-          style={styles.magni}
-          contentFit="cover"
-      
-        />
-         <Image
-          style={[styles.filter]}
-          contentFit="cover"
-        
-        /> 
-    </View>
-
+  
+            <View style={AboutDoctorStyle.header}>
+                <TouchableOpacity
+                    style={DoctorNotificationStyle.arrowButton}
+                    onPress={() => navigation.goBack()}>
+                    <Entypo name="chevron-thin-left" size={14} />
+                </TouchableOpacity>
+                <View style={{ justifyContent: 'center', width: "83%" }}>
+                    <Text style={DoctorNotificationStyle.title}>About this Doctor</Text>
+                </View>
+            </View>
+            <View style={{paddingHorizontal: 20, paddingTop: 20,}}>
     <View style={styles.cont}>
-        
       <View style={styles.container1}>
           <Image style={styles.filter1} contentFit="cover" source={require("../../../assets/pictures/Doc.png")}/> 
             <View>
@@ -126,7 +151,7 @@ const styles = StyleSheet.create({
   },
   cont:{
     flexDirection:'column',
-    padding: 10,
+   
     backgroundColor: '#ffffff',
     width: '100%',
     borderRadius: 20,

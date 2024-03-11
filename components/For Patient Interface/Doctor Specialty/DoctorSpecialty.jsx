@@ -45,7 +45,7 @@ const DoctorSpecialty = ({ navigation }) => {
   return (
     <>
       <ScrollView style={styles.scrollContainer} >
-
+      
       <View style={styles.bluecont}> 
         <View style={styles.container2}>
           <Image
@@ -90,7 +90,7 @@ const DoctorSpecialty = ({ navigation }) => {
         </View>
       </View>
 
-
+      <View>
         <View style={styles.container4}>
             <Text style={{paddingLeft: 20, marginLeft:3, fontFamily:'Poppins-SemiBold', fontSize: 18}}>Doctor Specialty</Text>
             <View style={styles.container41}>
@@ -105,6 +105,7 @@ const DoctorSpecialty = ({ navigation }) => {
         </View>
             <View style={[styles.container41,{paddingBottom:50}]}></View> 
         </View> 
+      </View>
       </ScrollView>
     
       <NavigationBar/>
@@ -116,28 +117,28 @@ export default DoctorSpecialty;
 
 const styles = StyleSheet.create({
   bluecont: {
-    paddingTop: 10,
-    width: '100%',
-    height: 193,
-    borderBottomLeftRadius: 20,
+    paddingHorizontal: 10,
+    paddingBottom: 10,
     borderBottomRightRadius: 20,
-    overflow: 'hidden', // Clip child elements to prevent shadow from being visible on the sides
-    elevation: 2, // Adjust the elevation value based on your preference
+    borderBottomLeftRadius: 20,
+    elevation: 5, 
     shadowColor: 'black',
-    shadowOffset: { width: 0, height: 5 }, // Shadow offset, adjust the height value for the desired distance
-    shadowOpacity: 0.20, 
-    shadowRadius: 20, 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.08, 
+    shadowRadius: 50, 
+    backgroundColor: 'white'
   },
   container: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     padding: 15,
-    marginTop: 30,
+    marginTop: 50,
+   
   },
 
   container2: {
-    marginTop: 40,
+    marginTop: 50,
     flexDirection: "row",
     height: 60,
     padding: 10,
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
     marginRight: 5,
     alignItems: "center",
     marginBottom: 10, 
+    
   },
   container21: {
     flex: 1,
@@ -251,8 +253,9 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   scrollContainer: {
-    backgroundColor: '#FFFFFF',
-    flexGrow: 1,
+    backgroundColor: '#ffffffff',
+    
+    flex: 1,
 
   },
 
