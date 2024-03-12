@@ -24,7 +24,7 @@ const LandingPage =({navigation})=>{
           >
 
           <View style={styles.logoContainer}>
-            <Image source={require('../../../assets/pictures/RxpressCare.png')} style={styles.logo}/>
+            <Image source={require('../../../assets/pictures/MyPDoctorApp.png')} style={styles.logo}/>
           </View>
           <View style={styles.container}>
             {/* textpage */}
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold'
   },
   logo:{
-    width: 600,
-    height: 600,
+    width: 450,
+    height: 450,
 
   },
 
