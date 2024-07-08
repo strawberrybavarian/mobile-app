@@ -1,38 +1,151 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Platform, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import PickerSelect from 'react-native-picker-select';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import axios from 'axios';
 
 const CreateAccount = ({ navigation }) => {
-  const [username, setUsername] = useState('');
+  const [firstname, setFirstName] = useState('');
+  const [lastname, setLastName] = useState('');
+  const [middleinitial, setMiddleInitial] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('');
-  const [usernameError, setUsernameError] = useState('');
+  const [urole, setRole] = useState('');
+  const [firstnameError, setfirstnameError] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [lastnameError, setlastnameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [existingEmail, setExistingEmail] = useState([]);
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const validateUsername = (text) => {
-    if (!text || text.length < 8) {
-      setUsernameError("Username must be at least 8 characters");
-    } else {
-      setUsernameError("");
+  useEffect(() => {
+    axios.get('http://localhost:8000/patient/api/allemail')
+    .then((res) => {
+      console.log(res.data)
+      setExistingEmail(res.data)
+    })
+    .catch((err) => {
+      console.log(err.response);
+    });
+  },[])
+
+  const checkIfEmailExists = (email) => {
+    return existingEmail.includes(email);
+  };
+
+  const registerUser =(e) => {
+    e.preventDefault();
+
+    if (firstname.length == 0 || lastname.length == 0 || email.length == 0  || password.length == 0  ){
+      alert('Please fill in all required fields.');
     }
-    setUsername(text);
+
+    else if (checkIfEmailExists){
+      alert('Email already exists.')
+    }
+
+    else if (password !== confirmPassword) {
+      alert('Passwords do not match.');
+    }
+
+    else{
+      if (
+        firstnameError === '',
+        lastnameError === '',
+        emailError === '',
+        passwordError === '',
+        confirmPasswordError === ''
+      ){
+        if(urole === "Practitioner")
+          {
+              const doctorUser = {
+                  dr_firstName: firstname,
+                  dr_lastName: lastname,
+                  dr_middleInitial: middleinitial,
+                  dr_email: email,
+                  dr_password: password,
+                  // dr_dob: uBirth,
+                  // dr_contactNumber: uNumber,
+                  // dr_gender: uGender, 
+              }
+                  axios.post('http://localhost:8000/doctor/api/signup', doctorUser)
+                  .then((response) => {
+                      console.log(response);
+                      window.alert("Successfully registered Doctor");
+                      navigation.navigate('SigninPage');
+          
+                  })
+                  .catch((err)=> {
+                      console.log(err);
+                  })
+          }
+          else if (urole === "Patient") {
+              const patientUser = {
+                  patient_firstName: firstname,
+                  patient_middleInitial: middleinitial,
+                  patient_lastName: lastname,
+                  patient_email: email,
+                  patient_password: password,
+                  // patient_dob: uBirth,
+                  // patient_contactNumber: uNumber,
+                  // patient_gender: uGender,
+              };
+              console.log(patientUser)
+              axios.post('http://localhost:8000/patient/api/signup', patientUser)
+                  .then((response) => {
+                      console.log(response);
+                      window.alert("Successfully registered Patient");
+                      navigation.navigate('SigninPage');
+                  })
+                  .catch((err) => {
+                      console.log(err);
+                  });
+          }
+      }
+      else {
+        window.alert('May error.')
+      }
+    }
+    
+}
+
+  const validateFirstName = (text) => {
+    if (!text) {
+      setfirstnameError("First name cannot be empty");
+    } else {
+      setfirstnameError("");
+    }
+    setFirstName(text);
+  };
+  
+  const validateLastName = (text) => {
+    if (!text) {
+      setlastnameError("Last name cannot be empty.");
+    } else {
+      setlastnameError("");
+    }
+    setLastName(text);
   };
 
   const validateEmail = (text) => {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!text || text.length < 8) {
       setEmailError("Email must be at least 8 characters");
-    } else {
+    }
+    else if (!emailRegex.test(text)) {
+      setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
+    }
+    else {
       setEmailError("");
     }
     setEmail(text);
@@ -49,7 +162,7 @@ const CreateAccount = ({ navigation }) => {
 
   const validateConfirmPassword = (text) => {
     if (password !== text) {
-      setConfirmPasswordError("Password do not match");
+      setConfirmPasswordError("Passwords do not match");
     } else {
       setConfirmPasswordError("");
     }
@@ -62,19 +175,17 @@ const CreateAccount = ({ navigation }) => {
   const handleSignUp = () => {
     // Validation logic here
 
-      
-      if (username.length < 8 || email.length <8  || password.length < 8  )
-      {
-        alert('Please fill in all fields.');
-      }
+    if (firstname.length == 0 || lastname.length == 0 || email.length == 0  || password.length == 0  ){
+      alert('Please fill in all required fields.');
+    }
 
     else if (password !== confirmPassword) {
       alert('Passwords do not match.');
-      
     }
-   else{
+    else{
+      registerUser();
       navigation.navigate('SigninPage');
-   }
+    }
     
   };
 
@@ -99,15 +210,34 @@ const CreateAccount = ({ navigation }) => {
       </View>
 
       <View style={styles.container1}>
-        {/* Username Input */}
+        {/* First Name Input */}
         <TextInput
           style={styles.textInput}
-          placeholder="Username"
-          value={username}
-          onChangeText={validateUsername}
+          placeholder="First Name"
+          value={firstname}
+          onChangeText={validateFirstName}
         />
-          {usernameError ? (
-                <Text style={styles.errorMessage}>{usernameError}</Text>
+          {firstnameError ? (
+                <Text style={styles.errorMessage}>{firstnameError}</Text>
+          ) : null}
+
+          {/* Middle Name Input */}
+        <TextInput
+          style={styles.textInput}
+          placeholder="Middle Initial"
+          value={middleinitial}
+          onChangeText={setMiddleInitial}
+        />
+
+          {/* Last Name Input */}
+        <TextInput
+          style={styles.textInput}
+          placeholder="Last Name"
+          value={lastname}
+          onChangeText={validateLastName}
+        />
+          {lastnameError ? (
+                <Text style={styles.errorMessage}>{lastnameError}</Text>
           ) : null}
 
         {/* Email Input */}
@@ -163,7 +293,7 @@ const CreateAccount = ({ navigation }) => {
                   onValueChange={(value) => setRole(value)}
                   items={[
                   { label: 'Patient', value: 'Patient' },
-                  { label: 'Doctor', value: 'Doctor' },
+                  { label: 'Practitioner', value: 'Practitioner' },
 
                 ]}
                 style={{
@@ -186,7 +316,7 @@ const CreateAccount = ({ navigation }) => {
         >
           <TouchableOpacity
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-            onPress={handleSignUp}
+            onPress={(e) => {registerUser(e)}}
           >
             <Text style={styles.textButton}>SIGN IN</Text>
           </TouchableOpacity>

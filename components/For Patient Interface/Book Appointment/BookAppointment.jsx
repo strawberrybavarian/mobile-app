@@ -5,6 +5,10 @@ import doctorImage1 from '../../../assets/pictures/Doc.png'
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import axios from 'axios';
+
+
+
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>

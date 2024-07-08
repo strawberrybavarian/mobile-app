@@ -11,28 +11,28 @@ const PatientSchema = new Schema ({
     },
     patient_firstName: {
         type: String,
-        minlength: 3,
-        maxlength: 20
+        // minlength: 3,
+        // maxlength: 20
     },
     patient_middleInitial: {
         type: String,
-        maxlength: 1
+        // maxlength: 1
     },
     patient_lastName: {
         type: String,
-        minlength: 2,
-        maxlength: 20
+        // minlength: 2,
+        // maxlength: 20
     },
     patient_email: {
         type: String,
-        unique: true,
+        // unique: true,
         lowercase: true,
-        validate: {
-            validator: function(v) {
-                return /\S+@\S+\.\S+/.test(v);
-            },
-            message: props => `${props.value} is not a valid email address.`
-        }
+        // validate: {
+        //     validator: function(v) {
+        //         return /\S+@\S+\.\S+/.test(v);
+        //     },
+        //     message: props => `${props.value} is not a valid email address.`
+        // }
     },
     patient_password: {
         type: String,

@@ -209,7 +209,17 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-
+    //get all emails
+    const getAllPatientEmails = (req, res) => {
+      Patient.find({}, 'patient_email')
+      .then((patients) => {
+          const emails = patients.map(patient => patient.patient_email);
+          res.json({ emails: emails });
+      })
+      .catch((err) => {
+          res.json({ message: 'Something went wrong', error: err });
+      });
+  };
 
 
 module.exports = {
@@ -222,5 +232,6 @@ module.exports = {
     findPatientById,
     updatePostAtIndex,
     createAppointment,
-    cancelAppointment
+    cancelAppointment,
+    getAllPatientEmails
 }

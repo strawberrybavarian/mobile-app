@@ -31,9 +31,16 @@ const SigninPage = ({ navigation }) => {
 
   //For Realtime Validations
   const validateEmail = (text) => {
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!text || text.length < 8) {
       setEmailError("Email must be at least 8 characters");
-    } else {
+    }
+    else if (!emailRegex.test(text)) {
+      setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
+    }
+    else {
       setEmailError("");
     }
     setEmail(text);

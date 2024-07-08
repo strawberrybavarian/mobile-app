@@ -31,11 +31,14 @@ module.exports = app => {
   app.get('/doctor/api/test', (req, res) => { res.json({ message: "the api is working" }) });
   // For Registration
   app.post('/doctor/api/signup', DoctorController.NewDoctorSignUp);
+  app.post('/doctor/api/:email', DoctorController.findDoctorByEmail);
 
   // For LogIn
   app.get('/doctor/api/alldoctor', DoctorController.findAllDoctors);
+
   //Update Information Details
   app.put('/doctor/api/:id/updateDetails', DoctorController.updateDoctorDetails);
+
   // For Post
   app.post('/doctor/api/addpost/:id', DoctorController.addNewPostById);
   app.get('/doctor/api/finduser/:id', DoctorController.findDoctorById);
