@@ -12,11 +12,14 @@ const NewDoctorSignUp = (req, res) => {
     Doctors.create(req.body)
         .then((newDoctor) => {
             res.json({ newDoctor: newDoctor, status: "Successfully registered Doctor." });
+            console.log(newDoctor)
         })
         .catch((err) => {
-            res.json({ message: 'Something went wrong. Please try again.', error: err });
+            console.error('Error creating doctor:', err);
+            res.status(500).json({ message: 'Error creating doctor:', error: err.message });
         });
 };
+
 const updateDoctorDetails = (req, res) => {
     const updateData = {
       dr_firstName: req.body.dr_firstName,
@@ -327,8 +330,17 @@ const getPatientsByDoctor = async (req, res) => {
     }
 };
 
-
-
+//
+const getAllDoctorEmails = (req, res) => {
+    Doctors.find({}, 'dr_email')
+        .then((doctors) => {
+            res.status(200).json(doctors); // Send raw doctors data for inspection
+        })
+        .catch((err) => {
+            console.error('Error fetching doctor emails:', err);
+            res.status(500).json({ message: 'Something went wrong', error: err });
+        });
+};
 
 module.exports = {
     NewDoctorSignUp,
@@ -346,4 +358,5 @@ module.exports = {
     createPrescription,
     getPrescriptionsByDoctor,
     getPatientsByDoctor,
+    getAllDoctorEmails,
 };

@@ -7,7 +7,8 @@ const PatientSchema = new Schema ({
     //personal info
     patient_ID: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     patient_firstName: {
         type: String,
@@ -25,7 +26,7 @@ const PatientSchema = new Schema ({
     },
     patient_email: {
         type: String,
-        // unique: true,
+        unique: true,
         lowercase: true,
         // validate: {
         //     validator: function(v) {
@@ -67,26 +68,31 @@ const PatientSchema = new Schema ({
 //for Patient ID
 PatientSchema.pre('save', async function (next) {
     if (!this.isNew) {
-        return next();
+      return next();
     }
+  
     const currentYear = new Date().getFullYear();
-
+  
     try {
-        const highestPatient = await this.constructor.findOne({ patient_ID: new RegExp(`^Patient ${currentYear}`, 'i') })
-            .sort({ patient_ID: -1 })
-            .limit(1);
-        let nextNumber = 1;
-        if (highestPatient) {
-            const lastNumber = parseInt(highestPatient.patient_ID.split(' - ')[1]);
-            nextNumber = lastNumber + 1;
-        }
-        const paddedNumber = nextNumber.toString().padStart(6, '0');
-        this.patient_ID = `P${currentYear}-${paddedNumber}`;
-        next();
+      const highestPatient = await this.constructor.findOne({
+        patient_ID: new RegExp(`^P${currentYear}-`, 'i') // Match patient_ID starting with current year's format
+      })
+      .sort({ patient_ID: -1 })
+      .limit(1);
+  
+      let nextNumber = 1;
+      if (highestPatient) {
+        const lastNumber = parseInt(highestPatient.patient_ID.split('-')[1]);
+        nextNumber = lastNumber + 1;
+      }
+  
+      const paddedNumber = nextNumber.toString().padStart(6, '0');
+      this.patient_ID = `P${currentYear}-${paddedNumber}`;
+      next();
     } catch (error) {
-        next(error);
+      next(error);
     }
-});
+  });
 
 
 // PatientSchema.method({

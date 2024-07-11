@@ -14,7 +14,7 @@ const CreateAccount = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [urole, setRole] = useState('');
+  const [role, setRole] = useState('');
   const [firstnameError, setfirstnameError] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [lastnameError, setlastnameError] = useState('');
@@ -27,95 +27,199 @@ const CreateAccount = ({ navigation }) => {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:8000/patient/api/allemail')
-    .then((res) => {
-      console.log(res.data)
-      setExistingEmail(res.data)
-    })
-    .catch((err) => {
-      console.log(err.response);
-    });
-  },[])
+    if (role === 'Patient'){
+      axios.get('http://localhost:8000/patient/api/allemail')
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setExistingEmail(res.data); // Set the response if it's an array
+          console.log('Emails set:', res.data); // Log the array being set
+        } else {
+          console.error('Expected an array but got:', typeof res.data, res.data);
+        }
+      })
+      .catch((err) => {
+        console.log('error here');
+      });
+    }
+    else if (role === 'Doctor') {
+      axios.get('http://localhost:8000/doctor/api/allemail')
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setExistingEmail(res.data); // Set the response if it's an array
+          console.log('Emails set:', res.data); // Log the array being set
+        } else {
+          console.error('Expected an array but got:', typeof res.data, res.data);
+        }
+      })
+      .catch((err) => {
+        console.log('error here');
+      });
+    }
+
+  },[email, role])
 
   const checkIfEmailExists = (email) => {
-    return existingEmail.includes(email);
+    // Check if the email exists in the existingEmail array
+    
+    return existingEmail.some(existing => existing === email);
   };
 
-  const registerUser =(e) => {
+
+  // const registerUser =(e) => {
+  //   e.preventDefault();
+
+  //   if (firstname.length == 0 || lastname.length == 0 || email.length == 0  || password.length == 0  ){
+  //     alert('Please fill in all required fields.');
+  //   }
+
+  //   else if (checkIfEmailExists(email)){
+  //     console.log(checkIfEmailExists)
+  //     setEmailError('Email already exists.')
+  //     alert('Email already exists.')
+  //   }
+
+  //   else if (password !== confirmPassword) {
+  //     alert('Passwords do not match.');
+  //   }
+
+  //   else{
+  //     if (
+  //       firstnameError === '',
+  //       lastnameError === '',
+  //       emailError === '',
+  //       passwordError === '',
+  //       confirmPasswordError === ''
+  //     ){
+  //       if(role === "Doctor")
+  //         {
+  //             const doctorUser = {
+  //                 dr_firstName: firstname,
+  //                 dr_lastName: lastname,
+  //                 dr_middleInitial: middleinitial,
+  //                 dr_email: email,
+  //                 dr_password: password,
+  //                 // dr_dob: uBirth,
+  //                 // dr_contactNumber: uNumber,
+  //                 // dr_gender: uGender, 
+  //             }
+  //                 axios.post('http://localhost:8000/doctor/api/signup', doctorUser)
+  //                 .then((response) => {
+  //                     console.log(response.data);
+  //                     window.alert("Successfully registered Doctor");
+  //                     navigation.navigate('SigninPage');
+  //                 })
+  //                 .catch((err)=> {
+  //                     console.log(err);
+  //                 })
+  //         }
+  //         else if (role === "Patient") {
+  //             const patientUser = {
+  //                 patient_firstName: firstname,
+  //                 patient_middleInitial: middleinitial,
+  //                 patient_lastName: lastname,
+  //                 patient_email: email,
+  //                 patient_password: password,
+  //                 // patient_dob: uBirth,
+  //                 // patient_contactNumber: uNumber,
+  //                 // patient_gender: uGender,
+  //             };
+  //             console.log(patientUser)
+  //             axios.post('http://localhost:8000/patient/api/signup', patientUser)
+  //                 .then((response) => {
+  //                     console.log(response);
+  //                     window.alert("Successfully registered Patient");
+  //                     navigation.navigate('SigninPage');
+  //                 })
+  //                 .catch((err) => {
+  //                     console.log(err);
+  //                 });
+  //         }
+  //     }
+  //     else {
+  //       window.alert('May error.')
+  //     }
+  //   }
+    
+  // }
+
+  const registerUser = async (e) => {
     e.preventDefault();
 
-    if (firstname.length == 0 || lastname.length == 0 || email.length == 0  || password.length == 0  ){
-      alert('Please fill in all required fields.');
+    if (firstname.length == 0 || lastname.length == 0 || email.length == 0 || password.length == 0) {
+        alert('Please fill in all required fields.');
+        return;
     }
 
-    else if (checkIfEmailExists){
-      alert('Email already exists.')
+    if (await checkIfEmailExists(email)) {
+        setEmailError('Email already exists.');
+        alert('Email already exists.');
+        return;
     }
 
-    else if (password !== confirmPassword) {
-      alert('Passwords do not match.');
+    if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return;
     }
 
-    else{
-      if (
-        firstnameError === '',
-        lastnameError === '',
-        emailError === '',
-        passwordError === '',
+    if (
+        firstnameError === '' &&
+        lastnameError === '' &&
+        emailError === '' &&
+        passwordError === '' &&
         confirmPasswordError === ''
-      ){
-        if(urole === "Practitioner")
-          {
-              const doctorUser = {
-                  dr_firstName: firstname,
-                  dr_lastName: lastname,
-                  dr_middleInitial: middleinitial,
-                  dr_email: email,
-                  dr_password: password,
-                  // dr_dob: uBirth,
-                  // dr_contactNumber: uNumber,
-                  // dr_gender: uGender, 
-              }
-                  axios.post('http://localhost:8000/doctor/api/signup', doctorUser)
-                  .then((response) => {
-                      console.log(response);
-                      window.alert("Successfully registered Doctor");
-                      navigation.navigate('SigninPage');
-          
-                  })
-                  .catch((err)=> {
-                      console.log(err);
-                  })
-          }
-          else if (urole === "Patient") {
-              const patientUser = {
-                  patient_firstName: firstname,
-                  patient_middleInitial: middleinitial,
-                  patient_lastName: lastname,
-                  patient_email: email,
-                  patient_password: password,
-                  // patient_dob: uBirth,
-                  // patient_contactNumber: uNumber,
-                  // patient_gender: uGender,
-              };
-              console.log(patientUser)
-              axios.post('http://localhost:8000/patient/api/signup', patientUser)
-                  .then((response) => {
-                      console.log(response);
-                      window.alert("Successfully registered Patient");
-                      navigation.navigate('SigninPage');
-                  })
-                  .catch((err) => {
-                      console.log(err);
-                  });
-          }
-      }
-      else {
-        window.alert('May error.')
-      }
+    ) {
+        try {
+            if (role === "Doctor") {
+                const doctorUser = {
+                    dr_firstName: firstname,
+                    dr_lastName: lastname,
+                    dr_middleInitial: middleinitial,
+                    dr_email: email,
+                    dr_password: password,
+                    // dr_dob: uBirth,
+                    // dr_contactNumber: uNumber,
+                    // dr_gender: uGender, 
+                };
+                const response = await axios.post('http://localhost:8000/doctor/api/signup', doctorUser);
+                if (response.status === 200) {
+                    console.log(response.data);
+                    window.alert("Successfully registered Doctor");
+                    navigation.navigate('SigninPage');
+                } else {
+                    console.error(response.data);
+                    window.alert('Registration failed. Please try again.');
+                }
+            } else if (role === "Patient") {
+                const patientUser = {
+                    patient_firstName: firstname,
+                    patient_middleInitial: middleinitial,
+                    patient_lastName: lastname,
+                    patient_email: email,
+                    patient_password: password,
+                    // patient_dob: uBirth,
+                    // patient_contactNumber: uNumber,
+                    // patient_gender: uGender,
+                };
+                console.log(patientUser);
+                const response = await axios.post('http://localhost:8000/patient/api/signup', patientUser);
+                if (response.status === 200) {
+                    console.log(response.data);
+                    window.alert("Successfully registered Patient");
+                    navigation.navigate('SigninPage');
+                } else {
+                    console.error(response.data);
+                    window.alert('Registration failed. Please try again.');
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            window.alert('An error occurred during registration. Please try again.');
+        }
+    } else {
+        window.alert('There are some errors in the form.');
     }
-    
-}
+};
+
 
   const validateFirstName = (text) => {
     if (!text) {
@@ -289,11 +393,11 @@ const CreateAccount = ({ navigation }) => {
 
         <View style={styles.pickerContainer}>
             <PickerSelect
-                  placeholder={{ label: 'Select Role', value: null }}
+                  placeholder={{ label: 'Select Role', value: "" }}
                   onValueChange={(value) => setRole(value)}
                   items={[
                   { label: 'Patient', value: 'Patient' },
-                  { label: 'Practitioner', value: 'Practitioner' },
+                  { label: 'Doctor', value: 'Doctor' },
 
                 ]}
                 style={{
@@ -318,7 +422,7 @@ const CreateAccount = ({ navigation }) => {
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
             onPress={(e) => {registerUser(e)}}
           >
-            <Text style={styles.textButton}>SIGN IN</Text>
+            <Text style={styles.textButton}>SIGN UP</Text>
           </TouchableOpacity>
         </LinearGradient>
       </View>

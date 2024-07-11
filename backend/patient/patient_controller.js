@@ -3,6 +3,7 @@ const Doctor = require('../doctor/doctor_model');
 const Appointment = require('../appointments/appointment_model');
 const MedicalSecretary = require('../medicalsecretary/medicalsecretary_model');
 const Prescription = require('../prescription/prescription_model')
+
 const NewPatientSignUp = (req, res) => {
     Patient.create(req.body)
     .then((newPatient) => {
@@ -214,7 +215,7 @@ const cancelAppointment = async (req, res) => {
       Patient.find({}, 'patient_email')
       .then((patients) => {
           const emails = patients.map(patient => patient.patient_email);
-          res.json({ emails: emails });
+          res.json(emails);
       })
       .catch((err) => {
           res.json({ message: 'Something went wrong', error: err });

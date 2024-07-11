@@ -32,6 +32,8 @@ module.exports = app => {
   // For Registration
   app.post('/doctor/api/signup', DoctorController.NewDoctorSignUp);
   app.post('/doctor/api/:email', DoctorController.findDoctorByEmail);
+  app.get('/doctor/api/allemail', DoctorController.getAllDoctorEmails);
+
 
   // For LogIn
   app.get('/doctor/api/alldoctor', DoctorController.findAllDoctors);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,12 +14,20 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import PickerSelect from 'react-native-picker-select';
+import axios from "axios";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+
+  //arrays
+  const [allUsers, setAllUsers] = useState([]);
+  const [allPass, setAllPass] = useState([]);
+  const [allEmail, setAllEmail] = useState([]);
+
+  //errors
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
@@ -28,6 +36,79 @@ const SigninPage = ({ navigation }) => {
   const seePassword = () => {
     setPasswordVisible(!passwordVisible);
   };
+
+  useEffect(()=>{
+    const fetchData = async () => {
+      try {
+        let response;
+        if (role === "Patient") {
+          response = await axios.get('http://localhost:8000/patient/api/allpatient')
+        }
+        else if (role === 'Doctor') {
+          response = await axios.get('http://localhost:8000/doctor/api/alldoctor')
+        }
+
+        if (role === 'Patient' && response && response.data) {
+          const userData = response.data.thePatient;
+          setAllUsers(userData);
+
+          const emails = userData.map(user => user.patient_email)
+          setAllEmail(emails);
+
+          const passwords = userData.map(user => user.patient_password);
+          setAllPass(passwords);
+          
+        }
+        else if (role === 'Doctor' && response && response.data){
+          const userData = response.data.theDoctor;
+          setAllUsers(userData);
+
+          const emails = userData.map(user => user.dr_email)
+          setAllEmail(emails);
+
+          const passwords = userData.map(user => user.dr_password);
+          setAllPass(passwords);
+        }
+      }
+      catch (err) {
+        console.log(err)
+      }
+    }
+
+    fetchData()
+  }, [email, role])
+
+  //login
+  const loginUser = (e) => {
+    e.preventDefault();
+
+    if (email.length <= 8 && password.length <= 8) {
+      Alert.alert("Validation Error", "Please check the input fields", [
+        { text: "OK" },
+      ])
+    } 
+    else {
+      const emailIndex = allEmail.indexOf(email);
+      if (emailIndex !== -1 && password === allPass[emailIndex]) {
+          const user = allUsers[emailIndex];
+
+          if(role === 'Patient'){
+              window.alert("Successfully logged in");
+              console.log(user._id);
+              navigation.navigate(`doctorspecialty`);
+          }
+          else if (role === 'Doctor'){
+              window.alert("Successfully logged in");
+              console.log(user._id);
+              navigation.navigate(`doctormain`);
+          }
+        
+      } else {
+          window.alert("Wrong Email or Password");
+      }
+    }
+    
+};
 
   //For Realtime Validations
   const validateEmail = (text) => {
@@ -67,12 +148,15 @@ const SigninPage = ({ navigation }) => {
   const doctorSpecialty = () => {
 
       console.log(email,password,role)
+
+
       if (role === "Patient" && email.length >= 8 && password.length >= 8) {
         navigation.navigate("doctorspecialty");
-      } else if (role === "Doctor" && email.length >= 8 && password.length >= 8) {
+      } 
+      else if (role === "Doctor" && email.length >= 8 && password.length >= 8) {
         navigation.navigate("doctormain");
       }
-   else {
+      else {
       Alert.alert("Validation Error", "Please check the input fields", [
         { text: "OK" },
       ]);
@@ -146,7 +230,7 @@ const SigninPage = ({ navigation }) => {
             {/* Role Picker */}
             <View style={styles.pickerContainer}>
               <PickerSelect
-                  placeholder={{ label: 'Select Role', value: null }}
+                  placeholder={{ label: 'Select Role', value: "" }}
                   onValueChange={validateRole}
                   items={[
                   { label: 'Patient', value: 'Patient' },
@@ -176,7 +260,7 @@ const SigninPage = ({ navigation }) => {
             >
               <TouchableOpacity
                 style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-                onPress={doctorSpecialty}
+                onPress={(e)=>{loginUser(e)}}
               >
                 <Text style={styles.textButton}>SIGN IN</Text>
               </TouchableOpacity>
