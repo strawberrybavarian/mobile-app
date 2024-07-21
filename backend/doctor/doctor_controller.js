@@ -1,4 +1,4 @@
-const Doctors = require('./doctor_model');
+const Doctor = require('./doctor_model');
 const Post = require('../announcement/announcement_model');
 const Patient = require('../patient/patient_model');
 const Appointment = require('../appointments/appointment_model');
@@ -9,7 +9,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 const NewDoctorSignUp = (req, res) => {
-    Doctors.create(req.body)
+    Doctor.create(req.body)
         .then((newDoctor) => {
             res.json({ newDoctor: newDoctor, status: "Successfully registered Doctor." });
             console.log(newDoctor)
@@ -25,12 +25,13 @@ const updateDoctorDetails = (req, res) => {
       dr_firstName: req.body.dr_firstName,
       dr_lastName: req.body.dr_lastName,
       dr_middleInitial: req.body.dr_middleInitial,
-      dr_contactNumber: req.body.dr_contactNumber,
+    //   dr_contactNumber: req.body.dr_contactNumber,
       dr_dob: req.body.dr_dob,
       dr_email: req.body.dr_email,
-      dr_password: req.body.dr_password
+      dr_password: req.body.dr_password,
+      dr_specialty: req.body.dr_specialty
     };
-    Doctors.findByIdAndUpdate({ _id: req.params.id }, updateData, { new: true, runValidators: true })
+    Doctor.findByIdAndUpdate({ _id: req.params.id }, updateData, { new: true, runValidators: true })
       .then((updatedDoctor) => {
         res.json({ updatedDoctor: updatedDoctor, message: "Successfully updated the doctor" });
       })
@@ -39,10 +40,10 @@ const updateDoctorDetails = (req, res) => {
       });
 };
 const findAllDoctors = (req, res) => {
-    Doctors.find()
+    Doctor.find()
         .populate('dr_posts')
-        .then((allDataDoctors) => {
-            res.json({ theDoctor: allDataDoctors });
+        .then((allDataDoctor) => {
+            res.json({ theDoctor: allDataDoctor });
         })
         .catch((err) => {
             res.json({ message: 'Something went wrong', error: err });
@@ -54,7 +55,7 @@ const updateDoctorImage = async (req, res) => {
       const imagePath = `images/${req.file.filename}`; // Store relative path
   
       // Update the doctor's image path in the database
-      const updatedDoctor = await Doctors.findByIdAndUpdate(doctorId, { dr_image: imagePath }, { new: true });
+      const updatedDoctor = await Doctor.findByIdAndUpdate(doctorId, { dr_image: imagePath }, { new: true });
   
       res.json({ updatedDoctor, message: 'Doctor image updated successfully' });
     } catch (error) {
@@ -64,7 +65,7 @@ const updateDoctorImage = async (req, res) => {
 };
 // Get Doctor by ID
 const findDoctorById = (req, res) => {
-    Doctors.findOne({ _id: req.params.id })
+    Doctor.findOne({ _id: req.params.id })
         .populate('dr_posts')
         .then((theDoctor) => {
             res.json({ theDoctor });
@@ -74,7 +75,7 @@ const findDoctorById = (req, res) => {
         });
 };
 const findDoctorByEmail = (req, res) => {
-    Doctors.findOne({ email: req.params.email })
+    Doctor.findOne({ email: req.params.email })
         .populate('dr_posts')
         .then((theDoctor) => {
             res.json({ theEmail: theDoctor });
@@ -92,7 +93,7 @@ const addNewPostById = (req, res) => {
 
     newPost.save()
         .then((post) => {
-            return Doctors.findByIdAndUpdate(
+            return Doctor.findByIdAndUpdate(
                 req.params.id,
                 { $push: { dr_posts: post._id } },
                 { new: true }
@@ -107,7 +108,7 @@ const addNewPostById = (req, res) => {
 };
 // Retrieve all posts 
 const getAllPostbyId = (req, res) => {
-    Doctors.findOne({ _id: req.params.id })
+    Doctor.findOne({ _id: req.params.id })
         .populate('dr_posts')
         .then((Doctor) => {
             if (!Doctor) {
@@ -125,7 +126,7 @@ const findPostByIdDelete = async (req, res) => {
 
     try {
         // Find the doctor document
-        const doctor = await Doctors.findById(doctorId);
+        const doctor = await Doctor.findById(doctorId);
 
         if (!doctor) {
             return res.status(404).json({ message: 'Doctor not found' });
@@ -169,7 +170,7 @@ const updatePostAtIndex = async (req, res) => {
     }
 
     try {
-        const doctor = await Doctors.findById(doctorId);
+        const doctor = await Doctor.findById(doctorId);
 
         if (!doctor) {
             return res.status(404).json({ message: 'Doctor not found' });
@@ -233,7 +234,7 @@ const completeAppointment = async (req, res) => {
         const patientId = updatedAppointment.patient; // Assuming 'patient' field in Appointment schema
 
         // Update doctor's list of patients if the patient is not already in the list
-        await Doctors.findByIdAndUpdate(
+        await Doctor.findByIdAndUpdate(
             doctorId,
             { $addToSet: { dr_patients: patientId } }, // AddToSet ensures no duplicates
             { new: true }
@@ -276,7 +277,7 @@ const createPrescription = async (req, res) => {
         }
 
         // Update the doctor's record to include the new prescription
-        const doctorRecord = await Doctors.findById(doctor);
+        const doctorRecord = await Doctor.findById(doctor);
         if (doctorRecord) {
             doctorRecord.dr_prescriptions.push(prescription._id);
             await doctorRecord.save();
@@ -318,7 +319,7 @@ const getPatientsByDoctor = async (req, res) => {
         const doctorId = req.params.doctorId;
 
         // Find the doctor and populate the dr_patients field
-        const doctor = await Doctors.findById(doctorId).populate('dr_patients');
+        const doctor = await Doctor.findById(doctorId).populate('dr_patients');
 
         if (!doctor) {
             return res.status(404).json({ message: "Doctor not found" });
@@ -332,9 +333,10 @@ const getPatientsByDoctor = async (req, res) => {
 
 //
 const getAllDoctorEmails = (req, res) => {
-    Doctors.find({}, 'dr_email')
+    Doctor.find({}, 'dr_email')
         .then((doctors) => {
-            res.status(200).json(doctors); // Send raw doctors data for inspection
+            const emails = doctors.map(doctor => doctor.dr_email);
+            res.json(emails); // Send raw doctors data for inspection
         })
         .catch((err) => {
             console.error('Error fetching doctor emails:', err);

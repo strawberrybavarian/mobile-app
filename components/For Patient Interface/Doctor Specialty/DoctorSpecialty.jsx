@@ -9,25 +9,25 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 //For Searching
-const specialtiesData = 
+
+const DoctorSpecialty = ({ navigation }) => {
+  const [search, setSearch] = useState('');
+  // const [filternav, setFilterNav] = useState('')
+
+  const specialtiesData = 
  [
-  { id: 1, name: 'Primary Care & General Medicine', image: require('../../../assets/pictures/Stethoscope.png') },
-  { id: 2, name: "OB-GYN's & Women's Health", image: require('../../../assets/pictures/FemaleReproductive.png') },
-  { id: 3, name: 'Pediatrics', image: require('../../../assets/pictures/Pedia.png') }, 
-  { id: 4, name: 'Heart & Cardiology', image: require('../../../assets/pictures/Heart.png') },
-  { id: 5, name: 'Eye & Vision', image: require('../../../assets/pictures/Eye.png') },
-  { id: 6, name: 'Skin & Dermatology', image: require('../../../assets/pictures/Dermatology.png') },
-  { id: 7, name: 'Brain & Nerves', image: require('../../../assets/pictures/Brain.png') },
-  { id: 8, name: 'Stomach, Digestion &  Gastroenterology', image: require('../../../assets/pictures/Stomach.png') },
+  { id: 1, name: 'Primary Care & General Medicine', image: require('../../../assets/pictures/Stethoscope.png'), spec: 'PrimaryCare' },
+  { id: 2, name: "OB-GYN's & Women's Health", image: require('../../../assets/pictures/FemaleReproductive.png'), spec: 'Obgyn' },
+  { id: 3, name: 'Pediatrics', image: require('../../../assets/pictures/Pedia.png'), spec: 'Pedia'  }, 
+  { id: 4, name: 'Heart & Cardiology', image: require('../../../assets/pictures/Heart.png'), spec: 'Cardio'  },
+  { id: 5, name: 'Eye & Vision', image: require('../../../assets/pictures/Eye.png'), spec: 'Opthal'  },
+  { id: 6, name: 'Skin & Dermatology', image: require('../../../assets/pictures/Dermatology.png'), spec: 'Derma'  },
+  { id: 7, name: 'Brain & Nerves', image: require('../../../assets/pictures/Brain.png'), spec: 'Neuro'  },
+  { id: 8, name: 'Stomach, Digestion &  Gastroenterology', image: require('../../../assets/pictures/Stomach.png'), spec: 'InternalMed'  },
  
 
 ];
-
-console.log(specialtiesData);
-
-const DoctorSpecialty = ({ navigation }) => {
-
-  const [search, setSearch] = useState('');
+  console.log(specialtiesData);
 
   const handleSearch = (serts) => {
     setSearch(serts);
@@ -37,9 +37,10 @@ const DoctorSpecialty = ({ navigation }) => {
     specialty.name.toLowerCase().includes(search.toLowerCase())
   );
 
-
-  const appointmentButton = () => {
-    navigation.navigate('searchappointment')
+  const appointmentButton = (spec) => {
+    console.log(spec, typeof(spec))
+    const specpec = spec
+    navigation.navigate('searchappointment', { specpec })
   }
 
   return (
@@ -95,7 +96,7 @@ const DoctorSpecialty = ({ navigation }) => {
             <Text style={{paddingLeft: 20, marginLeft:3, fontFamily:'Poppins-SemiBold', fontSize: 18}}>Doctor Specialty</Text>
             <View style={styles.container41}>
             {filteredSpecialties.map((specialty, index) => (
-              <TouchableOpacity onPress={appointmentButton} key={specialty.id} style={styles.specialtyButton}>
+              <TouchableOpacity onPress={() => appointmentButton(specialty.spec)} key={specialty.id} style={styles.specialtyButton}>
                 <View style={styles.container42}>
                 <Image source={specialty.image} style={styles.images} />
                   <Text style={styles.buttonText}>{specialty.name}</Text>

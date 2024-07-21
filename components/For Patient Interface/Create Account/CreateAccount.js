@@ -13,20 +13,25 @@ const CreateAccount = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('');
-  const [firstnameError, setfirstnameError] = useState('');
   const [contactNumber, setContactNumber] = useState('');
+  const [specialty, setSpecialty] = useState('');
+  const [role, setRole] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSpecialty, setShowSpecialty] = useState(false)
+
+  const [firstnameError, setfirstnameError] = useState('');
   const [lastnameError, setlastnameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [existingEmail, setExistingEmail] = useState([]);
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  useEffect(() => {
+  useEffect(() => { //for email check
     if (role === 'Patient'){
       axios.get('http://localhost:8000/patient/api/allemail')
       .then((res) => {
@@ -58,12 +63,21 @@ const CreateAccount = ({ navigation }) => {
 
   },[email, role])
 
+  useEffect(() => { //for specialty visibility
+      if (role === 'Doctor') {
+        setShowSpecialty(true)
+      }
+      else {
+        setShowSpecialty(false)
+      }
+    
+  }, [role])
+
   const checkIfEmailExists = (email) => {
     // Check if the email exists in the existingEmail array
     
     return existingEmail.some(existing => existing === email);
   };
-
 
   // const registerUser =(e) => {
   //   e.preventDefault();
@@ -145,12 +159,12 @@ const CreateAccount = ({ navigation }) => {
   const registerUser = async (e) => {
     e.preventDefault();
 
-    if (firstname.length == 0 || lastname.length == 0 || email.length == 0 || password.length == 0) {
+    if (firstname.length == 0 || lastname.length == 0 || email.length == 0 || password.length == 0 || confirmPassword.length == 0) {
         alert('Please fill in all required fields.');
         return;
     }
 
-    if (await checkIfEmailExists(email)) {
+    if (checkIfEmailExists(email)) {
         setEmailError('Email already exists.');
         alert('Email already exists.');
         return;
@@ -176,6 +190,7 @@ const CreateAccount = ({ navigation }) => {
                     dr_middleInitial: middleinitial,
                     dr_email: email,
                     dr_password: password,
+                    dr_specialty: specialty
                     // dr_dob: uBirth,
                     // dr_contactNumber: uNumber,
                     // dr_gender: uGender, 
@@ -243,10 +258,7 @@ const CreateAccount = ({ navigation }) => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!text || text.length < 8) {
-      setEmailError("Email must be at least 8 characters");
-    }
-    else if (!emailRegex.test(text)) {
+    if (!emailRegex.test(text)) {
       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
     }
     else {
@@ -398,6 +410,28 @@ const CreateAccount = ({ navigation }) => {
                   items={[
                   { label: 'Patient', value: 'Patient' },
                   { label: 'Doctor', value: 'Doctor' },
+
+                ]}
+                style={{
+                  inputIOS: styles.pickerItem,
+                  inputAndroid: styles.pickerItem,
+                }}
+                />
+        </View>
+
+        <View style={[styles.pickerContainer, {display: showSpecialty ? 'flex' : 'none'}]}>
+            <PickerSelect
+                  placeholder={{ label: 'Select Specialty', value: "" }}
+                  onValueChange={(value) => setSpecialty(value)}
+                  items={[
+                  { label: 'Primary Care & General Medicine', value: 'PrimaryCare' },
+                  { label: 'OB-GYN', value: 'Obgyn' },
+                  { label: 'Pediatrics', value: 'Pedia' },
+                  { label: 'Cardiology', value: 'Cardio' },
+                  { label: 'Opthalmology', value: 'Opthal' },
+                  { label: 'Dermatology', value: 'Derma' },
+                  { label: 'Neurology', value: 'Neuro' },
+                  { label: 'Internal Medicine', value: 'InternalMed' },
 
                 ]}
                 style={{

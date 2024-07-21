@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import PickerSelect from 'react-native-picker-select';
 import axios from "axios";
+import { FIREBASE_AUTH } from "../../../FirebaseConfig";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);

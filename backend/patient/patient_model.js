@@ -5,11 +5,11 @@ const {Schema, model} = mongoose
 const PatientSchema = new Schema ({
 
     //personal info
-    patient_ID: {
-        type: String,
-        unique: true,
-        required: true
-    },
+    // patient_ID: {
+    //     type: String,
+    //     unique: true,
+    //     required: true
+    // },
     patient_firstName: {
         type: String,
         // minlength: 3,
@@ -66,33 +66,33 @@ const PatientSchema = new Schema ({
 }, { timestamps: true });
 
 //for Patient ID
-PatientSchema.pre('save', async function (next) {
-    if (!this.isNew) {
-      return next();
-    }
+// PatientSchema.pre('save', async function (next) {
+//     if (!this.isNew) {
+//       return next();
+//     }
   
-    const currentYear = new Date().getFullYear();
+//     const currentYear = new Date().getFullYear();
   
-    try {
-      const highestPatient = await this.constructor.findOne({
-        patient_ID: new RegExp(`^P${currentYear}-`, 'i') // Match patient_ID starting with current year's format
-      })
-      .sort({ patient_ID: -1 })
-      .limit(1);
+//     try {
+//       const highestPatient = await this.constructor.findOne({
+//         patient_ID: new RegExp(`^P${currentYear}-`, 'i') // Match patient_ID starting with current year's format
+//       })
+//       .sort({ patient_ID: -1 })
+//       .limit(1);
   
-      let nextNumber = 1;
-      if (highestPatient) {
-        const lastNumber = parseInt(highestPatient.patient_ID.split('-')[1]);
-        nextNumber = lastNumber + 1;
-      }
+//       let nextNumber = 1;
+//       if (highestPatient) {
+//         const lastNumber = parseInt(highestPatient.patient_ID.split('-')[1]);
+//         nextNumber = lastNumber + 1;
+//       }
   
-      const paddedNumber = nextNumber.toString().padStart(6, '0');
-      this.patient_ID = `P${currentYear}-${paddedNumber}`;
-      next();
-    } catch (error) {
-      next(error);
-    }
-  });
+//       const paddedNumber = nextNumber.toString().padStart(6, '0');
+//       this.patient_ID = `P${currentYear}-${paddedNumber}`;
+//       next();
+//     } catch (error) {
+//       next(error);
+//     }
+//   });
 
 
 // PatientSchema.method({

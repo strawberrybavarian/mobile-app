@@ -6,7 +6,7 @@ import magnify from '../../../assets/pictures/magni.png';
 import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
-
+import axios from "axios";
 
 const dummyAppointments = [
   { id: "1", doctor: "Dr. Analyn Santos", specialty: "Cardiologist", rating: 4.5, image: doctorImage1 },
@@ -17,15 +17,39 @@ const dummyAppointments = [
   { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
 ];
 
-const SearchForAppointment = ({navigation}) => {
+const SearchForAppointment = ({navigation, route}) => {
   const [searchText, setSearchText] = useState("");
   const [appointments, setAppointments] = useState(dummyAppointments);
+  const [allDoctorArray, setAllDoctorArray] = useState([])
+  const [doctorFiltered, setDoctorFiltered] = useState([])
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  const { specpec } = route.params || {};
+
+  useEffect(()=>{
+    axios.get('http://localhost:8000/doctor/api/alldoctor')
+    .then((res)=> {
+      if (Array.isArray(res.data.theDoctor)) {
+        setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array
+        console.log('Docs set:', res.data.theDoctor); // Log the array being set
+      } else {
+        console.error('Expected an array but got:', typeof res.data.theDoctor, res.data.theDoctor);
+      }
+    })
+    .catch((err) => {
+      console.log('error here');
+    })
+  },[])
+
+  useEffect(() => {
+    
+  },[])
+
   const bookAppointmentButton = () => {
     navigation.navigate('aboutdoctor')
-  }
+  } //to be changed
+  
   useEffect(() => {
     const filteredData = appointments.filter((item) =>
       item.doctor.toLowerCase().includes(searchText.toLowerCase())
@@ -79,7 +103,9 @@ const SearchForAppointment = ({navigation}) => {
 
           <View style={styles.allSearch}>
             <View style={styles.arrowCont}>
-              <TouchableOpacity style={styles.arrowButton}>
+              <TouchableOpacity 
+              style={styles.arrowButton}
+              onPress={() => navigation.goBack()}>
                 <Entypo name="chevron-thin-left" style={styles.arrowText} size={11} />
               </TouchableOpacity>
             </View>
