@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../../assets/pictures/Doc.png'
@@ -11,16 +11,57 @@ import { useNavigation } from '@react-navigation/native';
 
 
 
-const AboutDoctor = () => {
+const AboutDoctor = ({navigation, route}) => {
     
-    const navigation = useNavigation();
+    //const navigation = useNavigation();
+
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [specialty, setSpecialty] = useState('');
+
+    const { item } = route.params || {};
+    console.log(item)
+
+    useEffect(() => {
+        setFirstName(item.dr_firstName)
+        setLastName(item.dr_lastName)
+
+        let placeholder;
+        switch (item.dr_specialty) {
+            case 'PrimaryCare':
+                placeholder = 'General';
+                break;
+            case 'Obgyn':
+                placeholder = 'OB-GYN';
+                break;
+            case 'Pedia':
+                placeholder = 'Pediatrics';
+                break;
+            case 'Cardio':
+                placeholder = 'Cardiology';
+                break;
+            case 'Opthal':
+                placeholder = 'Eye & Vision';
+                break;
+            case 'Derma':
+                placeholder = 'Dermatology';
+                break;
+            case 'Neuro':
+                placeholder = 'Neurology';
+                break;
+            case 'InternalMed':
+                placeholder = 'Gastroenterology';
+                break;
+        }
+        setSpecialty(placeholder)
+    },[])
 
     const backButton = () => {
-        navigation.navigate('searchappointment')
+        navigation.goBack()
       }
 
   const nextButton = () => {
-    navigation.navigate('bookappointment')
+    navigation.navigate('bookappointment', {item})
   }
   return (
     <>
@@ -43,8 +84,8 @@ const AboutDoctor = () => {
                 <View style={AboutDoctorStyle.containerCard}>
                     <View style={AboutDoctorStyle.doctorContainer}>
                         <Image source={doctorImage1} style={AboutDoctorStyle.doctorImage} />
-                        <Text style={{fontFamily:'Poppins-SemiBold', fontSize: 20, marginTop: 5,}}>Dr. Analyn Santos</Text>
-                        <Text style={{fontFamily:'Poppins', fontSize: 12,}}>Cardiologist</Text>
+                        <Text style={{fontFamily:'Poppins-SemiBold', fontSize: 20, marginTop: 5,}}>Dr. {firstName} {lastName}</Text>
+                        <Text style={{fontFamily:'Poppins', fontSize: 12,}}>{specialty}</Text>
                     </View>
 
                     <View style={AboutDoctorStyle.profileDoctorContainer}>

@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
-import doctorImage1 from '../../../assets/pictures/Doc.png'
+import doctorImage1 from '../../../assets/pictures/Doc.png';
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
-
-
-
+import { TextInput } from 'react-native-paper';
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>
@@ -16,11 +14,10 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
     <View style={styles.doctorCardContent}>
       <Text style={styles.doctorCardName}>{doctorName}</Text>
       <Text style={styles.doctorCardSpecialty}>{specialty}</Text>
-      <View style={{flexDirection: 'row'}}>
-      <FontAwesome5 name="thumbtack" size={12} style={styles.Icon} />
+      <View style={{ flexDirection: 'row' }}>
+        <FontAwesome5 name="thumbtack" size={12} style={styles.Icon} />
         <Text style={styles.doctorCardSpecialty1}>NU Hospital</Text>
       </View>
-      
     </View>
   </View>
 );
@@ -28,47 +25,41 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
 const BookAppointment = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
+  const [reason, setReason] = useState('')
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
+
   const handleHourSelect = (hour) => {
     setSelectedHour(hour);
   };
+
+  const handleReason = (input) => {
+    setReason(input)
+  }
+
   const handleNext = () => {
     if (selectedDate && selectedHour) {
       navigation.navigate('healthassess', { date: selectedDate, hour: selectedHour });
-    } else {
     }
   };
-  const formatHour = (hour) => {
-    let period = hour >= 12 ? 'PM' : 'AM';
-    if (hour > 12) {
-      hour -= 12;
-    } else if (hour === 0) {
-      hour = 12;
-    }
-    return `${hour}:00 ${period}`;
-  };
-  const groupedHours = [6, 7, 8, 12, 13, 14].reduce((acc, hour, index, array) => {
-    if (index % 3 === 0) {
-      acc.push(array.slice(index, index + 3));
-    }
-    return acc;
-  }, []);
-  const backButton = () => {
-    navigation.navigate('searchappointment')
-  }
 
- 
+  const availableHours = ["8:00 AM to 11:00 AM", "3:00 PM to 4:00 PM"];
+
+  const backButton = () => {
+    navigation.navigate('searchappointment');
+  };
 
   const nextButton = () => {
-    navigation.navigate('healthassess')
-  }
+    console.log(reason)
+    navigation.navigate('healthassess');
+  };
+
   return (
     <>
-    <ScrollView style={styles.container}>
-
-    <View style={styles.header}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
           <TouchableOpacity
             style={styles.arrowButton}
             onPress={backButton}
@@ -78,72 +69,79 @@ const BookAppointment = ({ navigation }) => {
           <View style={{ justifyContent: 'center', width: "83%" }}>
             <Text style={styles.title}>Book Appointment</Text>
           </View>
-    </View>
+        </View>
 
-      <DoctorCard
-        doctorName="Dr. Analyn Santos"
-        specialty="Cardiologist"
-        rating={4.5}
-        image={doctorImage1}
-      />
-
-      <Text style={styles.subtitle}>Select a Date</Text>
-      <View style={styles.calendarContainer}>
-        <CalendarPicker 
-          onDateChange={handleDateChange} 
-          selectedDayColor="#92a3fd"
-          selectedDayTextColor="white"
-          todayBackgroundColor="transparent"
-          todayTextStyle={{ color: '#000' }}
-          textStyle={{ color: '#000', fontFamily:'Poppins' }}
-          customDatesStyles={[
-            {
-              date: selectedDate,
-              style: { backgroundColor: 'red' },
-              textStyle: { color: 'white' },
-            },
-          ]}
-          dayShape="circle"
-          width={300}
-          height={300}
-          hideDayNames={true}
+        <DoctorCard
+          doctorName="Dr. Analyn Santos"
+          specialty="Cardiologist"
+          rating={4.5}
+          image={doctorImage1}
         />
-      </View>
 
-      <Text style={styles.subtitle}>Select Hour</Text>
-      <View style={styles.hourContainer}>
-        {groupedHours.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.rowContainer}>
-            {row.map((hour) => (
-              <TouchableOpacity 
-                key={hour} 
-                style={[
-                  styles.hourOval, 
-                  selectedHour === hour && styles.selectedHour 
-                ]}
-                onPress={() => handleHourSelect(hour)}
-              >
-                <Text style={[
-                  styles.hourText, 
-                  selectedHour === hour && styles.selectedHourText,
-                  styles.boldText,
-                ]}>
-                  {formatHour(hour)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-      </View>
+        <Text style={styles.subtitle}>Select a Date</Text>
+        <View style={styles.calendarContainer}>
+          <CalendarPicker
+            onDateChange={handleDateChange}
+            selectedDayColor="#92a3fd"
+            selectedDayTextColor="white"
+            todayBackgroundColor="transparent"
+            todayTextStyle={{ color: '#000' }}
+            textStyle={{ color: '#000', fontFamily: 'Poppins' }}
+            customDatesStyles={[
+              {
+                date: selectedDate,
+                style: { backgroundColor: 'red' },
+                textStyle: { color: 'white' },
+              },
+            ]}
+            dayShape="circle"
+            width={300}
+            height={300}
+            hideDayNames={true}
+          />
+        </View>
 
-      <TouchableOpacity 
-        style={styles.nextButton} 
-        onPress={nextButton}
-      >
-        <Text style={styles.nextButtonText}>Next</Text>
-      </TouchableOpacity>
-    </ScrollView>
-                <NavigationBar/>
+        <Text style={styles.subtitle}>Select Hour</Text>
+        <View style={styles.hourContainer}>
+          {availableHours.map((hour, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.hourOval,
+                selectedHour === hour && styles.selectedHour
+              ]}
+              onPress={() => handleHourSelect(hour)}
+            >
+              <Text style={[
+                styles.hourText,
+                selectedHour === hour && styles.selectedHourText,
+                styles.boldText,
+              ]}>
+                {hour}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.subtitle}>Primary Concern</Text>
+        <View>
+          <TextInput
+            onChangeText={handleReason}
+            placeholder='State your reason here.'
+            value = {reason}
+            multiline = {true}
+          />
+        </View>
+
+
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={nextButton}
+        >
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </ScrollView>
+      <NavigationBar />
     </>
   );
 };
@@ -158,7 +156,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 30,
-
   },
   arrowButton: {
     padding: 10,
@@ -170,9 +167,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily:'Poppins-SemiBold',
+    fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
-   
   },
   subtitle: {
     fontSize: 14,
@@ -190,10 +186,6 @@ const styles = StyleSheet.create({
   },
   hourContainer: {
     marginTop: 8,
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   hourOval: {
     marginLeft: 5,
@@ -251,17 +243,15 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   doctorCardContent: {
-
     justifyContent: 'center'
   },
   doctorCardName: {
     fontSize: 15,
     fontFamily: 'Poppins-SemiBold'
   },
-  Icon:{
+  Icon: {
     width: 20,
-    
-    justifyContent:'flex-start',
+    justifyContent: 'flex-start',
     marginTop: 2,
     color: '#666',
   },

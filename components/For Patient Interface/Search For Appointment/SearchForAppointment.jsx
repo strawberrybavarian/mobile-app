@@ -8,57 +8,62 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
 import axios from "axios";
 
-const dummyAppointments = [
-  { id: "1", doctor: "Dr. Analyn Santos", specialty: "Cardiologist", rating: 4.5, image: doctorImage1 },
-  { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
-  { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-  { id: "4", doctor: "Dr. Jennie Kim", specialty: "Neurologist", rating: 4.5, image: doctorImage1 },
-  { id: "5", doctor: "Dr. Vice Ganda", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-  { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-];
+// const dummyAppointments = [
+//   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
+//   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
+//   { id: "4", doctor: "Dr. Jennie Kim", specialty: "Neurologist", rating: 4.5, image: doctorImage1 },
+//   { id: "5", doctor: "Dr. Vice Ganda", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
+//   { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
+// ];
 
-const SearchForAppointment = ({navigation, route}) => {
+const SearchForAppointment = ({ navigation, route }) => {
   const [searchText, setSearchText] = useState("");
-  const [appointments, setAppointments] = useState(dummyAppointments);
-  const [allDoctorArray, setAllDoctorArray] = useState([])
-  const [doctorFiltered, setDoctorFiltered] = useState([])
-  const [filteredAppointments, setFilteredAppointments] = useState([]);
-  const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
-  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
+  // const [appointments, setAppointments] = useState(dummyAppointments);
+  const [allDoctorArray, setAllDoctorArray] = useState([]);
+  const [doctorFiltered, setDoctorFiltered] = useState([]);
+  // const [filteredAppointments, setFilteredAppointments] = useState([]);
+  // const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
+  const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const { specpec } = route.params || {};
+  //console.log("specpec = " + specpec, typeof (specpec));
 
-  useEffect(()=>{
+  // Get all doctors
+  useEffect(() => {
     axios.get('http://localhost:8000/doctor/api/alldoctor')
-    .then((res)=> {
-      if (Array.isArray(res.data.theDoctor)) {
-        setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array
-        console.log('Docs set:', res.data.theDoctor); // Log the array being set
-      } else {
-        console.error('Expected an array but got:', typeof res.data.theDoctor, res.data.theDoctor);
-      }
-    })
-    .catch((err) => {
-      console.log('error here');
-    })
-  },[])
+      .then((res) => {
+        if (Array.isArray(res.data.theDoctor)) {
+          setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array
+          console.log('Docs set:', res.data.theDoctor); // Log the array being set
+        } else {
+          console.error('Expected an array but got:', typeof res.data.theDoctor, res.data.theDoctor);
+        }
+      })
+      .catch((err) => {
+        console.log('error here');
+      });
+  }, []);
 
+  // Filter based on params
   useEffect(() => {
-    
-  },[])
+    const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === specpec);
+    setDoctorFiltered(filteredDoctors);
+    console.log(filteredDoctors);
+  }, [allDoctorArray, specpec]);
 
-  const bookAppointmentButton = () => {
-    navigation.navigate('aboutdoctor')
-  } //to be changed
-  
+  const bookAppointmentButton = (item) => {
+    navigation.navigate('aboutdoctor', { item });
+    console.log(item)
+  }; //to be changed
+
+  // For search
   useEffect(() => {
-    const filteredData = appointments.filter((item) =>
-      item.doctor.toLowerCase().includes(searchText.toLowerCase())
+    const filteredData = allDoctorArray.filter((item) =>
+      item.dr_firstName.toLowerCase().includes(searchText.toLowerCase()
+    || item.dr_lastName.toLowerCase().includes(searchText.toLowerCase())
+  )
     );
-    setFilteredAppointments(filteredData);
-
-    const specialties = Array.from(new Set(appointments.map(item => item.specialty)));
-    setUniqueSpecialties(specialties);
-  }, [searchText, appointments]);
+    setDoctorFiltered(filteredData);
+  }, [searchText]);
 
   const renderSpecialtyOval = (specialty) => (
     <TouchableOpacity
@@ -77,80 +82,133 @@ const SearchForAppointment = ({navigation, route}) => {
 
   const handleSpecialtyClick = (specialty) => {
     console.log(`Clicked on: ${specialty}`);
+    let mappedSpecialty;
+    switch (specialty) {
+      case 'General':
+        mappedSpecialty = 'PrimaryCare'
+        break;
+      case 'OB-GYN':
+        mappedSpecialty = 'Obgyn'
+        break;
+      case 'Pediatrics':
+        mappedSpecialty = 'Pedia';
+        break;
+      case 'Cardiology':
+        mappedSpecialty = 'Cardio';
+        break;
+      case 'Eye & Vision':
+        mappedSpecialty = 'Opthal';
+        break;
+      case 'Dermatology':
+        mappedSpecialty = 'Derma';
+        break;
+      case 'Neurology':
+        mappedSpecialty = 'Neuro';
+        break;
+      case 'Gastroenterology':
+        mappedSpecialty = 'InternalMed';
+        break;
+      default:
+        mappedSpecialty = 'All';
+    }
+
     setSelectedSpecialty(specialty);
+    if(mappedSpecialty == 'All'){
+      setDoctorFiltered(allDoctorArray)
+    }
+    else{
+      const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === mappedSpecialty);
+      setDoctorFiltered(filteredDoctors);
+    }
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.appointmentItem} onPress={bookAppointmentButton}>
-      <Image source={item.image} style={styles.doctorImage} />
-      <View style={styles.textContainer}>
-        <Text style={styles.doctorName}>{item.doctor}</Text>
-        <Text style={styles.specialty}>{item.specialty}</Text>
-        <View style={styles.ratingContainer}>
-       
-         <View style={DoctorHomeStyles.container211}>
-                  <Text style={{fontFamily: 'Poppins', fontSize: 12 }}> 
-                  <FontAwesome name="circle" size={12} style={{color:'green'}} />  Active Now | </Text>
-                  <Text style={{fontSize: 12, fontFamily: 'Poppins'}}>National U Hospital</Text>
-          </View> 
+  useEffect(() => {
+    console.log(doctorFiltered)
+  }, [doctorFiltered])
+
+  const renderItem = ({ item }) => {
+    console.log('Rendering item: ', item);
+  
+    if (!item) return null;
+  
+    return (
+      <TouchableOpacity style={styles.appointmentItem} onPress={() => bookAppointmentButton(item)}>
+        <Image source={doctorImage1} style={styles.doctorImage} />
+        <View style={styles.textContainer}>
+          <Text style={styles.doctorName}>Dr. {item.dr_firstName} {item.dr_lastName}</Text>
+          <Text style={styles.specialty}>{item.dr_specialty}</Text>
+          <View style={styles.ratingContainer}>
+            <View style={DoctorHomeStyles.container211}>
+              <Text style={{ fontFamily: 'Poppins', fontSize: 12 }}>
+                <FontAwesome name="circle" size={12} style={{ color: 'green' }} /> Active Now | 
+              </Text>
+              <Text style={{ fontSize: 12, fontFamily: 'Poppins' }}>Molino Polyclinic</Text>
+            </View>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
+  
 
   return (
     <>
+      <View style={styles.allSearch}>
 
-          <View style={styles.allSearch}>
-            <View style={styles.arrowCont}>
-              <TouchableOpacity 
-              style={styles.arrowButton}
-              onPress={() => navigation.goBack()}>
-                <Entypo name="chevron-thin-left" style={styles.arrowText} size={11} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.searchInputContainer}>
-              <Image source={magnify} style={styles.magnifyIcon}/>
-              <TextInput
-                style={[styles.searchInput]}
-                placeholder="Search your Doctor"
-                value={searchText}
-                onChangeText={(text) => setSearchText(text)}
-              />
-            </View>
-          </View>
-
-
-
-          <View style={styles.filterContainer}>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{width: "100%",}}>
-                <View style={styles.specialtyOvalContainer}>
-                  {renderSpecialtyOval("All")}
-                  {renderSpecialtyOval("General")}
-                  {uniqueSpecialties.map((specialty) => renderSpecialtyOval(specialty))}
-                </View>
-            </ScrollView>
-          </View>
-
-
-        <View style={styles.container}>
-          <View style={styles.appointmentBox}>
-            <FlatList
-              data={filteredAppointments}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-            />
-          </View>
+        {/* arrow */}
+        <View style={styles.arrowCont}>
+          <TouchableOpacity
+            style={styles.arrowButton}
+            onPress={() => navigation.goBack()}>
+            <Entypo name="chevron-thin-left" style={styles.arrowText} size={11} />
+          </TouchableOpacity>
         </View>
-  
-      <View style={styles.navcontainer}>
-        <NavigationBar/>
+
+        {/* search bar */}
+        <View style={styles.searchInputContainer}>
+          <Image source={magnify} style={styles.magnifyIcon} />
+          <TextInput
+            style={[styles.searchInput]}
+            placeholder="Search your Doctor"
+            value={searchText}
+            onChangeText={(text) => setSearchText(text)}
+          />
+        </View>
       </View>
 
-      <View style={{marginTop:70}}>
-   
+
+      <View style={styles.filterContainer}>
+        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{ width: "100%", }}>
+          <View style={styles.specialtyOvalContainer}>
+            {renderSpecialtyOval("All")}
+            {renderSpecialtyOval("General")}
+            {renderSpecialtyOval("OB-GYN")}
+            {renderSpecialtyOval("Pediatrics")}
+            {renderSpecialtyOval("Cardiology")}
+            {renderSpecialtyOval("Eye & Vision")}
+            {renderSpecialtyOval("Dermatology")}
+            {renderSpecialtyOval("Neurology")}
+            {renderSpecialtyOval("Gastroenterology")}
+          </View>
+        </ScrollView>
       </View>
+
+      <View style={styles.container}>
+        <View style={styles.appointmentBox}>
+          <FlatList
+            data={doctorFiltered}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </View>
+
+      <View style={styles.navcontainer}>
+        <NavigationBar />
+      </View>
+
+      <View style={{ marginTop: 70 }}></View>
     </>
   );
 };

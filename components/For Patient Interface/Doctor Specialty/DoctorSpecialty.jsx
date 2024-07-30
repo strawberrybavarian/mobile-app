@@ -27,7 +27,7 @@ const DoctorSpecialty = ({ navigation }) => {
  
 
 ];
-  console.log(specialtiesData);
+  // console.log(specialtiesData);
 
   const handleSearch = (serts) => {
     setSearch(serts);
