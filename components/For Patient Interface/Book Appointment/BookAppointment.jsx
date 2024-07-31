@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../../assets/pictures/Doc.png';
@@ -7,6 +7,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
 import { TextInput } from 'react-native-paper';
+import { getSpecialtyCode, getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>
@@ -22,10 +23,28 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   </View>
 );
 
-const BookAppointment = ({ navigation }) => {
+const BookAppointment = ({ navigation , route}) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
   const [reason, setReason] = useState('')
+
+  const { item } = route.params || {}
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        let response;
+        response = await axios.get('http://localhost:8000/patient/api/allpatient')
+        console.log(response)
+      }
+      catch (err) {
+        console.log(err)
+      }
+    }
+  }, [])
+
+  const drname = ("Dr. " + item.dr_firstName + " " + item.dr_lastName)
+  const dr_specialty = getSpecialtyDisplayName(item.dr_specialty);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -52,8 +71,9 @@ const BookAppointment = ({ navigation }) => {
   };
 
   const nextButton = () => {
-    console.log(reason)
-    navigation.navigate('healthassess');
+    console.log(reason, selectedDate, selectedHour)
+    console.log(item)
+    // navigation.navigate('healthassess');
   };
 
   return (
@@ -72,8 +92,8 @@ const BookAppointment = ({ navigation }) => {
         </View>
 
         <DoctorCard
-          doctorName="Dr. Analyn Santos"
-          specialty="Cardiologist"
+          doctorName = {drname}
+          specialty= {dr_specialty}
           rating={4.5}
           image={doctorImage1}
         />

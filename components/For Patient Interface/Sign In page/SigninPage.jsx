@@ -8,14 +8,13 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import PickerSelect from 'react-native-picker-select';
 import axios from "axios";
-import { FIREBASE_AUTH } from "../../../FirebaseConfig";
+import { getData, storeData } from "../../storageUtility";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -23,17 +22,14 @@ const SigninPage = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  //arrays
   const [allUsers, setAllUsers] = useState([]);
   const [allPass, setAllPass] = useState([]);
   const [allEmail, setAllEmail] = useState([]);
 
-  //errors
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
 
-  
   const seePassword = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -53,7 +49,7 @@ const SigninPage = ({ navigation }) => {
           const userData = response.data.thePatient;
           setAllUsers(userData);
 
-          const emails = userData.map(user => user.patient_email)
+          const emails = userData.map(user => user.patient_email);
           setAllEmail(emails);
 
           const passwords = userData.map(user => user.patient_password);
@@ -64,7 +60,7 @@ const SigninPage = ({ navigation }) => {
           const userData = response.data.theDoctor;
           setAllUsers(userData);
 
-          const emails = userData.map(user => user.dr_email)
+          const emails = userData.map(user => user.dr_email);
           setAllEmail(emails);
 
           const passwords = userData.map(user => user.dr_password);
@@ -72,52 +68,55 @@ const SigninPage = ({ navigation }) => {
         }
       }
       catch (err) {
-        console.log(err)
+        console.log(err);
       }
-    }
+    };
 
-    fetchData()
-  }, [email, role])
+    fetchData();
+  }, [email, role]);
 
-  //login
-  const loginUser = (e) => {
+  const loginUser = async (e) => {
     e.preventDefault();
 
     if (email.length <= 8 && password.length <= 8) {
       Alert.alert("Validation Error", "Please check the input fields", [
         { text: "OK" },
-      ])
+      ]);
     } 
     else {
       const emailIndex = allEmail.indexOf(email);
       if (emailIndex !== -1 && password === allPass[emailIndex]) {
-          const user = allUsers[emailIndex];
+        const user = allUsers[emailIndex];
 
-          if(role === 'Patient'){
-              window.alert("Successfully logged in");
-              console.log(user._id);
-              navigation.navigate(`doctorspecialty`);
-          }
-          else if (role === 'Doctor'){
-              window.alert("Successfully logged in");
-              console.log(user._id);
-              navigation.navigate(`doctormain`);
-          }
-        
+        try {
+          await storeData('userEmail', email);
+          await storeData('userRole', role);
+          await storeData('userId', user._id)
+        } catch (error) {
+          console.error("Error storing user data: ", error);
+        }
+
+        if(role === 'Patient'){
+          Alert.alert("Successfully logged in");
+          console.log(user._id);
+          navigation.navigate('doctorspecialty');
+        }
+        else if (role === 'Doctor'){
+          Alert.alert("Successfully logged in");
+          console.log(user._id);
+          navigation.navigate('doctormain');
+        }
       } else {
-          window.alert("Wrong Email or Password");
+        Alert.alert("Wrong Email or Password");
       }
     }
-    
-};
+  };
 
-  //For Realtime Validations
   const validateEmail = (text) => {
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!text || text.length < 8) {
-      setEmailError("Email must be at least 8 characters");
+    if (!text ) {
+      setEmailError("Email cannot be empty");
     }
     else if (!emailRegex.test(text)) {
       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
@@ -146,24 +145,6 @@ const SigninPage = ({ navigation }) => {
     setRole(value);
   };
 
-  const doctorSpecialty = () => {
-
-      console.log(email,password,role)
-
-
-      if (role === "Patient" && email.length >= 8 && password.length >= 8) {
-        navigation.navigate("doctorspecialty");
-      } 
-      else if (role === "Doctor" && email.length >= 8 && password.length >= 8) {
-        navigation.navigate("doctormain");
-      }
-      else {
-      Alert.alert("Validation Error", "Please check the input fields", [
-        { text: "OK" },
-      ]);
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -171,7 +152,6 @@ const SigninPage = ({ navigation }) => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
     >
       <>
-        {/* Header */}
         <View style={{ flex: 1 }}>
           <View style={styles.container}>
             <TouchableOpacity
@@ -190,7 +170,6 @@ const SigninPage = ({ navigation }) => {
             <Text style={styles.text1}>Account</Text>
           </View>
 
-          {/* Email Text Input */}
           <View style={styles.con2}>
             <View style={styles.passwordContainer}>
               <TextInput
@@ -204,8 +183,6 @@ const SigninPage = ({ navigation }) => {
                 <Text style={styles.errorMessage}>{emailError}</Text>
             ) : null}
 
-
-           {/* Password Text Input */}
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -228,7 +205,6 @@ const SigninPage = ({ navigation }) => {
                 <Text style={styles.errorMessage}>{passwordError}</Text>
               ) : null}
 
-            {/* Role Picker */}
             <View style={styles.pickerContainer}>
               <PickerSelect
                   placeholder={{ label: 'Select Role', value: "" }}
@@ -236,14 +212,12 @@ const SigninPage = ({ navigation }) => {
                   items={[
                   { label: 'Patient', value: 'Patient' },
                   { label: 'Doctor', value: 'Doctor' },
-
                 ]}
                 style={{
                   inputIOS: styles.pickerItem,
                   inputAndroid: styles.pickerItem,
                 }}
                 />
-              
             </View>
             {roleError ? (
                 <Text style={styles.errorMessage}>{roleError}</Text>

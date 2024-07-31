@@ -7,6 +7,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { getData } from '../../storageUtility';
 
 //For Searching
 
@@ -27,7 +28,7 @@ const DoctorSpecialty = ({ navigation }) => {
  
 
 ];
-  // console.log(specialtiesData);
+   console.log(getData('userId'));
 
   const handleSearch = (serts) => {
     setSearch(serts);
