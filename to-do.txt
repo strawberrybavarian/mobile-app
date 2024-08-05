@@ -1,0 +1,12 @@
+add converter from cardio to cardiologist and vv
+    - meron na di lang nagamit HSHSHS
+finish appt
+    - tapus na purge lang database
+ayusin upcoming
+    - ito mejo magulo
+ayusin edit profile 
+    - kebs na to bukas
+wrap app in session para di paulitulit log in
+    - di ko alam pang ilang prio to kasi mahalaga sha
+ayusin ui
+    - imamatch sa web ui

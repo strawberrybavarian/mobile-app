@@ -45,9 +45,14 @@ const SearchForAppointment = ({ navigation, route }) => {
 
   // Filter based on params
   useEffect(() => {
+    if( specpec == null ){
+      setDoctorFiltered(allDoctorArray);
+    }
+    else{
     const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === specpec);
     setDoctorFiltered(filteredDoctors);
     console.log(filteredDoctors);
+    }
   }, [allDoctorArray, specpec]);
 
   const bookAppointmentButton = (item) => {
@@ -122,9 +127,9 @@ const SearchForAppointment = ({ navigation, route }) => {
     }
   };
 
-  useEffect(() => {
-    console.log(doctorFiltered)
-  }, [doctorFiltered])
+  // useEffect(() => {
+  //   console.log(doctorFiltered)
+  // }, [doctorFiltered])
 
   const renderItem = ({ item }) => {
     console.log('Rendering item: ', item);
