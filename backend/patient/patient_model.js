@@ -54,7 +54,6 @@ const PatientSchema = new Schema ({
     },
     patient_gender: {
         type: String,
-        enum: ['Male', 'Female', 'Other']
     },
     patient_appointments: [{
         type: Schema.Types.ObjectId,

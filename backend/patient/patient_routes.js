@@ -10,6 +10,16 @@ module.exports = app => {
     //Patient Log In
     app.get('/patient/api/allpatient', PatientController.findAllPatient);
 
+    //Update Patient Information
+    app.put('/patient/api/:uid/updatefirstname', PatientController.updatePatientFirstName);
+    app.put('/patient/api/:uid/updatelastname', PatientController.updatePatientLastName);
+    app.put('/patient/api/:uid/updateemail', PatientController.updatePatientEmail);
+    app.put('/patient/api/:uid/updatecontactnumber', PatientController.updatePatientContactNumber);
+    app.put('/patient/api/:uid/updatepassword', PatientController.updatePatientPassword);
+    app.put('/patient/api/:uid/updategender', PatientController.updatePatientGender);
+    app.put('/patient/api/:uid/updateDOB', PatientController.updatePatientDob);
+    app.put('/patient/api/:uid/updatemiddleinitial', PatientController.updatePatientMiddleInitial);
+
     //Finding One Patient
     app.get('/patient/api/onepatient/:uid', PatientController.findPatientById)
     app.get('/patient/api/allemail', PatientController.getAllPatientEmails)

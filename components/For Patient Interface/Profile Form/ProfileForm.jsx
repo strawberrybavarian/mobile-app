@@ -4,6 +4,7 @@ import CalendarPicker from 'react-native-calendar-picker';
 import RNPickerSelect from 'react-native-picker-select';
 import Entypo from "@expo/vector-icons/Entypo";
 import { LinearGradient } from 'expo-linear-gradient';
+import { deleteData, getData, storeData } from '../../storageUtility';
 
 const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   <View style={styles.inputContainer}>
@@ -16,6 +17,25 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
     />
   </View>
 );
+
+useEffect(() => {
+  const fetchUserId = async () => {
+    try {
+      const id = await getData('userId');
+      if (id) {
+        setUserId(id);
+      } else {
+        console.log('User not found');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchUserId();
+}, []);
+
+
 
 const ProfileForm = ({ navigation }) => {
   const [fullName, setFullName] = useState('');
