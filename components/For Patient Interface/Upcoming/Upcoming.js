@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, Button, TouchableOpacity, TouchableWithoutFeedback, Alert} from 'react-native';
 import NavigationBar from '../Navigation/NavigationBar';
 import { LinearGradient } from "expo-linear-gradient";
 import { AboutDoctorStyle } from '../PatientStyleSheet/PatientCSS';
 import { DoctorNotificationStyle } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS';
 import Entypo from "@expo/vector-icons/Entypo";
+import { getData } from '../../storageUtility';
+import axios from 'axios';
+
 const Upcoming = ({navigation}) => {
 
+  const [allAppointments, setAllAppointments] = useState([])
+  const [userId, setUserId] = useState(null)
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getData('userId');
+        if (id) {
+          setUserId(id);
+          const response = await axios.get(`http://localhost:8000/patient/api/${userId}/allappt`)
+          console.log("Appts set: " , response.data)
+        } else {
+          console.log('User not found');
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   const handleCancelBooking = () => {
     Alert.alert(
@@ -51,19 +75,17 @@ const Upcoming = ({navigation}) => {
   };
   return (
     <>
-
-  
-            <View style={AboutDoctorStyle.header}>
-                <TouchableOpacity
-                    style={DoctorNotificationStyle.arrowButton}
-                    onPress={() => navigation.goBack()}>
-                    <Entypo name="chevron-thin-left" size={14} />
-                </TouchableOpacity>
-                <View style={{ justifyContent: 'center', width: "83%" }}>
-                    <Text style={DoctorNotificationStyle.title}>About this Doctor</Text>
-                </View>
-            </View>
-            <View style={{paddingHorizontal: 20, paddingTop: 20,}}>
+    <View style={AboutDoctorStyle.header}>
+        <TouchableOpacity
+            style={DoctorNotificationStyle.arrowButton}
+            onPress={() => navigation.goBack()}>
+            <Entypo name="chevron-thin-left" size={14} />
+        </TouchableOpacity>
+        <View style={{ justifyContent: 'center', width: "83%" }}>
+            <Text style={DoctorNotificationStyle.title}>Appointments</Text>
+        </View>
+    </View>
+    <View style={{paddingHorizontal: 20, paddingTop: 20,}}>
     <View style={styles.cont}>
       <View style={styles.container1}>
           <Image style={styles.filter1} contentFit="cover" source={require("../../../assets/pictures/Doc.png")}/> 

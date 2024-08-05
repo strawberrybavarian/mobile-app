@@ -214,39 +214,43 @@ const getAllAppointments = (req, res) => {
       });
   };
 
-const completeAppointment = async (req, res) => {
-    try {
-        const appointmentId = req.params.uid; // Appointment ID from URL parameter
+// const completeAppointment = async (req, res) => {
+//     try {
+//         const appointmentId = req.params.uid; // Appointment ID from URL parameter
 
-        // Find the appointment and update its status to 'Completed'
-        const updatedAppointment = await Appointment.findByIdAndUpdate(
-            appointmentId,
-            { status: 'Completed' },
-            { new: true }
-        );
+//         // Find the appointment and update its status to 'Completed'
+//         const updatedAppointment = await Appointment.findByIdAndUpdate(
+//             appointmentId,
+//             { status: 'Completed' },
+//             { new: true }
+//         );
 
-        if (!updatedAppointment) {
-            return res.status(404).json({ message: "Appointment not found" });
-        }
+//         if (!updatedAppointment) {
+//             return res.status(404).json({ message: "Appointment not found" });
+//         }
 
-        // Get doctor and patient IDs from the appointment
-        const doctorId = updatedAppointment.doctor; // Assuming 'doctor' field in Appointment schema
-        const patientId = updatedAppointment.patient; // Assuming 'patient' field in Appointment schema
+//         // Get doctor and patient IDs from the appointment
+//         const doctorId = updatedAppointment.doctor; // Assuming 'doctor' field in Appointment schema
+//         const patientId = updatedAppointment.patient; // Assuming 'patient' field in Appointment schema
 
-        // Update doctor's list of patients if the patient is not already in the list
-        await Doctor.findByIdAndUpdate(
-            doctorId,
-            { $addToSet: { dr_patients: patientId } }, // AddToSet ensures no duplicates
-            { new: true }
-        );
+//         // Update doctor's list of patients if the patient is not already in the list
+//         await Doctor.findByIdAndUpdate(
+//             doctorId,
+//             { $addToSet: { dr_patients: patientId } }, // AddToSet ensures no duplicates
+//             { new: true }
+//         );
 
-        res.status(200).json(updatedAppointment);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+//         res.status(200).json(updatedAppointment);
+//     } catch (error) {
+//         res.status(400).json({ message: error.message });
+//     }
+// };
+
 
 //For Prescription
+
+
+
 const createPrescription = async (req, res) => {
     const { patientId, appointmentId } = req.params;
     const { gender, dateOfConsultation, doctor, medications } = req.body;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../../assets/pictures/Doc.png';
 import NavigationBar from '../Navigation/NavigationBar';
@@ -8,6 +8,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
 import { TextInput } from 'react-native-paper';
 import { getSpecialtyCode, getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
+import { getData } from '../../storageUtility';
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>
@@ -24,24 +25,31 @@ const DoctorCard = ({ doctorName, specialty, rating, image }) => (
 );
 
 const BookAppointment = ({ navigation , route}) => {
+  //arrays
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
   const [reason, setReason] = useState('')
+  const [userId, setUserId] = useState(null)
 
   const { item } = route.params || {}
 
   useEffect(() => {
-    const fetchData = async () => {
-      try{
-        let response;
-        response = await axios.get('http://localhost:8000/patient/api/allpatient')
-        console.log(response)
+    const fetchUserId = async () => {
+      try {
+        const id = await getData('userId');
+        if (id) {
+          setUserId(id);
+        } else {
+          console.log('User not found');
+        }
+      } catch (err) {
+        console.log(err);
       }
-      catch (err) {
-        console.log(err)
-      }
-    }
-  }, [])
+    };
+
+    fetchUserId();
+  }, []);
+
 
   const drname = ("Dr. " + item.dr_firstName + " " + item.dr_lastName)
   const dr_specialty = getSpecialtyDisplayName(item.dr_specialty);
@@ -58,23 +66,43 @@ const BookAppointment = ({ navigation , route}) => {
     setReason(input)
   }
 
-  const handleNext = () => {
-    if (selectedDate && selectedHour) {
-      navigation.navigate('healthassess', { date: selectedDate, hour: selectedHour });
+  const handleCreateAppointment = async () => {
+    console.log(selectedDate, selectedHour, reason)
+
+    if (!selectedDate || !selectedHour || !reason || !userId) {
+      Alert.alert('Validation Error', 'Please fill all fields');
+      return;
+    }
+
+    try {
+      const appointmentData = {
+        doctorId: item._id,  
+        date: selectedDate,
+        time: selectedHour,
+        reason: reason,
+        cancelReason: '',
+        secretaryId: null,  
+        prescriptionId: null  
+      };
+
+      const response = await axios.post(`http://localhost:8000/patient/api/${userId}/createappointment`, appointmentData);
+      console.log('Appointment created:', response.data);
+      Alert.alert('Success', 'Appointment created successfully');
+      navigation.navigate('upcoming');  
+    } 
+    catch (err) {
+      console.error('Error creating appointment:', err);
+      Alert.alert('Error', 'Could not create appointment');
     }
   };
 
   const availableHours = ["8:00 AM to 11:00 AM", "3:00 PM to 4:00 PM"];
 
-  const backButton = () => {
-    navigation.navigate('searchappointment');
-  };
-
-  const nextButton = () => {
-    console.log(reason, selectedDate, selectedHour)
-    console.log(item)
-    // navigation.navigate('healthassess');
-  };
+  // const nextButton = () => {
+  //   console.log(reason, selectedDate, selectedHour)
+  //   console.log(item)
+  //   // navigation.navigate('healthassess');
+  // };
 
   return (
     <>
@@ -82,7 +110,7 @@ const BookAppointment = ({ navigation , route}) => {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.arrowButton}
-            onPress={backButton}
+            onPress={() => navigation.goBack()}
           >
             <Entypo name="chevron-thin-left" size={14} />
           </TouchableOpacity>
@@ -156,7 +184,7 @@ const BookAppointment = ({ navigation , route}) => {
 
         <TouchableOpacity
           style={styles.nextButton}
-          onPress={nextButton}
+          onPress={handleCreateAppointment}
         >
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
