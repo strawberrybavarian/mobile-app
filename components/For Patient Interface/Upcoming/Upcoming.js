@@ -19,7 +19,7 @@ const Upcoming = ({navigation}) => {
         const id = await getData('userId');
         if (id) {
           setUserId(id);
-          const response = await axios.get(`http://localhost:8000/patient/api/${userId}/allappt`)
+          const response = await axios.get(`http://localhost:8000/patient/api/${id}/allappt`)
           console.log("Appts set: " , response.data)
         } else {
           console.log('User not found');
