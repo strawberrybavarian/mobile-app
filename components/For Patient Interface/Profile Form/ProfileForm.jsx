@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import RNPickerSelect from 'react-native-picker-select';
@@ -18,22 +18,22 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   </View>
 );
 
-useEffect(() => {
-  const fetchUserId = async () => {
-    try {
-      const id = await getData('userId');
-      if (id) {
-        setUserId(id);
-      } else {
-        console.log('User not found');
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+// useEffect(() => {
+//   const fetchUserId = async () => {
+//     try {
+//       const id = await getData('userId');
+//       if (id) {
+//         setUserId(id);
+//       } else {
+//         console.log('User not found');
+//       }
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   };
 
-  fetchUserId();
-}, []);
+//   fetchUserId();
+// }, []);
 
 
 

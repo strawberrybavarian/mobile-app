@@ -358,7 +358,7 @@ module.exports = {
     findDoctorById,
     updatePostAtIndex,
     getAllAppointments,
-    completeAppointment,
+    // completeAppointment,
     updateDoctorImage,
     updateDoctorDetails,
     createPrescription,

@@ -51,7 +51,7 @@ module.exports = app => {
   // For Appointments
   app.get('/doctor/appointments/:doctorId', DoctorController.getAllAppointments);
   
-  app.put('/doctor/api/:uid/completeappointment', DoctorController.completeAppointment)
+  // app.put('/doctor/api/:uid/completeappointment', DoctorController.completeAppointment)
 
   // Uploading Image
   app.post('/doctor/api/:id/updateimage', upload.single('image'), DoctorController.updateDoctorImage);
