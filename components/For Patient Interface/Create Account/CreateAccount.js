@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import PickerSelect from 'react-native-picker-select';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
-
+import {ip} from '../../../ContentExport'
 const CreateAccount = ({ navigation }) => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
@@ -118,7 +118,7 @@ const CreateAccount = ({ navigation }) => {
                     // dr_contactNumber: uNumber,
                     // dr_gender: uGender, 
                 };
-                const response = await axios.post('http://localhost:8000/doctor/api/signup', doctorUser);
+                const response = await axios.post(`${ip.address}/doctor/api/signup`, doctorUser);
                 if (response.status === 200) {
                     console.log(response.data);
                     window.alert("Successfully registered Doctor");
@@ -139,7 +139,7 @@ const CreateAccount = ({ navigation }) => {
                     // patient_gender: uGender,
                 };
                 console.log(patientUser);
-                const response = await axios.post('http://localhost:8000/patient/api/signup', patientUser);
+                const response = await axios.post(`${ip.address}/patient/api/signup`, patientUser);
                 if (response.status === 200) {
                     console.log(response.data);
                     window.alert("Successfully registered Patient");
