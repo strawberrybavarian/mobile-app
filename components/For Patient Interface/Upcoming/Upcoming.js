@@ -7,6 +7,7 @@ import { DoctorNotificationStyle } from '../../For Doctor Interface/DoctorStyleS
 import Entypo from "@expo/vector-icons/Entypo";
 import { getData } from '../../storageUtility';
 import axios from 'axios';
+import { ip } from '../../../ContentExport';
 
 const Upcoming = ({navigation}) => {
 
@@ -19,7 +20,7 @@ const Upcoming = ({navigation}) => {
         const id = await getData('userId');
         if (id) {
           setUserId(id);
-          const response = await axios.get(`http://localhost:8000/patient/api/${id}/allappt`)
+          const response = await axios.get(`${ip.address}/patient/api/${id}/allappt`)
           console.log("Appts set: " , response.data)
         } else {
           console.log('User not found');

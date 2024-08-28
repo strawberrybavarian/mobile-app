@@ -44,13 +44,6 @@ const PatientSchema = new Schema ({
     },
     patient_contactNumber: {
         type: String,
-        unique: true,
-        validate: {
-            validator: function(v) {
-                return v.length == 11;
-            },
-            message: props => `${props.value} has to be 11 characters long.`
-        }
     },
     patient_gender: {
         type: String,

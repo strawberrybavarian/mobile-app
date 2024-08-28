@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import RNPickerSelect from 'react-native-picker-select';
 import Entypo from "@expo/vector-icons/Entypo";
 import { LinearGradient } from 'expo-linear-gradient';
-import { deleteData, getData, storeData } from '../../storageUtility';
+import axios from 'axios';
+import { getData } from '../../storageUtility';
+import { ip } from '../../../ContentExport';
+import { StyleSheet } from 'react-native';
 
 const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   <View style={styles.inputContainer}>
@@ -18,46 +21,79 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
   </View>
 );
 
-// useEffect(() => {
-//   const fetchUserId = async () => {
-//     try {
-//       const id = await getData('userId');
-//       if (id) {
-//         setUserId(id);
-//       } else {
-//         console.log('User not found');
-//       }
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   fetchUserId();
-// }, []);
-
-
-
 const ProfileForm = ({ navigation }) => {
-  const [fullName, setFullName] = useState('');
+  const [userId, setUserId] = useState(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState('');
-  const [showDatePicker, setShowDatePicker] = useState(false); // Add this line
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getData('userId');
+        if (id) {
+          console.log("userId: " + id);
+          setUserId(id);
+        } else {
+          console.log('User not found');
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      const fetchData = () => {
+        axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+          .then(res => {
+            console.log(res.data.thePatient);
+            const patient = res.data.thePatient;
+            setFirstName(patient.patient_firstName);
+            setLastName(patient.patient_lastName);
+            setSelectedDate(new Date(patient.patient_dob));
+            setEmail(patient.patient_email);
+            setPhoneNumber(patient.patient_contactNumber);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      };
+
+      fetchData();
+    }
+  }, [userId]);
 
   const handleSaveProfile = () => {
-    console.log('Full Name:', fullName);
-    console.log('Date of Birth:', selectedDate);
-    console.log('Email:', email);
-    console.log('Phone Number:', phoneNumber);
-    console.log('Gender:', gender);
+    axios.put(`${ip}/patient/api/${userId}/updatedetails`, {
+      patient_firstName: firstName || '',
+      patient_lastName: lastName || '',
+      patient_dob: selectedDate || '',
+      patient_email: email || '',
+      patient_contactNumber: phoneNumber || '',
+      patient_gender: gender || '',
+    })
+      .then((res) => {
+        console.log('Profile updated successfully:', res.data);
+        navigation.goBack();
+      })
+      .catch((err) => {
+        console.log('Error updating profile:', err);
+      });
   };
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setShowDatePicker(false);
   };
-
+  
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -69,18 +105,31 @@ const ProfileForm = ({ navigation }) => {
             <Entypo name="chevron-thin-left" size={14} />
           </TouchableOpacity>
           <View style={{ justifyContent: 'center', width: "83%" }}>
-            <Text style={styles.title}>Fill Profile</Text>
+            <Text style={styles.title}>Edit Profile</Text>
           </View>
         </View>
-
-        {/* Profile Picture */}
+  
         <Image
           style={styles.profilePicture}
-          source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}  // Replace with your profile picture link
+          source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}
         />
-
-        <OvalLabelTextInput label="Full Name" value={fullName} onChangeText={setFullName} />
-
+  
+        {/* Display current data */}
+        <View style={styles.currentDataContainer}>
+          <Text style={styles.currentDataTitle}>Current Data</Text>
+          <Text style={styles.currentDataText}>First Name: {firstName}</Text>
+          <Text style={styles.currentDataText}>Last Name: {lastName}</Text>
+          <Text style={styles.currentDataText}>
+            Date of Birth: {selectedDate ? selectedDate.toDateString() : 'Not set'}
+          </Text>
+          <Text style={styles.currentDataText}>Email: {email}</Text>
+          <Text style={styles.currentDataText}>Phone Number: {phoneNumber}</Text>
+          <Text style={styles.currentDataText}>Gender: {gender}</Text>
+        </View>
+  
+        <OvalLabelTextInput label="First Name" value={firstName} onChangeText={setFirstName} />
+        <OvalLabelTextInput label="Last Name" value={lastName} onChangeText={setLastName} />
+  
         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
           <OvalLabelTextInput
             label="Date of Birth"
@@ -88,7 +137,7 @@ const ProfileForm = ({ navigation }) => {
             onTouch={() => setShowDatePicker(true)}
           />
         </TouchableOpacity>
-
+  
         {showDatePicker && (
           <View style={styles.calendarContainer}>
             <Text style={styles.subtitle}>Select a Date</Text>
@@ -113,11 +162,10 @@ const ProfileForm = ({ navigation }) => {
             />
           </View>
         )}
-
+  
         <OvalLabelTextInput label="Email" value={email} onChangeText={setEmail} />
-
         <OvalLabelTextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} />
-
+  
         <View style={styles.pickerContainer}>
           <RNPickerSelect
             placeholder={{ label: 'Select Gender', value: null }}
@@ -131,9 +179,10 @@ const ProfileForm = ({ navigation }) => {
               inputIOS: styles.picker,
               inputAndroid: styles.picker,
             }}
+            value={gender}
           />
         </View>
-
+  
         <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
           <LinearGradient
             start={{ x: 1, y: 0 }}
@@ -146,14 +195,13 @@ const ProfileForm = ({ navigation }) => {
               justifyContent: "center",
               alignItems: "center"
             }}>
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>Save Changes</Text>
           </LinearGradient>
         </TouchableOpacity>
-
       </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

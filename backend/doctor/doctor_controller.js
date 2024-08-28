@@ -25,11 +25,12 @@ const updateDoctorDetails = (req, res) => {
       dr_firstName: req.body.dr_firstName,
       dr_lastName: req.body.dr_lastName,
       dr_middleInitial: req.body.dr_middleInitial,
-    //   dr_contactNumber: req.body.dr_contactNumber,
+      dr_contactNumber: req.body.dr_contactNumber,
       dr_dob: req.body.dr_dob,
       dr_email: req.body.dr_email,
       dr_password: req.body.dr_password,
-      dr_specialty: req.body.dr_specialty
+      dr_specialty: req.body.dr_specialty,
+      dr_gender: req.body.dr_gender
     };
     Doctor.findByIdAndUpdate({ _id: req.params.id }, updateData, { new: true, runValidators: true })
       .then((updatedDoctor) => {

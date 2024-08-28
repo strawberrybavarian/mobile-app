@@ -15,6 +15,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import PickerSelect from 'react-native-picker-select';
 import axios from "axios";
 import { getData, storeData } from "../../storageUtility";
+import { ip } from "../../../ContentExport";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -39,10 +40,10 @@ const SigninPage = ({ navigation }) => {
       try {
         let response;
         if (role === "Patient") {
-          response = await axios.get('http://localhost:8000/patient/api/allpatient')
+          response = await axios.get(`${ip.address}/patient/api/allpatient`)
         }
         else if (role === 'Doctor') {
-          response = await axios.get('http://localhost:8000/doctor/api/alldoctor')
+          response = await axios.get(`${ip.address}/doctor/api/alldoctor`)
         }
 
         if (role === 'Patient' && response && response.data) {

@@ -43,11 +43,11 @@ const DoctorSchema = new Schema({
         type: Date,
         // required: true,
     },
-    // dr_contactNumber: {
-    //     type: String,
-    //     // required: true,
-    //     // unique: true,
-    // },
+    dr_contactNumber: {
+        type: String,
+        // required: true,
+        // unique: true,
+    },
     dr_patients: [{
         type: Schema.Types.ObjectId,
         ref: 'Patient'
@@ -71,7 +71,11 @@ const DoctorSchema = new Schema({
     }],
     dr_specialty: {
         type: String
-    }
+    },
+    dr_gender: {
+        type: String,
+        // required: true,
+    },
 }, { timestamps: true });
 
 const Doctor = mongoose.model('Doctor', DoctorSchema);

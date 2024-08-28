@@ -6,7 +6,14 @@ import PickerSelect from 'react-native-picker-select';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
 import {ip} from '../../../ContentExport'
+import RNPickerSelect from 'react-native-picker-select';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 const CreateAccount = ({ navigation }) => {
+
+  // arrays
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [middleinitial, setMiddleInitial] = useState('');
@@ -16,24 +23,38 @@ const CreateAccount = ({ navigation }) => {
   const [contactNumber, setContactNumber] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [role, setRole] = useState('');
-
-  const [showPassword, setShowPassword] = useState(false);
+  const [gender, setGender] = useState('');
+  const [dob, setDob] = useState(new Date());
+  
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPassword, setShowPassword] = useState(true);
   const [showSpecialty, setShowSpecialty] = useState(false)
 
   const [firstnameError, setfirstnameError] = useState('');
   const [lastnameError, setlastnameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [contactNumberError, setContactNumberError] = useState('');
   const [existingEmail, setExistingEmail] = useState([]);
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [specialtyError, setSpecialtyError] = useState('');
+  const [roleError, setRoleError] = useState('');
+  const [genderError, setGenderError] = useState('');
+  const [dobError, setDobError] = useState('')
   
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dob;
+    setShowDatePicker(Platform.OS === 'ios');
+    setDob(currentDate);
+  };
+
   useEffect(() => { //for email check
     if (role === 'Patient'){
-      axios.get('http://localhost:8000/patient/api/allemail')
+      axios.get(`${ip.address}/patient/api/allemail`)
       .then((res) => {
         if (Array.isArray(res.data)) {
           setExistingEmail(res.data); // Set the response if it's an array
@@ -47,7 +68,7 @@ const CreateAccount = ({ navigation }) => {
       });
     }
     else if (role === 'Doctor') {
-      axios.get('http://localhost:8000/doctor/api/allemail')
+      axios.get(`${ip.address}/doctor/api/allemail`)
       .then((res) => {
         if (Array.isArray(res.data)) {
           setExistingEmail(res.data); // Set the response if it's an array
@@ -113,10 +134,10 @@ const CreateAccount = ({ navigation }) => {
                     dr_middleInitial: middleinitial,
                     dr_email: email,
                     dr_password: password,
-                    dr_specialty: specialty
+                    dr_specialty: specialty,
                     // dr_dob: uBirth,
-                    // dr_contactNumber: uNumber,
-                    // dr_gender: uGender, 
+                    dr_contactNumber: contactNumber,
+                    dr_gender: gender, 
                 };
                 const response = await axios.post(`${ip.address}/doctor/api/signup`, doctorUser);
                 if (response.status === 200) {
@@ -135,8 +156,8 @@ const CreateAccount = ({ navigation }) => {
                     patient_email: email,
                     patient_password: password,
                     // patient_dob: uBirth,
-                    // patient_contactNumber: uNumber,
-                    // patient_gender: uGender,
+                    patient_contactNumber: contactNumber,
+                    patient_gender: gender,
                 };
                 console.log(patientUser);
                 const response = await axios.post(`${ip.address}/patient/api/signup`, patientUser);
@@ -190,6 +211,19 @@ const CreateAccount = ({ navigation }) => {
     setEmail(text);
   };
 
+  const validateContactNumber = (text) => {
+    if (!text || text.length == 0) {
+      setContactNumberError("Contact number cannot be empty.");
+    }
+    else if (text.length < 11) {
+      setContactNumberError("Contact number must be at least 11 characters.");
+    }
+    else {
+      setContactNumberError("");
+    }
+    setContactNumber(text);
+  }
+
   const validatePassword = (text) => {
     if (!text || text.length < 8) {
       setPasswordError("Password must be at least 8 characters");
@@ -208,24 +242,61 @@ const CreateAccount = ({ navigation }) => {
     setConfirmPassword(text);
   };
 
+  const validateRole = (value) => {
+    if (!value || value == "") {
+      setRoleError("Please select a role");
+    } else {
+      setRoleError("");
+    }
+    setRole(value);
+    console.log(value)
+  }
 
+  const validateSpecialty = (value) => {
+    if (role === 'Doctor') {
+      if (!value || value == "") {
+        setSpecialtyError("Please select a specialty");
+      }
+      else {
+        setSpecialtyError("");
+      }
+      setSpecialty(value);
+    }
+  }
 
+  const validateGender = (value) => {
+    if (!value || value == "") {
+      setGenderError("Please select a gender.")
+    }
+    else {
+      setGenderError("");
+    }
+    setGender(value);
+    console.log(value)
+  }
 
-  const handleSignUp = () => {
-    // Validation logic here
-
-    if (firstname.length == 0 || lastname.length == 0 || email.length == 0  || password.length == 0  ){
-      alert('Please fill in all required fields.');
+  const validateDob = (selectedDate) => {
+    if (!selectedDate) {
+      setDobError("Date of Birth cannot be empty.");
+      return false;
     }
 
-    else if (password !== confirmPassword) {
-      alert('Passwords do not match.');
+    const today = new Date();
+    const minimumValidDate = new Date(
+      today.getFullYear() - 16, 
+      today.getMonth(),
+      today.getDate()
+    );
+
+    if (selectedDate > minimumValidDate) {
+      setDobError("You must be at least 16 years old.");
+      console.log("You must be at least 16 years old.");
+      return false;
     }
-    else{
-      registerUser();
-      navigation.navigate('SigninPage');
-    }
-    
+
+    setDobError('');
+    setDob(selectedDate);
+    return true;
   };
 
   return (
@@ -249,6 +320,7 @@ const CreateAccount = ({ navigation }) => {
       </View>
 
       <View style={styles.container1}>
+
         {/* First Name Input */}
         <TextInput
           style={styles.textInput}
@@ -260,7 +332,7 @@ const CreateAccount = ({ navigation }) => {
                 <Text style={styles.errorMessage}>{firstnameError}</Text>
           ) : null}
 
-          {/* Middle Name Input */}
+        {/* Middle Name Input */}
         <TextInput
           style={styles.textInput}
           placeholder="Middle Initial"
@@ -288,6 +360,72 @@ const CreateAccount = ({ navigation }) => {
         />
           {emailError ? (
                 <Text style={styles.errorMessage}>{emailError}</Text>
+          ) : null}
+        
+        {/* Contact Number Input */}
+        <TextInput
+          style={styles.textInput}
+          placeholder="Contact Number"
+          value={contactNumber}
+          onChangeText={validateContactNumber}
+        />
+          {contactNumberError ? (
+                <Text style={styles.errorMessage}>{contactNumberError}</Text>
+          ) : null}
+
+        {/* Gender Input */}
+        <View style={styles.pickerContainer}>
+          <RNPickerSelect
+            placeholder={{ label: 'Select Gender', value: '' }}
+            onValueChange={validateGender}
+            items={[
+              { label: 'Male', value: 'male' },
+              { label: 'Female', value: 'female' },
+              { label: 'Other', value: 'other' },
+            ]}
+            style={{
+              inputIOS: styles.picker,
+              inputAndroid: styles.picker,
+            }}
+          />
+        </View>
+          {genderError ? (
+                <Text style={styles.errorMessage}>{genderError}</Text>
+          ) : null}
+
+        {/* Date of Birth Input */}
+        {/* <TouchableOpacity onPress={(e) => setShowDatePicker(e)} style={styles.dateInput}>
+        <Text style={styles.dateText}>
+          {dob.toDateString()}
+        </Text>
+      </TouchableOpacity> */}
+
+      <Text>
+        Date of Birth:
+      </Text>
+
+      {showDatePicker && Platform.OS !== 'web' && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={dob}
+          mode="date"
+          display="default"
+          onChange={setDob}
+        />
+      )}
+
+      {Platform.OS === 'web' && (
+        <DatePicker
+          selected={dob}
+          onChange={validateDob}
+          dateFormat="MMMM d, yyyy"
+          showYearDropdown
+          showMonthDropdown
+          dropdownMode='select'
+        />
+      )}
+        {dobError ? (
+                <Text style={styles.errorMessage}>{dobError}</Text>
           ) : null}
 
         {/* Password Input */}
@@ -324,12 +462,11 @@ const CreateAccount = ({ navigation }) => {
                   <Text style={styles.errorMessage}>{confirmPasswordError}</Text>
               ) : null}
 
-
-
+        {/* Role Input */}
         <View style={styles.pickerContainer}>
             <PickerSelect
                   placeholder={{ label: 'Select Role', value: "" }}
-                  onValueChange={(value) => setRole(value)}
+                  onValueChange={validateRole}
                   items={[
                   { label: 'Patient', value: 'Patient' },
                   { label: 'Doctor', value: 'Doctor' },
@@ -341,11 +478,14 @@ const CreateAccount = ({ navigation }) => {
                 }}
                 />
         </View>
+                {roleError ? (
+                  <Text style={styles.errorMessage}>{roleError}</Text>
+              ) : null}
 
         <View style={[styles.pickerContainer, {display: showSpecialty ? 'flex' : 'none'}]}>
             <PickerSelect
                   placeholder={{ label: 'Select Specialty', value: "" }}
-                  onValueChange={(value) => setSpecialty(value)}
+                  onValueChange={validateSpecialty}
                   items={[
                   { label: 'Primary Care & General Medicine', value: 'PrimaryCare' },
                   { label: 'OB-GYN', value: 'Obgyn' },
@@ -363,6 +503,9 @@ const CreateAccount = ({ navigation }) => {
                 }}
                 />
         </View>
+                {specialtyError ? (
+                  <Text style={styles.errorMessage}>{specialtyError}</Text>
+              ) : null}
 
         <LinearGradient
           start={{ x: 1, y: 0 }}
@@ -411,6 +554,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     left: 10,
     top: 2,
+    paddingLeft: 10,
   },
   eyeIconContainer: {
     padding: 10,

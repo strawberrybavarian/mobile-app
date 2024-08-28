@@ -7,9 +7,51 @@ import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { DoctorProfileStyles } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS';
+import { getData } from '../../storageUtility';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { ip } from '../../../ContentExport';
 
 
 const MyProfile = ({ navigation }) => {
+
+  const [userId, setUserId] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getData('userId');
+        if (id) {
+          console.log("userId: "+id);
+          setUserId(id);
+        } else {
+          console.log('User not found');
+        }
+      } catch (err) {
+        console.log(err);
+      }}
+    
+    fetchUserId();
+    }, []);
+
+  useEffect(() => {
+    const fetchData = () => {
+    axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+      .then(res => {
+        console.log(res.data.thePatient);
+        const patient = res.data.thePatient;
+        setFirstName(patient.patient_firstName);
+        setLastName(patient.patient_lastName);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    };
+
+    fetchData();
+  }, [userId]);
 
   const logoutButton = () => {
     Alert.alert(
@@ -54,7 +96,7 @@ const MyProfile = ({ navigation }) => {
               style={{ width: 50, height: 50, borderRadius: 50 }}
             />
               <View style={styles.container21}>
-                <Text style={{fontFamily:'Poppins-SemiBold', fontSize:18}}>Analyn Santos</Text>
+                <Text style={{fontFamily:'Poppins-SemiBold', fontSize:18}}>{firstName} {lastName}</Text>
                 <View style={styles.container211}>
                   <Text style={styles.textJoin}>Joined Since </Text>
                   <Text style={styles.textJoin}>February 29, 2024 </Text>

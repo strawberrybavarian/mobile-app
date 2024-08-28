@@ -9,6 +9,7 @@ import axios from 'axios';
 import { TextInput } from 'react-native-paper';
 import { getSpecialtyCode, getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
 import { getData } from '../../storageUtility';
+import { ip } from '../../../ContentExport';
 
 const DoctorCard = ({ doctorName, specialty, rating, image }) => (
   <View style={styles.doctorCardContainer}>
@@ -85,7 +86,7 @@ const BookAppointment = ({ navigation , route}) => {
         prescriptionId: null  
       };
 
-      const response = await axios.post(`http://localhost:8000/patient/api/${userId}/createappointment`, appointmentData);
+      const response = await axios.post(`${ip.address}/patient/api/${userId}/createappointment`, appointmentData);
       console.log('Appointment created:', response.data);
       Alert.alert('Success', 'Appointment created successfully');
       navigation.navigate('upcoming');  

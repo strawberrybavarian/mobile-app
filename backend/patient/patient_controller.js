@@ -419,6 +419,24 @@ const updatePatientGender = async (req, res) => {
   }
 };
 
+const updatePatientDetails = (req, res) => {
+  const updateData = {
+    patient_firstName: req.body.patient_firstName,
+    patient_lastName: req.body.patient_lastName,
+    patient_middleInitial: req.body.patient_middleInitial,
+    patient_contactNumber: req.body.patient_contactNumber,
+    patient_dob: req.body.patient_dob,
+    patient_email: req.body.patient_email,
+    patient_password: req.body.patient_password,
+  };
+  Patient.findByIdAndUpdate({ _id: req.params.id }, updateData, { new: true, runValidators: true })
+    .then((updatedPatient) => {
+      res.json({ updatedPatient: updatedPatient, message: "Successfully updated the Patient" });
+    })
+    .catch((err) => {
+      res.json({ message: 'Something went wrong', error: err });
+    });
+};
 
 module.exports = {
     NewPatientSignUp,
@@ -442,5 +460,6 @@ module.exports = {
     updatePatientPassword,
     updatePatientDob,
     updatePatientContactNumber,
-    updatePatientGender
+    updatePatientGender,
+    updatePatientDetails
 }

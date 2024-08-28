@@ -7,6 +7,7 @@ import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
 import axios from "axios";
+import { ip } from "../../../ContentExport";
 
 // const dummyAppointments = [
 //   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
@@ -29,7 +30,7 @@ const SearchForAppointment = ({ navigation, route }) => {
 
   // Get all doctors
   useEffect(() => {
-    axios.get('http://localhost:8000/doctor/api/alldoctor')
+    axios.get(`${ip.address}/doctor/api/alldoctor`)
       .then((res) => {
         if (Array.isArray(res.data.theDoctor)) {
           setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array

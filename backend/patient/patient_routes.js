@@ -19,6 +19,7 @@ module.exports = app => {
     app.put('/patient/api/:uid/updategender', PatientController.updatePatientGender);
     app.put('/patient/api/:uid/updateDOB', PatientController.updatePatientDob);
     app.put('/patient/api/:uid/updatemiddleinitial', PatientController.updatePatientMiddleInitial);
+    app.put('/patient/api/:uid/updatedetails', PatientController.updatePatientDetails);
 
     //Finding One Patient
     app.get('/patient/api/onepatient/:uid', PatientController.findPatientById)
