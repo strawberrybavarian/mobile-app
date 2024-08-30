@@ -8,9 +8,10 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { DoctorProfileStyles } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS';
 import { getData } from '../../storageUtility';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const MyProfile = ({ navigation }) => {
@@ -36,23 +37,26 @@ const MyProfile = ({ navigation }) => {
     fetchUserId();
     }, []);
 
-  useEffect(() => {
-    const fetchData = () => {
-    axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
-      .then(res => {
-        console.log(res.data.thePatient);
-        const patient = res.data.thePatient;
-        setFirstName(patient.patient_firstName);
-        setLastName(patient.patient_lastName);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-    };
+    useFocusEffect(
+      useCallback(() => {
+        const fetchData = () => {
+          axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+            .then(res => {
+              console.log(res.data.thePatient);
+              const patient = res.data.thePatient;
+              setFirstName(patient.patient_firstName);
+              setLastName(patient.patient_lastName);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        };
+    
+        fetchData()
 
-    fetchData();
-  }, [userId]);
-
+      }, [userId])
+  )
+  
   const logoutButton = () => {
     Alert.alert(
       'Logout',

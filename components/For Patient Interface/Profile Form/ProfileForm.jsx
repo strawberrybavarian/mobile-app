@@ -22,14 +22,16 @@ const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
 );
 
 const ProfileForm = ({ navigation }) => {
-  const [userId, setUserId] = useState(null);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [userId, setUserId] = useState("");
+  // const [firstName, setFirstName] = useState('');
+  // const [lastName, setLastName] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [email, setEmail] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [gender, setGender] = useState('');
+  // const [email, setEmail] = useState('');
+  // const [phoneNumber, setPhoneNumber] = useState('');
+  // const [gender, setGender] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [patientData, setPatientData] = useState({});
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -50,35 +52,32 @@ const ProfileForm = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (userId) {
-      const fetchData = () => {
-        axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
-          .then(res => {
-            console.log(res.data.thePatient);
-            const patient = res.data.thePatient;
-            setFirstName(patient.patient_firstName);
-            setLastName(patient.patient_lastName);
-            setSelectedDate(new Date(patient.patient_dob));
-            setEmail(patient.patient_email);
-            setPhoneNumber(patient.patient_contactNumber);
-          })
-          .catch(err => {
-            console.log(err);
-          });
-      };
+    const fetchData = () => {
+    axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+      .then(res => {
+        console.log(res.data.thePatient);
+        setPatientData(res.data.thePatient);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    };
 
-      fetchData();
-    }
+    fetchData();
   }, [userId]);
+
+  useEffect(() => {
+    console.log('Patient data:', patientData);
+  }, [patientData]);
 
   const handleSaveProfile = () => {
     axios.put(`${ip}/patient/api/${userId}/updatedetails`, {
-      patient_firstName: firstName || '',
-      patient_lastName: lastName || '',
-      patient_dob: selectedDate || '',
-      patient_email: email || '',
-      patient_contactNumber: phoneNumber || '',
-      patient_gender: gender || '',
+      patient_firstName: firstName,
+      patient_lastName: lastName,
+      patient_dob: selectedDate,
+      patient_email: email,
+      patient_contactNumber: phoneNumber,
+      patient_gender: gender,
     })
       .then((res) => {
         console.log('Profile updated successfully:', res.data);
@@ -89,8 +88,23 @@ const ProfileForm = ({ navigation }) => {
       });
   };
 
+  const handleUpdate = () => {
+    axios.put(`${ip.address}/patient/api/${userId}/updatedetails`, patientData)
+      .then((res) => {
+        console.log('Profile updated successfully:', res.data);
+
+      })
+      .catch((err) => {
+        console.log('Error updating profile:', err);
+      });
+  }
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    setPatientData({
+      ...patientData,
+      patient_dob: date
+    })
     setShowDatePicker(false);
   };
   
@@ -100,7 +114,7 @@ const ProfileForm = ({ navigation }) => {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.arrowButton}
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('myprofilepage')}
           >
             <Entypo name="chevron-thin-left" size={14} />
           </TouchableOpacity>
@@ -114,21 +128,16 @@ const ProfileForm = ({ navigation }) => {
           source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}
         />
   
-        {/* Display current data */}
-        <View style={styles.currentDataContainer}>
-          <Text style={styles.currentDataTitle}>Current Data</Text>
-          <Text style={styles.currentDataText}>First Name: {firstName}</Text>
-          <Text style={styles.currentDataText}>Last Name: {lastName}</Text>
-          <Text style={styles.currentDataText}>
-            Date of Birth: {selectedDate ? selectedDate.toDateString() : 'Not set'}
-          </Text>
-          <Text style={styles.currentDataText}>Email: {email}</Text>
-          <Text style={styles.currentDataText}>Phone Number: {phoneNumber}</Text>
-          <Text style={styles.currentDataText}>Gender: {gender}</Text>
-        </View>
-  
-        <OvalLabelTextInput label="First Name" value={firstName} onChangeText={setFirstName} />
-        <OvalLabelTextInput label="Last Name" value={lastName} onChangeText={setLastName} />
+        <OvalLabelTextInput label="First Name" value={patientData.patient_firstName} onChangeText={(text) => {
+          setPatientData({
+            ...patientData,
+            patient_firstName: (text)
+        })}} />
+        <OvalLabelTextInput label="Last Name" value={patientData.patient_lastName} onChangeText={(text) => {
+          setPatientData({
+            ...patientData,
+            patient_lastName: (text)
+        })}} />
   
         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
           <OvalLabelTextInput
@@ -163,13 +172,25 @@ const ProfileForm = ({ navigation }) => {
           </View>
         )}
   
-        <OvalLabelTextInput label="Email" value={email} onChangeText={setEmail} />
-        <OvalLabelTextInput label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} />
+        <OvalLabelTextInput label="Email" value={patientData.patient_email} onChangeText={(text) => {
+          setPatientData({
+            ...patientData,
+            patient_email: (text)
+        })}} />
+
+        <OvalLabelTextInput label="Phone Number" value={patientData.patient_contactNumber} onChangeText={(text) => {
+          setPatientData({
+            ...patientData,
+            patient_contactNumber: (text)
+        })}} />
   
         <View style={styles.pickerContainer}>
           <RNPickerSelect
             placeholder={{ label: 'Select Gender', value: null }}
-            onValueChange={(value) => setGender(value)}
+            onValueChange={(value) => setPatientData({
+              ...patientData,
+              patient_gender: (value)
+            })}
             items={[
               { label: 'Male', value: 'male' },
               { label: 'Female', value: 'female' },
@@ -179,11 +200,11 @@ const ProfileForm = ({ navigation }) => {
               inputIOS: styles.picker,
               inputAndroid: styles.picker,
             }}
-            value={gender}
+            value={patientData.patient_gender}
           />
         </View>
   
-        <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
+        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
           <LinearGradient
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 2 }}

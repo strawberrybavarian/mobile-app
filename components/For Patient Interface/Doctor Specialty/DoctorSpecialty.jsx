@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TouchableWithoutFeedback, TextInput } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -8,11 +8,18 @@ import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { getData } from '../../storageUtility';
+import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
+import { ip } from '../../../ContentExport';
 
 //For Searching
 
 const DoctorSpecialty = ({ navigation }) => {
   const [search, setSearch] = useState('');
+  const [userId, setUserId] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
   // const [filternav, setFilterNav] = useState('')
 
   const specialtiesData = 
@@ -25,7 +32,6 @@ const DoctorSpecialty = ({ navigation }) => {
   { id: 6, name: 'Skin & Dermatology', image: require('../../../assets/pictures/Dermatology.png'), spec: 'Derma'  },
   { id: 7, name: 'Brain & Nerves', image: require('../../../assets/pictures/Brain.png'), spec: 'Neuro'  },
   { id: 8, name: 'Stomach, Digestion &  Gastroenterology', image: require('../../../assets/pictures/Stomach.png'), spec: 'InternalMed'  },
- 
 
 ];
    console.log(getData('userId'));
@@ -33,6 +39,43 @@ const DoctorSpecialty = ({ navigation }) => {
   const handleSearch = (serts) => {
     setSearch(serts);
   };
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await getData('userId');
+        if (id) {
+          console.log("userId: "+id);
+          setUserId(id);
+        } else {
+          console.log('User not found');
+        }
+      } catch (err) {
+        console.log(err);
+      }}
+    
+    fetchUserId();
+    }, []);
+
+    useFocusEffect(
+      useCallback(() => {
+        const fetchData = () => {
+          axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+            .then(res => {
+              console.log(res.data.thePatient);
+              const patient = res.data.thePatient;
+              setFirstName(patient.patient_firstName);
+              setLastName(patient.patient_lastName);
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        };
+    
+        fetchData()
+
+      }, [userId])
+  )
 
   const filteredSpecialties = specialtiesData.filter(specialty =>
     specialty.name.toLowerCase().includes(search.toLowerCase())
@@ -59,7 +102,7 @@ const DoctorSpecialty = ({ navigation }) => {
               <Text style={{fontFamily: 'Poppins', fontSize: 12, }}>Welcome!</Text>
             </View>
             <View style={styles.container211}>
-              <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 17, }}>Analyn Santos</Text>
+              <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 17, }}>{firstName} {lastName}</Text>
             </View>
           </View>
 

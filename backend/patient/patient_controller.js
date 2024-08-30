@@ -429,7 +429,7 @@ const updatePatientDetails = (req, res) => {
     patient_email: req.body.patient_email,
     patient_password: req.body.patient_password,
   };
-  Patient.findByIdAndUpdate({ _id: req.params.id }, updateData, { new: true, runValidators: true })
+  Patient.findByIdAndUpdate({ _id: req.params.uid }, updateData, { new: true, runValidators: true })
     .then((updatedPatient) => {
       res.json({ updatedPatient: updatedPatient, message: "Successfully updated the Patient" });
     })
