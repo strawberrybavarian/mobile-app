@@ -11,14 +11,7 @@ module.exports = app => {
     app.get('/patient/api/allpatient', PatientController.findAllPatient);
 
     //Update Patient Information
-    app.put('/patient/api/:uid/updatefirstname', PatientController.updatePatientFirstName);
-    app.put('/patient/api/:uid/updatelastname', PatientController.updatePatientLastName);
-    app.put('/patient/api/:uid/updateemail', PatientController.updatePatientEmail);
-    app.put('/patient/api/:uid/updatecontactnumber', PatientController.updatePatientContactNumber);
-    app.put('/patient/api/:uid/updatepassword', PatientController.updatePatientPassword);
-    app.put('/patient/api/:uid/updategender', PatientController.updatePatientGender);
-    app.put('/patient/api/:uid/updateDOB', PatientController.updatePatientDob);
-    app.put('/patient/api/:uid/updatemiddleinitial', PatientController.updatePatientMiddleInitial);
+    
     app.put('/patient/api/:uid/updatedetails', PatientController.updatePatientDetails);
 
     //Finding One Patient

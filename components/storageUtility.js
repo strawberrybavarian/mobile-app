@@ -1,5 +1,3 @@
-// storageUtility.js
-
 import * as SecureStore from 'expo-secure-store';
 import localForage from 'localforage';
 import { Platform } from 'react-native';
@@ -21,19 +19,37 @@ const storeData = async (key, value) => {
 };
 
 const getData = async (key) => {
+  let value = null;
+
   if (Platform.OS === 'web') {
     try {
-      return await localForage.getItem(key);
+      value = await localForage.getItem(key);
     } catch (error) {
       console.error("Error getting data from web: ", error);
     }
   } else {
     try {
-      return await SecureStore.getItemAsync(key);
+      value = await SecureStore.getItemAsync(key);
     } catch (error) {
       console.error("Error getting data from mobile: ", error);
     }
   }
+
+  // If the value doesn't exist, set a test value
+  if (value === null) {
+    const testValues = {
+      userId: '66cf343bdf339bc59f0b7985',  // Replace with your desired test values
+      // Add other test data here as needed
+    };
+
+    if (testValues[key]) {
+      await storeData(key, testValues[key]);
+      value = testValues[key];
+      console.log(`Set test data for ${key}: ${value}`);
+    }
+  }
+
+  return value;
 };
 
 const deleteData = async (key) => {
