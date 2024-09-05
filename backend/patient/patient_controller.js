@@ -235,8 +235,9 @@ const findAllAppointmentsForPatient = (req, res) => {
   };
 
   const findAppointmentByIdForPatient = (req, res) => {
-    const { uid, appointmentId } = req.params;
-  
+    const { uid, id } = req.params;
+    console.log(`Received UID: ${uid}, AppointmentID: ${id}`);
+
     Patient.findById(uid)
       .populate({
         path: 'patient_appointments',
@@ -248,21 +249,28 @@ const findAllAppointmentsForPatient = (req, res) => {
       })
       .then((patient) => {
         if (!patient) {
+          console.log('Patient not found');
           return res.status(404).json({ message: 'Patient not found' });
         }
-  
-        const appointment = patient.patient_appointments.id(appointmentId);
-  
+        console.log('Patient found:', patient);
+
+        // Finding the specific appointment in the populated array
+        const appointment = patient.patient_appointments.find(appt => appt._id.toString() === id);
+
         if (!appointment) {
+          console.log('Appointment not found');
           return res.status(404).json({ message: 'Appointment not found' });
         }
-  
+
+        console.log('Appointment found:', appointment);
         res.json({ appointment });
       })
       .catch((err) => {
-        res.status(500).json({ message: 'Something went wrong', error: err });
+        console.error('Error in findAppointmentByIdForPatient:', err);
+        res.status(500).json({ message: 'Something went wrong', error: err.message });
       });
-  };
+};
+
   
   const updateAppointmentForPatient = async (req, res) => {
     const { uid, appointmentId } = req.params;

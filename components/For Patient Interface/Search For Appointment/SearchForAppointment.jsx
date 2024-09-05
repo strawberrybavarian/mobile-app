@@ -29,6 +29,7 @@ const SearchForAppointment = ({ navigation, route }) => {
   //console.log("specpec = " + specpec, typeof (specpec));
 
   // Get all doctors
+  
   useEffect(() => {
     axios.get(`${ip.address}/doctor/api/alldoctor`)
       .then((res) => {
