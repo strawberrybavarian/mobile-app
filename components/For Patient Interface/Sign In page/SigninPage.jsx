@@ -12,10 +12,10 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import PickerSelect from 'react-native-picker-select';
 import axios from "axios";
 import { getData, storeData } from "../../storageUtility";
 import { ip } from "../../../ContentExport";
+import { Dropdown } from "react-native-element-dropdown"; // Import Dropdown
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -35,40 +35,36 @@ const SigninPage = ({ navigation }) => {
     setPasswordVisible(!passwordVisible);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchData = async () => {
       try {
         let response;
         if (role === "Patient") {
-          response = await axios.get(`${ip.address}/patient/api/allpatient`)
-        }
-        else if (role === 'Doctor') {
-          response = await axios.get(`${ip.address}/doctor/api/alldoctor`)
+          response = await axios.get(`${ip.address}/patient/api/allpatient`);
+        } else if (role === "Doctor") {
+          response = await axios.get(`${ip.address}/doctor/api/alldoctor`);
         }
 
-        if (role === 'Patient' && response && response.data) {
+        if (role === "Patient" && response && response.data) {
           const userData = response.data.thePatient;
           setAllUsers(userData);
 
-          const emails = userData.map(user => user.patient_email);
+          const emails = userData.map((user) => user.patient_email);
           setAllEmail(emails);
 
-          const passwords = userData.map(user => user.patient_password);
+          const passwords = userData.map((user) => user.patient_password);
           setAllPass(passwords);
-          
-        }
-        else if (role === 'Doctor' && response && response.data){
+        } else if (role === "Doctor" && response && response.data) {
           const userData = response.data.theDoctor;
           setAllUsers(userData);
 
-          const emails = userData.map(user => user.dr_email);
+          const emails = userData.map((user) => user.dr_email);
           setAllEmail(emails);
 
-          const passwords = userData.map(user => user.dr_password);
+          const passwords = userData.map((user) => user.dr_password);
           setAllPass(passwords);
         }
-      }
-      catch (err) {
+      } catch (err) {
         console.log(err);
       }
     };
@@ -80,32 +76,34 @@ const SigninPage = ({ navigation }) => {
     e.preventDefault();
 
     if (email.length <= 8 && password.length <= 8) {
-      Alert.alert("Validation Error", "Please check the input fields", [
-        { text: "OK" },
-      ]);
-    } 
-    else {
+      if(Platform.OS !== 'web'){
+        Alert.alert("Validation Error", "Please check the input fields", [
+          { text: "OK" },
+        ]);
+      } else {
+        window.alert("Validation Error: Please check the input fields");
+      }      
+    } else {
       const emailIndex = allEmail.indexOf(email);
       if (emailIndex !== -1 && password === allPass[emailIndex]) {
         const user = allUsers[emailIndex];
 
         try {
-          await storeData('userEmail', email);
-          await storeData('userRole', role);
-          await storeData('userId', user._id)
+          await storeData("userEmail", email);
+          await storeData("userRole", role);
+          await storeData("userId", user._id);
         } catch (error) {
           console.error("Error storing user data: ", error);
         }
 
-        if(role === 'Patient'){
+        if (role === "Patient") {
           Alert.alert("Successfully logged in");
           console.log(user._id);
-          navigation.navigate('doctorspecialty');
-        }
-        else if (role === 'Doctor'){
+          navigation.navigate("doctorspecialty");
+        } else if (role === "Doctor") {
           Alert.alert("Successfully logged in");
           console.log(user._id);
-          navigation.navigate('doctormain');
+          navigation.navigate("doctormain");
         }
       } else {
         Alert.alert("Wrong Email or Password");
@@ -115,19 +113,19 @@ const SigninPage = ({ navigation }) => {
 
   const validateEmail = (text) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!text ) {
+    
+    const lowerCaseText = text.toLowerCase(); // Convert the input to lowercase
+  
+    if (!lowerCaseText) {
       setEmailError("Email cannot be empty");
-    }
-    else if (!emailRegex.test(text)) {
+    } else if (!emailRegex.test(lowerCaseText)) {
       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-    }
-    else {
+    } else {
       setEmailError("");
     }
-    setEmail(text);
+    setEmail(lowerCaseText); // Set the lowercase email
   };
-
+  
   const validatePassword = (text) => {
     if (!text || text.length < 8) {
       setPasswordError("Password must be at least 8 characters");
@@ -161,9 +159,9 @@ const SigninPage = ({ navigation }) => {
             >
               <FontAwesome5 name="chevron-left" size={15} />
             </TouchableOpacity>
-            <View style={styles.con1}>
+            <TouchableOpacity style={styles.con1}>
               <Text style={styles.title}>Create Account</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.textcon}>
@@ -181,7 +179,7 @@ const SigninPage = ({ navigation }) => {
               />
             </View>
             {emailError ? (
-                <Text style={styles.errorMessage}>{emailError}</Text>
+              <Text style={styles.errorMessage}>{emailError}</Text>
             ) : null}
 
             <View style={styles.passwordContainer}>
@@ -192,7 +190,7 @@ const SigninPage = ({ navigation }) => {
                 value={password}
                 onChangeText={validatePassword}
               />
-             
+
               <View style={styles.eyeIconContainer}>
                 <TouchableWithoutFeedback onPress={seePassword}>
                   <FontAwesome5
@@ -203,26 +201,27 @@ const SigninPage = ({ navigation }) => {
               </View>
             </View>
             {passwordError ? (
-                <Text style={styles.errorMessage}>{passwordError}</Text>
-              ) : null}
+              <Text style={styles.errorMessage}>{passwordError}</Text>
+            ) : null}
 
             <View style={styles.pickerContainer}>
-              <PickerSelect
-                  placeholder={{ label: 'Select Role', value: "" }}
-                  onValueChange={validateRole}
-                  items={[
-                  { label: 'Patient', value: 'Patient' },
-                  { label: 'Doctor', value: 'Doctor' },
+              <Dropdown
+                style={styles.pickerItem}
+                data={[
+                  { label: "Patient", value: "Patient" },
+                  { label: "Doctor", value: "Doctor" },
                 ]}
-                style={{
-                  inputIOS: styles.pickerItem,
-                  inputAndroid: styles.pickerItem,
-                }}
-                />
+                labelField="label"
+                valueField="value"
+                placeholder="Select Role"
+                value={role}
+                onChange={(item) => validateRole(item.value)}
+              />
             </View>
             {roleError ? (
-                <Text style={styles.errorMessage}>{roleError}</Text>
+              <Text style={styles.errorMessage}>{roleError}</Text>
             ) : null}
+
             <LinearGradient
               start={{ x: 1, y: 0 }}
               end={{ x: 0, y: 2 }}
@@ -236,7 +235,9 @@ const SigninPage = ({ navigation }) => {
             >
               <TouchableOpacity
                 style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-                onPress={(e)=>{loginUser(e)}}
+                onPress={(e) => {
+                  loginUser(e);
+                }}
               >
                 <Text style={styles.textButton}>SIGN IN</Text>
               </TouchableOpacity>
@@ -301,7 +302,8 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Poppins",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-evenly",
+    // paddingHorizontal: 10,
   },
   picker: {
     flex: 1,
@@ -315,7 +317,10 @@ const styles = StyleSheet.create({
   pickerItem: {
     fontFamily: "Poppins",
     fontSize: 15,
-    paddingLeft: 10,
+    flex: 1,
+    width: "100%",
+    height: '100%',
+    paddingHorizontal: 10,
   },
   passwordContainer: {
     flexDirection: "row",

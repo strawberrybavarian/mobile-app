@@ -16,7 +16,6 @@ const NavigationBar = () => {
   const [scaleAnim4] = useState(new Animated.Value(1));
   const [activeButton, setActiveButton] = useState(null);
 
-  
   //Animations:
   const handlePressIn = (scaleAnim, buttonName) => () => {
     setActiveButton(buttonName);

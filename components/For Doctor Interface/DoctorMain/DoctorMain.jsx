@@ -1,54 +1,54 @@
-// DoctorMain.jsx
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView} from 'react-native';
-import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
-import DoctorAppointment from '../DoctorAppointment/DoctorAppointment';
+import { View, Dimensions } from 'react-native';
+import { TabView, SceneMap } from 'react-native-tab-view';
 import DoctorHome from '../DoctorHome/DoctorHome';
-import DoctorHeader from '../DoctorHeader/DoctorHeader';
+import MyPatients from '../MyPatients/MyPatients';
+import DoctorAppointment from '../DoctorAppointment/DoctorAppointment';
 import DoctorProfile from '../Doctor Profile/DoctorProfile';
+import DoctorHeader from '../DoctorHeader/DoctorHeader';
+import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
 
-const DoctorMain = ({ }) => {
-  const [activeTab, setActiveTab] = useState('Home');
+const initialLayout = { width: Dimensions.get('window').width };
 
-  const handleTabChange = (tabName) => {
-    setActiveTab(tabName);
-  };
+const DoctorMain = () => {
+  const [index, setIndex] = useState(0);
+
+  const [routes] = useState([
+    { key: 'home', title: 'Home' },
+    { key: 'patients', title: 'My Patients' },
+    { key: 'appointment', title: 'Appointment' },
+    { key: 'profile', title: 'Profile' },
+  ]);
+
+  const renderScene = SceneMap({
+    home: DoctorHome,
+    patients: MyPatients,
+    appointment: DoctorAppointment,
+    profile: DoctorProfile,
+  });
 
   return (
-  <>
-    
-    <ScrollView style={styles.container}>
-      <DoctorHeader/>
-      {activeTab === 'Home' && <DoctorHome />}
-      {activeTab === 'Appointment' && <DoctorAppointment />}
-      {activeTab === 'Profile' && <DoctorProfile />}
-    </ScrollView>
-      
- 
-      <View style={styles.navigationContainer}>
-        <DoctorNavigation activeTab={activeTab} onTabChange={handleTabChange} />
-    </View>
-  </>
-  
-   
-
-
-         
-  
+    <>
+      <DoctorHeader />
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={initialLayout}
+        renderTabBar={() => null} 
+      />
+      {/* Use DoctorNavigation for the tab navigation */}
+      <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+        <DoctorNavigation
+          activeTab={routes[index].title}
+          onTabChange={(tabName) => {
+            const newIndex = routes.findIndex(route => route.title === tabName);
+            setIndex(newIndex);
+          }}
+        />
+      </View>
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  navigationContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-});
 
 export default DoctorMain;

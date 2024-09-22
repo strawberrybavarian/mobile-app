@@ -2,7 +2,8 @@ const Patient = require('./patient_model');
 const Doctor = require('../doctor/doctor_model');
 const Appointment = require('../appointments/appointment_model');
 const MedicalSecretary = require('../medicalsecretary/medicalsecretary_model');
-const Prescription = require('../prescription/prescription_model')
+const Prescription = require('../prescription/prescription_model');
+const mongoose = require('mongoose');
 
 const NewPatientSignUp = (req, res) => {
     Patient.create(req.body)
@@ -271,47 +272,85 @@ const findAllAppointmentsForPatient = (req, res) => {
       });
 };
 
-  
-  const updateAppointmentForPatient = async (req, res) => {
-    const { uid, appointmentId } = req.params;
+const updateAppointmentForPatient = async (req, res) => {
+  try {
+    const { uid, id } = req.params;
     const updateData = req.body;
-  
-    try {
-      const patient = await Patient.findById(uid).populate('patient_appointments');
-  
-      if (!patient) {
-        return res.status(404).json({ message: 'Patient not found' });
+
+    // Convert the IDs to ObjectId
+    const patientId = new mongoose.Types.ObjectId(uid);
+    const appointmentId = new mongoose.Types.ObjectId(id);
+
+    // Update the specific appointment within the patient document
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { _id: patientId, "patient_appointments._id": appointmentId },
+      { $set: { "patient_appointments.$[elem]": updateData } },
+      {
+        arrayFilters: [{ "elem._id": appointmentId }],
+        new: true, // Return the updated document
+        runValidators: true // Apply schema validation
       }
-  
-      const appointment = patient.patient_appointments.id(appointmentId);
-  
-      if (!appointment) {
-        return res.status(404).json({ message: 'Appointment not found' });
-      }
-  
-      Object.keys(updateData).forEach((key) => {
-        appointment[key] = updateData[key];
-      });
-  
-      await patient.save();
-  
-      res.status(200).json({ appointment });
-    } catch (err) {
-      res.status(500).json({ message: 'Something went wrong', error: err });
+    );
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: 'Patient or appointment not found' });
     }
-  };
-  
+
+    // Find the updated appointment
+    const updatedAppointment = updatedPatient.patient_appointments.id(appointmentId);
+
+    res.status(200).json({ appointment: updatedAppointment });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(400).json({ message: error.message }); // Send a detailed error message
+  }
+};
+
+const updateAppointmentStatus = async (req, res) => {
+  const { uid, id } = req.params; // `uid` is the patient ID, `id` is the appointment ID
+  const { status } = req.body; // Retrieve status from the request body
+
+  console.log('UID:', uid);
+  console.log('Appointment ID:', id);
+  console.log('Status:', status); // This should not be undefined
+
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  try {
+    // Update the status of the specific appointment
+    const updatedPatient = await Patient.findOneAndUpdate(
+      { _id: uid, 'patient_appointments._id': id },
+      { $set: { 'patient_appointments.$.status': status } },
+      { new: true, runValidators: true } // Return the updated document and validate
+    );
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: 'Patient or appointment not found' });
+    }
+
+    // Retrieve the updated appointment
+    const updatedAppointment = updatedPatient.patient_appointments.id(id);
+
+    res.status(200).json({ appointment: updatedAppointment });
+  } catch (err) {
+    console.log('Error:', err); // Log the error for better debugging
+    res.status(500).json({ message: 'Something went wrong', error: err.message });
+  }
+};
+
 
 //get all emails
-    const getAllPatientEmails = (req, res) => {
-      Patient.find({}, 'patient_email')
-      .then((patients) => {
-          const emails = patients.map(patient => patient.patient_email);
-          res.json(emails);
-      })
-      .catch((err) => {
-          res.json({ message: 'Something went wrong', error: err });
-      });
+  const getAllPatientEmails = (req, res) => {
+    Patient.find({}, 'patient_email')
+    .then((patients) => {
+        const emails = patients.map(patient => patient.patient_email);
+        res.json(emails);
+    })
+    .catch((err) => {
+        res.json({ message: 'Something went wrong', error: err });
+    });
   };
 
 // update all details
@@ -350,5 +389,6 @@ module.exports = {
     findAllAppointmentsForPatient,
     findAppointmentByIdForPatient,
     updateAppointmentForPatient,
-    updatePatientDetails
+    updatePatientDetails,
+    updateAppointmentStatus
 }

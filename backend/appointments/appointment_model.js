@@ -33,8 +33,6 @@ const AppointmentSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Scheduled', 'Completed', 'Cancelled'],
-        default: 'Scheduled'
     },
     prescription: {
         type: Schema.Types.ObjectId,

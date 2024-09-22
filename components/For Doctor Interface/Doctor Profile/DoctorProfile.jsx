@@ -11,6 +11,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useNavigation } from '@react-navigation/native';
 const DoctorProfile = () => {
+  
   const [activeTab, setActiveTab] = useState('Home');
 
   const navigation = useNavigation();

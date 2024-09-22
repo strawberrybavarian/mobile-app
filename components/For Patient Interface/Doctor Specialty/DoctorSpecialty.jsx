@@ -147,7 +147,7 @@ const DoctorSpecialty = ({ navigation }) => {
                 </View>
               </TouchableOpacity>
             ))}
-        </View>
+            </View>
             <View style={[styles.container41,{paddingBottom:50}]}></View> 
         </View> 
       </View>

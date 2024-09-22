@@ -9,7 +9,6 @@ import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/Do
 import axios from "axios";
 import { ip } from "../../../ContentExport";
 
-// const dummyAppointments = [
 //   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
 //   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
 //   { id: "4", doctor: "Dr. Jennie Kim", specialty: "Neurologist", rating: 4.5, image: doctorImage1 },
@@ -200,7 +199,7 @@ const SearchForAppointment = ({ navigation, route }) => {
         </ScrollView>
       </View>
 
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.appointmentBox}>
           <FlatList
             data={doctorFiltered}
@@ -209,7 +208,7 @@ const SearchForAppointment = ({ navigation, route }) => {
             showsVerticalScrollIndicator={false}
           />
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.navcontainer}>
         <NavigationBar />

@@ -21,6 +21,7 @@ module.exports = app => {
     //Create Appointment
     app.post('/patient/api/:uid/createappointment', PatientController.createAppointment);
     app.put('/patient/api/:uid/updateappointment', PatientController.cancelAppointment)
+    app.put('/patient/api/:uid/updateapptstatus/:id', PatientController.updateAppointmentStatus)
 
     app.get('/patient/api/:uid/allappt', PatientController.findAllAppointmentsForPatient)
     app.get('/patient/api/:uid/oneappt/:id', PatientController.findAppointmentByIdForPatient)

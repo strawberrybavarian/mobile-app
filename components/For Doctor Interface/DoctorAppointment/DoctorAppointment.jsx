@@ -17,20 +17,9 @@ import DoctorHeader from '../DoctorHeader/DoctorHeader';
   
     return (
       <>
-
-        
-       
-          {/* Header */}
-        <Text style={{ paddingLeft: 5, fontFamily: 'Poppins-SemiBold', fontSize: 20, paddingVertical: 20, marginLeft: 20, }}>Appointment</Text>
-        <View style={styles.con3}>
-       
-                <UpperNavigation setActiveTab={setActiveTab}  />
-                    {activeTab === 'Upcoming' ? (
-                    <DoctorUpcoming />
-                        ) : (
-                    <DoctorAcceptedPatient />
-                    )}
-                  <View style={{paddingBottom: 80}}></View>
+          <View style={styles.con3}>
+            <DoctorUpcoming />
+        <View style={{paddingBottom: 80}}></View>
                  
         </View>
     
@@ -108,10 +97,9 @@ const styles = StyleSheet.create({
 
   con3: {
     flexDirection: "column",
-    marginTop: - 20,
-   
-    paddingLeft: 20,
-    paddingRight: 20,
+    marginTop: 0,
+    height: '100%',
+    marginBottom: 10,
   },
   searchContainer: {
     flexDirection: "row",

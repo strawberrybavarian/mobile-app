@@ -17,6 +17,7 @@ import HealthRiskAssessmentForm from './components/For Patient Interface/Health 
 import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
 import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
 import AppointmentDetails from './components/For Patient Interface/AppointmentDetails/AppointmentDetails';
+
 //Doctors
 
 import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment'
@@ -24,6 +25,8 @@ import DoctorHome from './components/For Doctor Interface/DoctorHome/DoctorHome'
 import DoctorMain from './components/For Doctor Interface/DoctorMain/DoctorMain';
 import DoctorProfile from './components/For Doctor Interface/Doctor Profile/DoctorProfile';
 import DoctorNotification from './components/For Doctor Interface/DoctorNotification/DoctorNotification';
+import CreateAccountDoctor from './components/For Patient Interface/Create Account/CreateAccoutDoctor';
+import Homepage from './components/For Patient Interface/Homepage/Homepage';
 
 export default function App() {
   
@@ -31,7 +34,24 @@ export default function App() {
   const Stack = createNativeStackNavigator();
   const [fontsLoaded] = useFonts ({
     'Poppins' : require('./assets/fonts/Poppins.ttf'),
-    'Poppins-SemiBold' : require('./assets/fonts/Poppins-SemiBold.ttf')
+    'Poppins-SemiBold' : require('./assets/fonts/Poppins-SemiBold.ttf'),
+    'Poppins-Bold' : require('./assets/fonts/Poppins-Bold.ttf'),
+    'Poppins-Medium' : require('./assets/fonts/Poppins-Medium.ttf'),
+    'Poppins-Light' : require('./assets/fonts/Poppins-Light.ttf'),
+    'Poppins-Thin' : require('./assets/fonts/Poppins-Thin.ttf'),
+    'Poppins-ExtraLight' : require('./assets/fonts/Poppins-ExtraLight.ttf'),
+    'Poppins-ExtraBold' : require('./assets/fonts/Poppins-ExtraBold.ttf'),
+    'Poppins-Black' : require('./assets/fonts/Poppins-Black.ttf'),
+    'Poppins-Italic' : require('./assets/fonts/Poppins-Italic.ttf'),
+    'Poppins-LightItalic' : require('./assets/fonts/Poppins-LightItalic.ttf'),
+    'Poppins-MediumItalic' : require('./assets/fonts/Poppins-MediumItalic.ttf'),
+    'Poppins-BoldItalic' : require('./assets/fonts/Poppins-BoldItalic.ttf'),
+    'Poppins-ExtraBoldItalic' : require('./assets/fonts/Poppins-ExtraBoldItalic.ttf'),
+    'Poppins-BlackItalic' : require('./assets/fonts/Poppins-BlackItalic.ttf'),
+    'Poppins-ThinItalic' : require('./assets/fonts/Poppins-ThinItalic.ttf'),
+    'Poppins-ExtraLightItalic' : require('./assets/fonts/Poppins-ExtraLightItalic.ttf'),
+    'Poppins-SemiBoldItalic' : require('./assets/fonts/Poppins-SemiBoldItalic.ttf'),
+
   })
   if (!fontsLoaded){
     return undefined
@@ -41,12 +61,14 @@ export default function App() {
     
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="apptdetails" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="landingpage" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
+          <Stack.Screen name='createDoctorAccount' component={CreateAccountDoctor}/>
 
           {/* Patient */}
+          <Stack.Screen name='home' component={Homepage}/>
           <Stack.Screen name='myprofilepage' component={MyProfile} />
           <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />

@@ -1,16 +1,24 @@
-const styleDictionary = {
-    
+
+
+const sd = {
+
     colors: {
-      primary: '#4CAF50',
-      secondary: '#FF9800',
-      background: '#f8f8f8',
-      textPrimary: '#212121',
-      textSecondary: '#757575',
+        primary: '#4CAF50',
+        secondary: '#FF9800',
+        background: '#f8f8f8',
+        textPrimary: '#212121',
+        textSecondary: '#757575',
+        blue: '#2F88D4',
+        red: '#E45155',
     },
     fonts: {
-      regular: 'Poppins-Regular',
-      bold: 'Poppins-Bold',
-      semiBold: 'Poppins-SemiBold',
+        regular: 'Poppins-Regular',
+        bold: 'Poppins-Bold',
+        semiBold: 'Poppins-SemiBold',
+        light: 'Poppins-Light',
+        thin: 'Poppins-Thin',
+        black: 'Poppins-Black',
+        italic: 'Poppins-Italic',
     },
     spacing: {
       small: 8,
@@ -20,6 +28,7 @@ const styleDictionary = {
     borders: {
       radiusSmall: 4,
       radiusLarge: 8,
+      radiusXL: 14,
     },
     shadows: {
       small: {
@@ -44,10 +53,13 @@ const styleDictionary = {
       },
     },
     fontSizes: {
-      small: 12,
-      medium: 16,
-      large: 20,
+        xs: 10,
+        small: 12,
+        medium: 16,
+        large: 20,
+        xl: 24,
+        xxl: 32,
     },
   };
   
-  export default styleDictionary;
+  export default sd;

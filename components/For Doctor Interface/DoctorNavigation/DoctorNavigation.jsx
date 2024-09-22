@@ -6,6 +6,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import sd from '../../../utils/styleDictionary';
 
 const DoctorNavigation = ({ activeTab, onTabChange }) => {
   const navigation = useNavigation();
@@ -52,7 +53,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
             <Animated.View style={{ transform: [{ scale: scaleAnim1 }] }}>
               <View style={styles.IconBehavior}>
                 <Entypo
-                  style={{ color: activeTab === 'Home' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Home' ? sd.colors.blue : '#98A3B3' }}
                   name="home"
                   size={30}
                 />
@@ -60,7 +61,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                   style={[
                     styles.texts,
                     {
-                      color: activeTab === 'Home' ? '#92A3FD' : '#98A3B3',
+                      color: activeTab === 'Home' ? sd.colors.blue : '#98A3B3',
                       fontFamily: 'Poppins',
                       marginBottom: 2,
                     },
@@ -73,13 +74,40 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
           </Pressable>
 
           <Pressable
-            onPressIn={handlePressIn(scaleAnim2, 'Appointment')}
+            onPressIn={handlePressIn(scaleAnim2, 'My Patients')}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
               <View style={styles.IconBehavior}>
+                <Entypo
+                  style={{ color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3' }}
+                  name="users"
+                  size={30}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {
+                      color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      marginBottom: 2,
+                    },
+                  ]}
+                >
+                  My Patients
+                </Text>
+              </View>
+            </Animated.View>
+          </Pressable>
+
+          <Pressable
+            onPressIn={handlePressIn(scaleAnim3, 'Appointment')}
+            onPressOut={handlePressOut(scaleAnim3)}
+          >
+            <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
+              <View style={styles.IconBehavior}>
                 <FontAwesome6
-                  style={{ color: activeTab === 'Appointment' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Appointment' ? sd.colors.blue : '#98A3B3' }}
                   name="calendar-alt"
                   size={30}
                 />
@@ -87,7 +115,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                   style={[
                     styles.texts,
                     {
-                      color: activeTab === 'Appointment' ? '#92A3FD' : '#98A3B3',
+                      color: activeTab === 'Appointment' ? sd.colors.blue : '#98A3B3',
                       fontFamily: 'Poppins',
                       marginBottom: 2,
                       fontFamily: 'Poppins',
@@ -101,13 +129,13 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
           </Pressable>
 
           <Pressable 
-            onPressIn={handlePressIn(scaleAnim3, 'Profile')}
-            onPressOut={handlePressOut(scaleAnim3)}
+            onPressIn={handlePressIn(scaleAnim4, 'Profile')}
+            onPressOut={handlePressOut(scaleAnim4)}
           >
-            <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
+            <Animated.View style={{ transform: [{ scale: scaleAnim4 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome
-                  style={{ color: activeTab === 'Profile' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Profile' ? sd.colors.blue : '#98A3B3' }}
                   name="user-md"
                   size={30}
                 />
@@ -115,7 +143,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                   style={[
                     styles.texts,
                     {
-                      color: activeTab === 'Profile' ? '#92A3FD' : '#98A3B3',
+                      color: activeTab === 'Profile' ? sd.colors.blue : '#98A3B3',
                       fontFamily: 'Poppins',
                     },
                   ]}

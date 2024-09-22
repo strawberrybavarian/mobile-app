@@ -82,6 +82,7 @@ const BookAppointment = ({ navigation , route}) => {
         time: selectedHour,
         reason: reason,
         cancelReason: '',
+        status: 'Scheduled',
         secretaryId: null,  
         prescriptionId: null  
       };
@@ -98,12 +99,6 @@ const BookAppointment = ({ navigation , route}) => {
   };
 
   const availableHours = ["8:00 AM to 11:00 AM", "3:00 PM to 4:00 PM"];
-
-  // const nextButton = () => {
-  //   console.log(reason, selectedDate, selectedHour)
-  //   console.log(item)
-  //   // navigation.navigate('healthassess');
-  // };
 
   return (
     <>

@@ -38,8 +38,8 @@ const getData = async (key) => {
   // If the value doesn't exist, set a test value
   if (value === null) {
     const testValues = {
-      userId: '66cf343bdf339bc59f0b7985',  // Replace with your desired test values
-      // Add other test data here as needed
+      //userId: '66cf343bdf339bc59f0b7985',  // patient
+      userId: '66cf342ddf339bc59f0b7982',  // doctor
     };
 
     if (testValues[key]) {

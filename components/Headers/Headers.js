@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } fr
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
-import { TextInput } from 'react-native-paper';
+import { Modal, TextInput } from 'react-native-paper';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import styles from './HeaderStyle';
 
@@ -29,10 +29,17 @@ const Header2 = ({ title }) => {
 
     return (
         <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
-                <Entypo name="chevron-left" size={24} color="black" />
+            <TouchableOpacity onPress={() => {
+                if(title === "Appointment Details") {
+                    closeModal();
+                }
+                else{
+                    navigation.goBack();
+                }
+            }} style={styles.arrowButton}>
+                <Entypo name="chevron-left" size={20} color="black" />
             </TouchableOpacity>
-            <Text style={styles.title}>{title}</Text> {/* Use the title prop */}
+            <Text style={styles.title}>{title}</Text> 
         </View>
     );
 };

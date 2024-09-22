@@ -11,6 +11,11 @@ const LandingPage =({navigation})=>{
     const createAccountPageButton =()=>{
       navigation.navigate('createaccount')
     }
+
+    const createDoctorAccountPageButton =()=>{
+      navigation.navigate('createDoctorAccount')
+    }
+    
     return(
         <>
           
@@ -27,7 +32,7 @@ const LandingPage =({navigation})=>{
             <Image source={require('../../../assets/pictures/MyPDoctorApp.png')} style={styles.logo}/>
           </View>
           <View style={styles.container}>
-            {/* textpage */}
+           
             <Text style={styles.text1}>By tapping ‘Sign in’ you agree to our {''}
               <TouchableWithoutFeedback >
                 <Text style={styles.linkText}>Terms.</Text>
@@ -44,7 +49,10 @@ const LandingPage =({navigation})=>{
             </Text>
             {/* create account button */}
             <TouchableOpacity onPress={createAccountPageButton} style={styles.CreateButton}>
-                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>CREATE ACCOUNT</Text>
+                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A PATIENT</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={createDoctorAccountPageButton} style={styles.CreateButton}>
+                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A DOCTOR</Text>
             </TouchableOpacity>
             {/* sign in button */}
             <TouchableOpacity onPress={signinPageButton} style={styles.SignInButton}>

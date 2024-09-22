@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 
-
 const styles = StyleSheet.create({
     //both headers
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 30,
+        padding: 10,
         backgroundColor: '#fff',
         borderBottomWidth: 1,
         borderColor: '#ccc',
-        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 2,
         // position: "absolute",
         width: '100%',
     },
@@ -33,11 +36,12 @@ const styles = StyleSheet.create({
 
     //header2
     arrowButton: {
-        marginRight: 20,
+        marginRight: 5,
     },
     title: {
-        fontSize: 20,
+        fontSize: 12,
         fontFamily: 'Poppins-SemiBold',
+        paddingTop: 1,
     }
 });
 
