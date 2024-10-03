@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableWithoutFeedback, TouchableOpacity, Image  } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import sd from '../../../utils/styleDictionary';
 
 const LandingPage =({navigation})=>{
 
@@ -25,7 +26,7 @@ const LandingPage =({navigation})=>{
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          colors={['#92A3FD', '#9DCEFF']}
+          colors={[sd.colors.blue, '#9DCEFF']}
           >
 
           <View style={styles.logoContainer}>
@@ -48,16 +49,18 @@ const LandingPage =({navigation})=>{
                 .
             </Text>
             {/* create account button */}
+            <TouchableOpacity onPress={signinPageButton} style={styles.SignInButton}>
+                    <Text  style={{color: sd.colors.blue , fontSize: 16, fontFamily: 'Poppins-Bold', marginTop: 1}}>LOG IN</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity onPress={createAccountPageButton} style={styles.CreateButton}>
-                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A PATIENT</Text>
+                    <Text  style={{color: 'white', fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A PATIENT</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={createDoctorAccountPageButton} style={styles.CreateButton}>
-                    <Text  style={{color: "#92A3FD", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A DOCTOR</Text>
+                    <Text  style={{color: "white", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN UP AS A DOCTOR</Text>
             </TouchableOpacity>
             {/* sign in button */}
-            <TouchableOpacity onPress={signinPageButton} style={styles.SignInButton}>
-                    <Text  style={{color: "white", fontSize: 16, fontFamily: 'Poppins', marginTop: 1}}>SIGN IN</Text>
-            </TouchableOpacity>
+            
 
             <TouchableWithoutFeedback>
                 <Text style={styles.TroubleSigningIn}>Trouble signing in?</Text>
@@ -97,21 +100,22 @@ const styles = StyleSheet.create({
   CreateButton: {
     width: 300,
     height: 45,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  SignInButton: {
-    width: 300,
-    height: 45,
     borderColor: "#FFFFFF",
     borderRadius: 40,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 12,
+  },
+  SignInButton: {
+    
+    width: 300,
+    height: 45,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
   },
   TroubleSigningIn: {
     marginTop: 10,

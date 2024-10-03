@@ -8,19 +8,20 @@ import NavigationBar from '../Navigation/NavigationBar';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { getData } from '../../storageUtility';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
+import sd from '../../../utils/styleDictionary';
 
 //For Searching
 
-const DoctorSpecialty = ({ navigation }) => {
+const DoctorSpecialty = () => {
   const [search, setSearch] = useState('');
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  // const [filternav, setFilterNav] = useState('')
+  const navigation = useNavigation();
 
   const specialtiesData = 
  [
@@ -91,7 +92,7 @@ const DoctorSpecialty = ({ navigation }) => {
     <>
       <ScrollView style={styles.scrollContainer} >
       
-      <View style={styles.bluecont}> 
+      {/* <View style={styles.bluecont}> 
         <View style={styles.container2}>
           <Image
             source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
@@ -111,6 +112,10 @@ const DoctorSpecialty = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
+        
+      </View> */}
+
+      <View>
         <View style={styles.con3}>
             <View style={styles.searchContainer}>
                 <FontAwesome5 name="search" style={{marginRight: 5, color: '#DDDADA'}}/>
@@ -133,11 +138,8 @@ const DoctorSpecialty = ({ navigation }) => {
               </View>
             </View>
         </View>
-      </View>
-
-      <View>
         <View style={styles.container4}>
-            <Text style={{paddingLeft: 20, marginLeft:3, fontFamily:'Poppins-SemiBold', fontSize: 18}}>Doctor Specialty</Text>
+            <Text style={{paddingLeft: 20, marginLeft:3, fontFamily:'Poppins-SemiBold', fontSize: sd.fontSizes.xl}}>Choose a Specialty</Text>
             <View style={styles.container41}>
             {filteredSpecialties.map((specialty, index) => (
               <TouchableOpacity onPress={() => appointmentButton(specialty.spec)} key={specialty.id} style={styles.specialtyButton}>
@@ -153,7 +155,7 @@ const DoctorSpecialty = ({ navigation }) => {
       </View>
       </ScrollView>
     
-      <NavigationBar/>
+      {/* <NavigationBar/> */}
     </>
   )
 }
@@ -222,7 +224,7 @@ const styles = StyleSheet.create({
 
   con3: {
     flexDirection: "column",
-    marginTop: -5,
+    marginTop: 5,
     paddingLeft: 20,
     paddingRight: 20,
   },

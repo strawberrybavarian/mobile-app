@@ -11,14 +11,8 @@ export const styles = StyleSheet.create({
     backgroundColor: 'white',
     zIndex: 100,
   },
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 15,
-    marginTop: 30,
-  },
-  container2: {
+  
+  wrapper: {
     // marginTop: 0,
     flexDirection: "row",
     height: 60,
@@ -28,13 +22,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  container21: {
+  textCont: {
     flex: 1,
     flexDirection: "column",
     padding: 5,
     marginLeft: 5,
   },
-  container211: {
+  infoCont: {
     flexDirection: "row",
     width: 200,
   },

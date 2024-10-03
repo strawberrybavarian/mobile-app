@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Picker } from 'react-native';
-import CalendarPicker from 'react-native-calendar-picker';
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, TouchableOpacity } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
+import { styles } from './ModalStyles'; // Importing styles from a separate file
+import moment from 'moment'; // moment.js for date manipulation
 
 const RescheduleModal = ({ isVisible, closeModal, onReschedule }) => {
-  const [newDate, setNewDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
   const availableTimeSlots = [
@@ -11,12 +15,29 @@ const RescheduleModal = ({ isVisible, closeModal, onReschedule }) => {
     { label: "3:00 PM to 4:00 PM", value: "3:00 PM to 4:00 PM" }
   ];
 
+  const days = Array.from({ length: 31 }, (_, i) => ({ label: `${i + 1}`, value: i + 1 }));
+  const months = Array.from({ length: 12 }, (_, i) => ({ label: moment().month(i).format('MMMM'), value: i + 1 }));
+  const years = Array.from({ length: 5 }, (_, i) => ({ label: `${moment().year() + i}`, value: moment().year() + i }));
+
+  useEffect(() => {
+    // Clear selection if the selected date becomes invalid
+    if (selectedDate && selectedMonth && selectedYear) {
+      const selectedFullDate = moment(`${selectedYear}-${selectedMonth}-${selectedDate}`, 'YYYY-MM-DD');
+      const today = moment().startOf('day');
+      if (selectedFullDate.isBefore(today) || selectedFullDate.isSame(today.add(1, 'day'))) {
+        setSelectedDate(null); // Clear invalid date
+        alert("Selected date cannot be today, in the past, or tomorrow.");
+      }
+    }
+  }, [selectedDate, selectedMonth, selectedYear]);
+
   const handleReschedulePress = () => {
-    if (newDate && selectedTimeSlot) {
-      onReschedule(newDate, selectedTimeSlot);
+    if (selectedDate && selectedMonth && selectedYear && selectedTimeSlot) {
+      const rescheduledDate = moment(`${selectedYear}-${selectedMonth}-${selectedDate}`, 'YYYY-MM-DD').toDate();
+      onReschedule(rescheduledDate, selectedTimeSlot);
       closeModal();
     } else {
-      alert("Please select both a date and a time slot");
+      alert("Please select a valid date and a time slot.");
     }
   };
 
@@ -26,90 +47,73 @@ const RescheduleModal = ({ isVisible, closeModal, onReschedule }) => {
         <View style={styles.modalContent}>
           <Text style={styles.title}>Reschedule Appointment</Text>
 
-          <Text style={styles.subtitle}>Select a Date</Text>
-          <CalendarPicker
-            onDateChange={(date) => setNewDate(date)}
-            selectedDayColor="#92a3fd"
-            selectedDayTextColor="white"
-            todayBackgroundColor="transparent"
-            todayTextStyle={{ color: '#000' }}
-            textStyle={{ color: '#000', fontFamily: 'Poppins' }}
-            dayShape="circle"
-            width={250} // Reduce width to make the calendar smaller
-            height={250} // Optional: adjust height
-          />
+          <View style = {styles.dropdownBody}>
+            <Text style={styles.subtitle}>Select a Date</Text>
+            <View style = {styles.dropdownParent}>
 
-          <Text style={styles.subtitle}>Select a Time Slot</Text>
-          <View style={styles.dropdownContainer}>
-            <Picker
-              selectedValue={selectedTimeSlot}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSelectedTimeSlot(itemValue)}
-            >
-              <Picker.Item label="Select a timeslot..." value={null} />
-              {availableTimeSlots.map((slot, index) => (
-                <Picker.Item key={index} label={slot.label} value={slot.value} />
-              ))}
-            </Picker>
+              <View style={styles.dropdownContainer}>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={months}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Month"
+                  value={selectedMonth}
+                  onChange={(item) => setSelectedMonth(item.value)}
+                />
+              </View>
+
+              <View style={styles.dropdownContainer}>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={days}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Day"
+                  value={selectedDate}
+                  onChange={(item) => setSelectedDate(item.value)}
+                />
+              </View>
+
+              <View style={styles.dropdownContainer}>
+                <Dropdown
+                  style={styles.dropdown}
+                  data={years}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Year"
+                  value={selectedYear}
+                  onChange={(item) => setSelectedYear(item.value)}
+                />
+              </View>
+            </View>
+
+            <Text style={styles.subtitle}>Select a Time Slot</Text>
+            <View style={styles.dropdownContainer}>
+              <Dropdown
+                style={styles.dropdown}
+                data={availableTimeSlots}
+                labelField="label"
+                valueField="value"
+                placeholder="Select a timeslot..."
+                value={selectedTimeSlot}
+                onChange={(item) => setSelectedTimeSlot(item.value)}
+              />
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleReschedulePress}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={closeModal}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleReschedulePress}>
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={closeModal}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginVertical: 10,
-  },
-  dropdownContainer: {
-    width: '100%',
-    borderColor: '#d3d3d3',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  picker: {
-    height: 40,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#5c85ff',
-    padding: 10,
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 10,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-});
 
 export default RescheduleModal;

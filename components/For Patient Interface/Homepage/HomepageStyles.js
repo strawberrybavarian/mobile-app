@@ -1,31 +1,25 @@
-import { StyleSheet } from 'react-native';
-import sd from '../../../utils/styleDictionary';
+import React from "react";
+import { StyleSheet, Dimensions } from "react-native";
+import sd from "../../../utils/styleDictionary";
 
 const styles = StyleSheet.create({
     mainContaineer: {
-        height: '100%',
+        flex: 1, // Ensures it takes the full available screen space
         backgroundColor: '#f8f8f8',
-        flex: 1,
     },
     scrollContainer: {
-        flex: 1,
+        flexGrow: 1, // Ensures the ScrollView expands with content
         backgroundColor: '#f8f8f8',
-        padding: 10,
-        paddingBottom: 120,
-        marginVertical: 10,
+        paddingBottom: Dimensions.get('window').height / 7, 
     },
     headercont: {
         marginTop: 0,
         flexDirection: "row",
-        height: 'auto',
         paddingHorizontal: 40,
         paddingVertical: 10,
-        borderBottomLeftRadius: sd.borders.radiusXL,
-        borderBottomRightRadius: sd.borders.radiusXL,
         alignItems: "center",
-        marginBottom: 10, 
-        ... sd.shadows.large,
-      },
+        ...sd.shadows.large,
+    },
     headerTextCont: {
         flex: 1,
         flexDirection: "column",
@@ -36,13 +30,52 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         width: 200,
     },
+    navcontainer: {
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+    },
+    carouselContainer: {
+        height: Dimensions.get('window').height / 4, // Keep a fixed height for carousel
+        backgroundColor: '#f8f8f8',
+    },
+    optionsContainer: {
+        padding: 20,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    optionsRow: {
+        flexDirection: "row",
+        width: '100%',
+        justifyContent: 'space-evenly',
+    },
+    optionBox: {
+        width: Dimensions.get('window').width / 3, 
+        height: Dimensions.get('window').width / 3,
+        margin: 10,
+        padding: 10,
+        backgroundColor: '#f8f8f8',
+        borderRadius: sd.borders.radiusXL,
+        ...sd.shadows.large,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     editButton: {
-        flex: 1,
         flexDirection: "row",
         justifyContent: "flex-end",
-        alignItems: "",
     },
-
+    title: {
+        fontSize: sd.fontSizes.large,
+        fontFamily: sd.fonts.semiBold,
+        marginVertical: 20,
+        textAlign: "center",
+    },
+    optionImage: {
+        width: 50,
+        height: 50,
+        marginBottom: 10,
+    },
 });
 
 export default styles;

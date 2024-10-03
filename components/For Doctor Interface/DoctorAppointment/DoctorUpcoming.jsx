@@ -111,7 +111,7 @@ const DoctorUpcoming = () => {
     ),
     scheduled: () => (
       <AppointmentList 
-        appointments={filterAppointmentsByStatus('Scheduled')} 
+        appointments= {filterAppointmentsByStatus('Scheduled')} 
         status="Scheduled" 
         setSelectedAppointment={(appointment) => {
           setSelectedAppointment(appointment);

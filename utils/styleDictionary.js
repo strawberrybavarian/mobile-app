@@ -12,7 +12,6 @@ const sd = {
         red: '#E45155',
     },
     fonts: {
-        regular: 'Poppins-Regular',
         bold: 'Poppins-Bold',
         semiBold: 'Poppins-SemiBold',
         light: 'Poppins-Light',

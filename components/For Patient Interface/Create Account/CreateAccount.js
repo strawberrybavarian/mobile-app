@@ -6,6 +6,8 @@ import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { Dropdown } from 'react-native-element-dropdown';
 import styles from './CreateAccountStyles';
+import { ProgressBar } from 'react-native-paper';
+import sd from '../../../utils/styleDictionary';
 
 const CreateAccount = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -327,13 +329,16 @@ const CreateAccount = ({ navigation }) => {
     );
   };
 
+  const progress = currentStep / 4;
+
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       {/* Progress Indicator */}
       <View style={styles.progressContainer}>
-        <View style={[styles.progressStep, currentStep >= 1 && styles.activeStep]} />
-        <View style={[styles.progressStep, currentStep >= 2 && styles.activeStep]} />
-        <View style={[styles.progressStep, currentStep >= 3 && styles.activeStep]} />
+        <ProgressBar 
+          progress={progress} 
+          color= {sd.colors.blue} 
+          style={styles.progressBar} />
       </View>
 
       {/* Step 1: Names */}
@@ -483,11 +488,19 @@ const CreateAccount = ({ navigation }) => {
 
       {/* Navigation Buttons */}
       <View style={styles.buttonContainer}>
-        {currentStep > 1 && (
+        {/* Back Button - If on Step 1, go back to the previous screen */}
+        {currentStep === 1 ? (
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.buttonText}>Back</Text>
+          </TouchableOpacity>
+        ) : (
+          /* Back Button for other steps within the form */
           <TouchableOpacity style={styles.backButton} onPress={handlePrevStep}>
             <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
         )}
+
+        {/* Next/Submit Button */}
         {currentStep < 3 ? (
           <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>
             <Text style={styles.buttonText}>Next</Text>
@@ -498,6 +511,7 @@ const CreateAccount = ({ navigation }) => {
           </TouchableOpacity>
         )}
       </View>
+
     </KeyboardAwareScrollView>
   );
 };

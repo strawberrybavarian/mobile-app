@@ -24,8 +24,8 @@ const MyPatients = () => {
       if (userId) {
         const response = await axios.get(`${ip.address}/doctor/api/getallpatients/${userId}`);
         console.log( response.data); 
-        const uniquePatients = deduplicatePatients(response.data);
-        setPatients(uniquePatients);
+        // const uniquePatients = deduplicatePatients(response.data);
+        // setPatients(uniquePatients);
       }
     } catch (err) {
       console.error(err);
@@ -39,65 +39,23 @@ const MyPatients = () => {
   );
 
   // Function to deduplicate patients based on patient ID
-  const deduplicatePatients = (appointments) => {
-    const uniquePatientsMap = new Map();
-    appointments.forEach(appointment => {
-      if (appointment.patient && appointment.patient._id) { // Check if patient and patient._id exist
-        const patientId = appointment.patient._id;
-        if (!uniquePatientsMap.has(patientId)) {
-          uniquePatientsMap.set(patientId, appointment.patient);
-        }
-      }
-    });
-    return Array.from(uniquePatientsMap.values());
-  };
+  // const deduplicatePatients = (appointments) => {
+  //   const uniquePatientsMap = new Map();
+  //   appointments.forEach(appointment => {
+  //     if (appointment.patient && appointment.patient._id) { // Check if patient and patient._id exist
+  //       const patientId = appointment.patient._id;
+  //       if (!uniquePatientsMap.has(patientId)) {
+  //         uniquePatientsMap.set(patientId, appointment.patient);
+  //       }
+  //     }
+  //   });
+  //   return Array.from(uniquePatientsMap.values());
+  // };
   
-  // Filter patients based on appointment status
-  const filterPatientsByStatus = (status) => {
-    return patients.filter(patient => 
-      patient.appointments.some(appointment => appointment.status === status)
-    );
-  };
-
-  const CurrentPatients = () => (
-    <View>
-      {filterPatientsByStatus('Scheduled').map(patient => (
-        <MedicalRecord key={patient._id} patient={patient} />
-      ))}
-    </View>
-  );
-
-  const PastPatients = () => (
-    <View>
-      {filterPatientsByStatus('Completed').map(patient => (
-        <MedicalRecord key={patient._id} patient={patient} />
-      ))}
-    </View>
-  );
-
-  const renderScene = SceneMap({
-    current: CurrentPatients,
-    past: PastPatients,
-  });
-
-  const renderTabBar = (props) => (
-    <TabBar
-      {...props}
-      indicatorStyle={{ backgroundColor: sd.colors.blue }} // Customize indicator
-      style={{ backgroundColor: sd.colors.lightGrey }} // Customize tab bar background
-      labelStyle={{ fontSize: 16 }} // Customize label font size
-    />
-  );
 
   return (
     <View style={styles.container}>
-      <TabView
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={setIndex}
-        initialLayout={{ width: Dimensions.get('window').width }}
-      />
+      
     </View>
   );
 };

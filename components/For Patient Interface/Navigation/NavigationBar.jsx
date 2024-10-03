@@ -1,30 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Pressable, Animated, View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation, useRoute, } from '@react-navigation/native';
+import { StyleSheet, Pressable, Animated, View, Text } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import sd from '../../../utils/styleDictionary';
 
-const NavigationBar = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-
+const NavigationBar = (props) => {
   const [scaleAnim1] = useState(new Animated.Value(1));
   const [scaleAnim2] = useState(new Animated.Value(1));
   const [scaleAnim3] = useState(new Animated.Value(1));
   const [scaleAnim4] = useState(new Animated.Value(1));
-  const [activeButton, setActiveButton] = useState(null);
 
-  //Animations:
+  const { activeTab, onTabChange } = props;
+
+  // Animations:
   const handlePressIn = (scaleAnim, buttonName) => () => {
-    setActiveButton(buttonName);
-
     Animated.spring(scaleAnim, {
       toValue: 1.2,
       useNativeDriver: true,
     }).start();
+
+    onTabChange(buttonName);
   };
+
   const handlePressOut = (scaleAnim) => () => {
     Animated.spring(scaleAnim, {
       toValue: 1,
@@ -32,31 +31,28 @@ const NavigationBar = () => {
     }).start();
   };
 
-  const navigateTo = (routeName) => {
-    navigation.navigate(routeName);
-  };
-
-
   return (
     <>
       <View style={styles.NavContainer}>
         <View style={styles.NavBar}>
           <Pressable
-            onPress={() => navigateTo('doctorspecialty')}
-            onPressIn={handlePressIn(scaleAnim1)}
+            onPressIn={handlePressIn(scaleAnim1, 'Home')}
             onPressOut={handlePressOut(scaleAnim1)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim1 }] }}>
               <View style={styles.IconBehavior}>
-                <Entypo 
-                  style={{ color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3' }} 
+                <Entypo
+                  style={{ color: activeTab === 'Home' ? sd.colors.blue : '#98A3B3' }}
                   name="home"
                   size={30}
                 />
                 <Text
                   style={[
                     styles.texts,
-                    {color: route.name === 'doctorspecialty' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
+                    {
+                      color: activeTab === 'Home' ? sd.colors.blue : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      marginBottom: 2,
                     },
                   ]}
                 >
@@ -67,14 +63,13 @@ const NavigationBar = () => {
           </Pressable>
 
           <Pressable
-            onPress={() => navigateTo('upcoming')}
-            onPressIn={handlePressIn(scaleAnim2)}
+            onPressIn={handlePressIn(scaleAnim2, 'Upcoming')}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome6
-                  style={{ color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Upcoming' ? sd.colors.blue : '#98A3B3' }}
                   name="calendar-alt"
                   size={30}
                 />
@@ -82,8 +77,9 @@ const NavigationBar = () => {
                   style={[
                     styles.texts,
                     {
-                      color: route.name === 'upcoming' ? '#92A3FD' : '#98A3B3',fontFamily: 'Poppins',marginBottom: 2,
+                      color: activeTab === 'Upcoming' ? sd.colors.blue : '#98A3B3',
                       fontFamily: 'Poppins',
+                      marginBottom: 2,
                     },
                   ]}
                 >
@@ -94,14 +90,13 @@ const NavigationBar = () => {
           </Pressable>
 
           <Pressable
-            onPress={() => navigateTo('searchappointment')}
-            onPressIn={handlePressIn(scaleAnim3)}
+            onPressIn={handlePressIn(scaleAnim3, 'Doctor Specialty')}
             onPressOut={handlePressOut(scaleAnim3)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome
-                  style={{ color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'Doctor Specialty' ? sd.colors.blue : '#98A3B3' }}
                   name="user-md"
                   size={30}
                 />
@@ -109,7 +104,7 @@ const NavigationBar = () => {
                   style={[
                     styles.texts,
                     {
-                      color: route.name === 'searchappointment' ? '#92A3FD' : '#98A3B3',
+                      color: activeTab === 'Doctor Specialty' ? sd.colors.blue : '#98A3B3',
                       fontFamily: 'Poppins',
                     },
                   ]}
@@ -121,14 +116,13 @@ const NavigationBar = () => {
           </Pressable>
 
           <Pressable
-            onPress={() => navigateTo('myprofilepage')}
-            onPressIn={handlePressIn(scaleAnim4)}
+            onPressIn={handlePressIn(scaleAnim4, 'My Profile')}
             onPressOut={handlePressOut(scaleAnim4)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim4 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome6
-                  style={{ color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3' }}
+                  style={{ color: activeTab === 'My Profile' ? sd.colors.blue : '#98A3B3' }}
                   name="user"
                   size={30}
                 />
@@ -136,8 +130,9 @@ const NavigationBar = () => {
                   style={[
                     styles.texts,
                     {
-                      color: route.name === 'myprofilepage' ? '#92A3FD' : '#98A3B3',
-                      fontFamily: 'Poppins', fontSize: 9,
+                      color: activeTab === 'My Profile' ? sd.colors.blue : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      fontSize: 9,
                     },
                   ]}
                 >

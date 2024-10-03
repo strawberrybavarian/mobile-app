@@ -17,19 +17,9 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     infocont: {
-
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 10,
-        padding: 10,
-        backgroundColor: '#ffffff',
-        shadowColor: '#000',
-        shadowOffset: { width: 2, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 10,
-        borderColor: 'rgba(158, 150, 150, .3)',
-        borderRadius: 20,
+        flexDirection: 'row',
+        marginBottom: 15,
+        alignItems: 'center',
     },
     infodetail : {
         padding: 15,
@@ -38,13 +28,19 @@ const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         backgroundColor: '#fff',
-        padding: 20,
+        // padding: 20,
+        width: '100%',
     },
     modalActions: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginVertical: 10,
     },
+    modal: {
+        justifyContent: 'flex-end',
+        margin: 0,
+        flex: 1,
+      },
 
     
     //header
@@ -57,9 +53,9 @@ const styles = StyleSheet.create({
 
     //info
     infotitle: {
-        fontFamily: sd.fonts.semiBold,
-        fontSize: sd.fontSizes.medium,
-        color: '#197195',
+        fontSize: sd.fontSizes.large,
+        fontFamily: 'Poppins-Medium',
+        marginRight: 10,
     },
 
     infobanner: {
@@ -74,8 +70,8 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth
     },
     infotext: {
-        fontFamily: 'Poppins',
-        fontSize: sd.fontSizes.medium,
+        fontSize: sd.fontSizes.large,
+    fontFamily: 'Poppins-Light',
     },
 
     //body
@@ -102,19 +98,6 @@ const styles = StyleSheet.create({
         top:0,
         width:'100%',
     },
-
-    
-
-    infotitle: {
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    infocont: {
-        marginBottom: 10,
-    },
-    infodetail: {
-        marginTop: 5,
-    }
 });
 
 export default styles;

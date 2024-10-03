@@ -183,21 +183,7 @@ const SearchForAppointment = ({ navigation, route }) => {
       </View>
 
 
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{ width: "100%", }}>
-          <View style={styles.specialtyOvalContainer}>
-            {renderSpecialtyOval("All")}
-            {renderSpecialtyOval("General")}
-            {renderSpecialtyOval("OB-GYN")}
-            {renderSpecialtyOval("Pediatrics")}
-            {renderSpecialtyOval("Cardiology")}
-            {renderSpecialtyOval("Eye & Vision")}
-            {renderSpecialtyOval("Dermatology")}
-            {renderSpecialtyOval("Neurology")}
-            {renderSpecialtyOval("Gastroenterology")}
-          </View>
-        </ScrollView>
-      </View>
+      
 
       <ScrollView style={styles.container}>
         <View style={styles.appointmentBox}>
@@ -210,9 +196,9 @@ const SearchForAppointment = ({ navigation, route }) => {
         </View>
       </ScrollView>
 
-      <View style={styles.navcontainer}>
+      {/* <View style={styles.navcontainer}>
         <NavigationBar />
-      </View>
+      </View> */}
 
       <View style={{ marginTop: 70 }}></View>
     </>

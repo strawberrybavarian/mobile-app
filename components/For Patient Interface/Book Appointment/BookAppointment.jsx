@@ -185,7 +185,7 @@ const BookAppointment = ({ navigation , route}) => {
           <Text style={styles.nextButtonText}>Next</Text>
         </TouchableOpacity>
       </ScrollView>
-      <NavigationBar />
+      {/* <NavigationBar /> */}
     </>
   );
 };

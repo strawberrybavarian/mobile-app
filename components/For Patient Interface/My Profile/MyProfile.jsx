@@ -11,12 +11,15 @@ import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
 import { getData } from '../../storageUtility';
-import { DoctorProfileStyles } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS'; // Use external styles
+import sd from '../../../utils/styleDictionary';
 
 const MyProfile = ({ navigation }) => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+
+  const [isAccountModalVisible, setAccountModalVisible] = useState(false);
+  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -62,10 +65,10 @@ const MyProfile = ({ navigation }) => {
   const profileFormEdit = () => navigation.navigate('profileform');
 
   const renderSettingOption = (icon, label, onPress = () => {}) => (
-    <TouchableOpacity style={DoctorProfileStyles.settingItem} onPress={onPress}>
-      <View style={DoctorProfileStyles.container31}>
-        <FontAwesome name={icon} size={18} style={DoctorProfileStyles.iconStyle} />
-        <Text style={DoctorProfileStyles.textProfile}>{label}</Text>
+    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
+      <View style={styles.settingOptionContainer}>
+        <FontAwesome name={icon} size={18} style={styles.iconStyle} />
+        <Text style={styles.textProfile}>{label}</Text>
       </View>
       <Entypo name="chevron-thin-right" size={11} />
     </TouchableOpacity>
@@ -74,58 +77,21 @@ const MyProfile = ({ navigation }) => {
   return (
     <>
       <ScrollView style={styles.scrollContainer}>
-        <View style={styles.background}>
-          <View style={styles.container}>
-            <Text style={styles.title}>My Profile</Text>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <FontAwesome5 name="ellipsis-h" size={15} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.profileInfo}>
-            <Image
-              source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
-              style={styles.profileImage}
-            />
-            <View style={styles.profileDetails}>
-              <Text style={styles.nameText}>{firstName} {lastName}</Text>
-              <Text style={styles.textJoin}>Joined Since February 29, 2024</Text>
-              <Text style={styles.textJoin}>id: P0001</Text>
-            </View>
-
-            <TouchableOpacity style={styles.editButton} onPress={profileFormEdit}>
-              <LinearGradient
-                start={{ x: 1, y: 0 }}
-                end={{ x: 0, y: 2 }}
-                colors={["#92A3FD", "#9DCEFF"]}
-                style={styles.editButtonGradient}
-              >
-                <Text style={styles.textButton}>Edit</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.settingsContainer}>
+          <Text style={styles.settingsTitle}> Settings </Text>
+          {renderSettingOption("user", "Account")}
+          {renderSettingOption("map", "Activity Logs")}
+          {renderSettingOption("globe", "Others")}
         </View>
 
-        <View style={DoctorProfileStyles.container3}>
-          <View style={DoctorProfileStyles.settings}>
-            <Text style={{ fontFamily: 'Poppins', fontSize: 14 }}> Settings </Text>
-            {renderSettingOption("globe", "Language")}
-            {renderSettingOption("map", "Activity Logs")}
-            {renderSettingOption("globe", "Others")}
-          </View>
-        </View>
-
-        <View style={DoctorProfileStyles.container4}>
-          <View style={DoctorProfileStyles.settings4}>
-            <Text> Others </Text>
-            {renderSettingOption("exclamation-circle", "About Us")}
-            {renderSettingOption("headphones", "Customer Service")}
-            {renderSettingOption("envelope-open-text", "Invite Other")}
-            {renderSettingOption("sign-out", "Logout", logoutButton)}
-          </View>
+        <View style={styles.othersContainer}>
+          <Text style={styles.othersTitle}> Others </Text>
+          {renderSettingOption("exclamation-circle", "About Us")}
+          {renderSettingOption("headphones", "Customer Service")}
+          {renderSettingOption("users", "Invite Other")}
+          {renderSettingOption("sign-out", "Logout", logoutButton)}
         </View>
       </ScrollView>
-      <NavigationBar />
     </>
   );
 };
@@ -137,11 +103,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 20,
-    marginTop: 30,
+    marginTop: 50,
   },
   title: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: 30,
+    fontFamily: sd.fonts.semiBold,
+    fontSize: sd.fontSizes.xl,
   },
   profileInfo: {
     marginTop: 10,
@@ -164,7 +130,7 @@ const styles = StyleSheet.create({
   },
   textJoin: {
     fontSize: 10,
-    fontFamily: 'Poppins',
+    fontFamily: sd.fonts.semiBold,
   },
   editButton: {
     flex: 1,
@@ -181,7 +147,7 @@ const styles = StyleSheet.create({
   textButton: {
     color: "white",
     fontSize: 12,
-    fontFamily: 'Poppins',
+    fontFamily: sd.fonts.semiBold,
   },
   scrollContainer: {
     flexGrow: 1,
@@ -198,7 +164,46 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.20,
     shadowRadius: 20,
     backgroundColor: 'white',
-  }
+  },
+  settingsContainer: {
+    marginTop: 30,
+    flexDirection: "column",
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  settingsTitle: {
+    fontFamily: sd.fonts.semiBold,
+    fontSize: sd.fontSizes.large,
+  },
+  othersContainer: {
+    marginTop: 10,
+    padding: 20,
+  },
+  othersTitle: {
+    fontFamily: sd.fonts.semiBold,
+    fontSize: sd.fontSizes.large,
+  },
+  settingItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  settingOptionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconStyle: {
+    marginRight: 10,
+    color: sd.colors.blue,
+  },
+  textProfile: {
+    fontFamily: sd.fonts.light,
+    color: sd.colors.textPrimary,
+    fontSize: 14,
+  },
 });
 
 export default MyProfile;

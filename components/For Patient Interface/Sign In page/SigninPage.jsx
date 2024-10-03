@@ -24,8 +24,6 @@ const SigninPage = ({ navigation }) => {
   const [role, setRole] = useState("");
 
   const [allUsers, setAllUsers] = useState([]);
-  const [allPass, setAllPass] = useState([]);
-  const [allEmail, setAllEmail] = useState([]);
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -39,77 +37,97 @@ const SigninPage = ({ navigation }) => {
     const fetchData = async () => {
       try {
         let response;
-        if (role === "Patient") {
+        if (role === "Patient" ) {
           response = await axios.get(`${ip.address}/patient/api/allpatient`);
-        } else if (role === "Doctor") {
+        } 
+        else if (role === "Doctor") {
           response = await axios.get(`${ip.address}/doctor/api/alldoctor`);
         }
 
-        if (role === "Patient" && response && response.data) {
-          const userData = response.data.thePatient;
+        if( response && response.data ){
+          const userData = response.data.thePatient || response.data.theDoctor;
           setAllUsers(userData);
-
-          const emails = userData.map((user) => user.patient_email);
-          setAllEmail(emails);
-
-          const passwords = userData.map((user) => user.patient_password);
-          setAllPass(passwords);
-        } else if (role === "Doctor" && response && response.data) {
-          const userData = response.data.theDoctor;
-          setAllUsers(userData);
-
-          const emails = userData.map((user) => user.dr_email);
-          setAllEmail(emails);
-
-          const passwords = userData.map((user) => user.dr_password);
-          setAllPass(passwords);
         }
+
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchData();
-  }, [email, role]);
+  }, [role]);
 
   const loginUser = async (e) => {
     e.preventDefault();
-
-    if (email.length <= 8 && password.length <= 8) {
-      if(Platform.OS !== 'web'){
-        Alert.alert("Validation Error", "Please check the input fields", [
-          { text: "OK" },
-        ]);
-      } else {
-        window.alert("Validation Error: Please check the input fields");
-      }      
-    } else {
-      const emailIndex = allEmail.indexOf(email);
-      if (emailIndex !== -1 && password === allPass[emailIndex]) {
-        const user = allUsers[emailIndex];
-
-        try {
-          await storeData("userEmail", email);
-          await storeData("userRole", role);
-          await storeData("userId", user._id);
-        } catch (error) {
-          console.error("Error storing user data: ", error);
+    
+    // Log to ensure function is called
+    console.log("Login button clicked");
+  
+    if (!emailError && !passwordError && !roleError) {
+      console.log("No validation errors, proceeding...");
+  
+      if (allUsers && allUsers.length > 0) {
+        console.log("Users data:", allUsers);
+  
+        const user = allUsers.find((user) => {
+          if (role === "Patient") {
+            return user.patient_email === email;
+          } else if (role === "Doctor") {
+            return user.dr_email === email;
+          }
+          return false;
+        });
+  
+        console.log("Found user:", user);
+  
+        if (user) {
+          if (role === "Patient") {
+            const userId = user._id;
+            if (user.patient_password === password) {
+              Alert.alert("Successfully logged in");
+              console.log("Logging in as Patient");
+              storeData("userId", userId);
+              navigation.navigate("ptnmain"); // Navigate to patient's homepage
+            } else {
+              Alert.alert("Invalid email or password. Please try again.");
+            }
+          } else if (role === "Practitioner") {
+            if (user.accountStatus === "Review") {
+              Alert.alert("Your account is under review and you cannot log in at this time.");
+              return;
+            }
+  
+            if (user.dr_password !== password) {
+              Alert.alert("Invalid email or password. Please try again.");
+              return;
+            }
+  
+            const userId = user._id;
+            try {
+              await axios.put(`${ip.address}/doctor/${userId}/status`, { status: "Online" });
+              console.log("Doctor status updated to Online.");
+            } catch (err) {
+              console.error("Error updating doctor status:", err);
+            }
+  
+            Alert.alert("Successfully logged in");
+            storeData("userId", userId);
+            navigation.navigate("doctormain");
+          }
+        } 
+        else {
+          Alert.alert("User not found. Please check your credentials.");
+          console.log("No user found matching the email and role.");
         }
-
-        if (role === "Patient") {
-          Alert.alert("Successfully logged in");
-          console.log(user._id);
-          navigation.navigate("doctorspecialty");
-        } else if (role === "Doctor") {
-          Alert.alert("Successfully logged in");
-          console.log(user._id);
-          navigation.navigate("doctormain");
-        }
       } else {
-        Alert.alert("Wrong Email or Password");
+        Alert.alert("No users found for the selected role.");
+        console.log("No users fetched for the selected role:", role);
       }
+    } else {
+      console.log("Validation errors - emailError:", emailError, "passwordError:", passwordError, "roleError:", roleError);
+      Alert.alert("Please fill in all fields correctly");
     }
-  };
+  };    
 
   const validateEmail = (text) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -235,9 +253,7 @@ const SigninPage = ({ navigation }) => {
             >
               <TouchableOpacity
                 style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-                onPress={(e) => {
-                  loginUser(e);
-                }}
+                onPress={loginUser}
               >
                 <Text style={styles.textButton}>SIGN IN</Text>
               </TouchableOpacity>

@@ -131,7 +131,7 @@ const AboutDoctor = ({navigation, route}) => {
                         <Text style={AboutDoctorStyle.buttonText}>Book Now!</Text>
                     </TouchableOpacity>
                 </View>
-        <NavigationBar/>
+        {/* <NavigationBar/> */}
     </>
   );
 };

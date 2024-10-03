@@ -40,6 +40,7 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
       swipeDirection={['right']}
       onSwipeComplete={onClose}
       coverScreen={true}
+      propagateSwipe={true}
     >
       {appointment && (
         <View style={styles.modalContent}>

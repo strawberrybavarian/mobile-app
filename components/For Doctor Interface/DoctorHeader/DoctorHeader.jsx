@@ -47,16 +47,16 @@ const DoctorHeader = () => {
     return (
       <>
         <View style={styles.mainContainer}> 
-          <View style={styles.container2}>
+          <View style={styles.wrapper}>
             <Image
                 source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
                 style={{ width: 50, height: 50, borderRadius: 50 }}
             />
-            <View style={styles.container21}>
-                <View style={styles.container211}>
+            <View style={styles.textCont}>
+                <View style={styles.infoCont}>
                 <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 18, }}>Dr. {doctorData.dr_firstName} {doctorData.dr_lastName}</Text>
                 </View>
-                <View style={styles.container211}>
+                <View style={styles.infoCont}>
                   <Text style={{fontFamily: 'Poppins', fontSize: 12 }}> 
                   <FontAwesome name="circle" size={12} style={{color:'green'}} />  Active Now</Text>
                 </View>

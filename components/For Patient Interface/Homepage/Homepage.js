@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions, Modal, Pressable, Animated } from 'react-native';
 import NavigationBar from '../Navigation/NavigationBar';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
@@ -12,11 +12,23 @@ import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import AppointmentDetails from '../AppointmentDetails/AppointmentDetails';
 import CancelAppointmentModal from '../AppointmentDetails/CancelAppointmentModal';
 import styles from './HomepageStyles';
+import Carousel, {
+    ICarouselInstance,
+    Pagination,
+  } from "react-native-reanimated-carousel";
 
 const Homepage = () => {
 
     const [userId, setUserId] = useState(null);
     const [patientData, setPatientData] = useState({});
+    const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+    const [imageArray, setImageArray] = useState([
+        'https://images.unsplash.com/photo-1576669801615-4e2f69504d58?q=80&w=3494&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'https://images.unsplash.com/photo-1596144241742-a54dffcc9b26?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGRvY3RvcnN8ZW58MHx8MHx8fDA%3D',
+        'https://images.unsplash.com/photo-1576669801615-4e2f69504d58?q=80&w=3494&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+
+    ]);
+
 
     useEffect(() => {
         getData('userId').then((id) => {
@@ -41,9 +53,43 @@ const Homepage = () => {
         console.log(patientData);
     }, [patientData])
 
+    const AnimatedButton = ({ label }) => {
+        const scaleValue = useRef(new Animated.Value(1)).current;
+
+        const onPressIn = () => {
+            Animated.spring(scaleValue, {
+                toValue: 0.95,
+                useNativeDriver: true,
+            }).start();
+        };
+
+        const onPressOut = () => {
+            Animated.spring(scaleValue, {
+                toValue: 1,
+                useNativeDriver: true,
+            }).start();
+        };
+
+        return (
+            <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+                <Pressable
+                    onPressIn={onPressIn}
+                    onPressOut={onPressOut}
+                    style={styles.optionBox}
+                >
+                    <Image 
+                        source={require('/Users/elijahcruz/Desktop/hp-management-patient/assets/pictures/stethoscope.svg')}
+                        style = {styles.optionImage}
+                        />
+                    <Text style={{ color: 'black' }}>{label}</Text> 
+                </Pressable>
+            </Animated.View>
+        );
+    };
+
     return (
         <View style={styles.mainContaineer}>
-            <View style={styles.headercont}>
+            {/* <View style={styles.headercont}>
                 <Image
                     source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
                     style={{ width: 50, height: 50, borderRadius: 50 }}
@@ -60,10 +106,72 @@ const Homepage = () => {
                 <TouchableOpacity style={styles.editButton}>
                     <FontAwesome5 name="bell" size={25} style={{}}/>
                 </TouchableOpacity>
-            </View>
-            <View style={styles.scrollContainer}>
+            </View> */}
+
+            <ScrollView    
+                style={styles.scrollContainer}
+                scrollEnabled = {true}
+                contentContainerStyle = {styles.scrollContainer}
+                >
+                
+                <View 
+                    style = {styles.carouselContainer}
+                    onLayout={(event) => {
+                        setContainerDimensions({
+                            width: event.nativeEvent.layout.width,
+                            height: event.nativeEvent.layout.height
+                        })
+                    }}
+                >
+                    <Carousel
+                    loop
+                    width={containerDimensions.width || 200}
+                    height={containerDimensions.height || 400}
+                    autoPlay={true}
+                    autoPlayInterval={3000}  // Set autoplay interval for automatic slide changes
+                    data={imageArray}
+                    scrollAnimationDuration={1000}  // Duration of the swipe/animation
+                    panGestureHandlerProps={{
+                        activeOffsetX: [-10, 10],  // Ensures swipe gestures are recognized
+                    }}
+                    
+                    renderItem={({ index }) => (
+                        <View
+                            style={{
+                                flex: 1,
+                                // borderWidth: 1,
+                                justifyContent: 'center',
+                                
+                            }}
+                        >
+                            <Image
+                                source={{ uri: imageArray[index] }}
+                                style={{ width: '100%', height: '100%' }}  // Ensure image fills the container
+                                resizeMode="cover"
+                            />
+                        </View>
+                    )}
+                    />
+                </View>
+
+                <Text style = {styles.title}>How can we help you today?</Text>
+                
+                <View style = {styles.optionsContainer}>
+                    <View style = {styles.optionsRow}>
+                        <AnimatedButton label="Book an Appointment"/>
+                        <AnimatedButton label="X-ray" />
+                    </View>
+                    <View style = {styles.optionsRow}>
+                        <AnimatedButton label = "Other Services" />
+                        <AnimatedButton label = "Other Services" />
+                    </View>
+                </View>
                
-            </View>
+            </ScrollView>
+
+            {/* <View style = {styles.navcontainer}>
+                <NavigationBar/>
+            </View> */}
         </View>
     );
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions, Modal } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import NavigationBar from '../Navigation/NavigationBar';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
@@ -11,9 +11,12 @@ import { Header2 } from '../../Headers/Headers';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import AppointmentDetails from '../AppointmentDetails/AppointmentDetails';
 import CancelAppointmentModal from '../AppointmentDetails/CancelAppointmentModal';
+import Modal from 'react-native-modal';  // Use react-native-modal
 
 const filterAppointments = (appointments, status) => {
-    return appointments.filter(appointment => appointment.status === status);
+    
+    if (!Array.isArray(appointments)) return [];
+    return appointments.filter(appointment => appointment?.status === status);
 };
 
 const AppointmentList = ({ appointments, status, setSelectedAppointment }) => {
@@ -110,7 +113,7 @@ const Upcoming = () => {
     return (
         <>
             <View style={styles.mainContainer}>
-                <Header2 title={"Your Appointments"} />
+                {/* <Header2 title={"Your Appointments"} /> */}
                 <TabView
                     navigationState={{ index, routes: [
                         { key: 'first', title: 'Pending' },
@@ -131,27 +134,11 @@ const Upcoming = () => {
                         />
                     )}
                 />
-
-                <Modal
-                    visible={modalVisible}
-                    animationType='slide'
-                    animationIn = 'slideInLeft'
-                    animationOut = 'slideOutRight'
-                    onRequestClose={handleModalClose}
-                    usenativeDriver={true}
-                    usenativeDriverForBackdrop={true}
-                    animationInTiming={1}
-                    animationOutTiming={1}
-                    backdropTransitionInTiming={1}
-                    backdropTransitionOutTiming={1}
-                    hideModalContentWhileAnimating={true}
-                >
-                    <AppointmentDetails appointmentData={selectedAppointment} closeModal={handleModalClose} />  
-                </Modal>
-
-                <View style={styles.navcontainer}>
-                    <NavigationBar />
-                </View>
+                <AppointmentDetails
+                    isVisible={modalVisible}
+                    appointmentData={selectedAppointment}
+                    closeModal={handleModalClose}
+                />
             </View>
         </>
     );

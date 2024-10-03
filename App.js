@@ -18,6 +18,7 @@ import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
 import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
 import AppointmentDetails from './components/For Patient Interface/AppointmentDetails/AppointmentDetails';
 
+
 //Doctors
 
 import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment'
@@ -27,6 +28,7 @@ import DoctorProfile from './components/For Doctor Interface/Doctor Profile/Doct
 import DoctorNotification from './components/For Doctor Interface/DoctorNotification/DoctorNotification';
 import CreateAccountDoctor from './components/For Patient Interface/Create Account/CreateAccoutDoctor';
 import Homepage from './components/For Patient Interface/Homepage/Homepage';
+import PatientMain from './components/For Patient Interface/PatientMain/PatientMain';
 
 export default function App() {
   
@@ -61,7 +63,7 @@ export default function App() {
     
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="landingpage" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="ptnmain" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
@@ -78,6 +80,8 @@ export default function App() {
           <Stack.Screen name='upcoming' component={Upcoming}/>
           <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
           <Stack.Screen name='apptdetails' component={AppointmentDetails} />
+          <Stack.Screen name='ptnmain' component={PatientMain} />
+
 
           {/* Doctors */}
           

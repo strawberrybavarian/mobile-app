@@ -12,11 +12,10 @@ const styles = StyleSheet.create({
       justifyContent: 'space-between',
       marginBottom: 20,
     },
-    progressStep: {
-      height: 5,
-      width: '30%',
-      backgroundColor: '#ccc',
-      borderRadius: 2,
+    progressBar: {
+      height: 10,  // Set a visible height
+      borderRadius: 5,  // Optional: To make it rounded
+      backgroundColor: 'lightgray',  // Optional: Add a background color to make it more visible
     },
     activeStep: {
       backgroundColor: '#9DCEFF',
