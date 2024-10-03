@@ -91,7 +91,7 @@ const SigninPage = ({ navigation }) => {
             } else {
               Alert.alert("Invalid email or password. Please try again.");
             }
-          } else if (role === "Practitioner") {
+          } else if (role === "Doctor") {
             if (user.accountStatus === "Review") {
               Alert.alert("Your account is under review and you cannot log in at this time.");
               return;
@@ -177,7 +177,7 @@ const SigninPage = ({ navigation }) => {
             >
               <FontAwesome5 name="chevron-left" size={15} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.con1}>
+            <TouchableOpacity style={styles.con1} onPress={() => {navigation.navigate('landingpage')}}>
               <Text style={styles.title}>Create Account</Text>
             </TouchableOpacity>
           </View>

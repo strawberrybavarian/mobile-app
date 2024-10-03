@@ -12,14 +12,14 @@ import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
 import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
+import ViewProfile from './ProfileModals/ViewProfile';
+
 
 const MyProfile = ({ navigation }) => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-
   const [isAccountModalVisible, setAccountModalVisible] = useState(false);
-  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -62,8 +62,6 @@ const MyProfile = ({ navigation }) => {
     );
   };
 
-  const profileFormEdit = () => navigation.navigate('profileform');
-
   const renderSettingOption = (icon, label, onPress = () => {}) => (
     <TouchableOpacity style={styles.settingItem} onPress={onPress}>
       <View style={styles.settingOptionContainer}>
@@ -79,7 +77,7 @@ const MyProfile = ({ navigation }) => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.settingsContainer}>
           <Text style={styles.settingsTitle}> Settings </Text>
-          {renderSettingOption("user", "Account")}
+          {renderSettingOption("user", "Account", () => setAccountModalVisible(true))}
           {renderSettingOption("map", "Activity Logs")}
           {renderSettingOption("globe", "Others")}
         </View>
@@ -92,6 +90,11 @@ const MyProfile = ({ navigation }) => {
           {renderSettingOption("sign-out", "Logout", logoutButton)}
         </View>
       </ScrollView>
+
+      <ViewProfile 
+        isVisible={isAccountModalVisible} 
+        closeModal={() => setAccountModalVisible(false)} 
+      />
     </>
   );
 };
