@@ -15,8 +15,8 @@ const DoctorMain = () => {
 
   const [routes] = useState([
     { key: 'home', title: 'Home' },
-    { key: 'patients', title: 'My Patients' },
     { key: 'appointment', title: 'Appointment' },
+    { key: 'patients', title: 'My Patients' },
     { key: 'profile', title: 'Profile' },
   ]);
 

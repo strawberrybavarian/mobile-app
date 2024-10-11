@@ -20,13 +20,13 @@ const AppointmentDetail = ({ label, value }) => {
 )};
 
 const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept, onReschedule, fetchAppointments }) => {
-    const [isCancelModalVisible, setCancelModalVisible] = useState(false);
-    const [isAcceptModalVisible, setAcceptModalVisible] = useState(false);
-    const [isRescheduleModalVisible, setRescheduleModalVisible] = useState(false);
+    // const [isCancelModalVisible, setCancelModalVisible] = useState(false);
+    // const [isAcceptModalVisible, setAcceptModalVisible] = useState(false);
+    // const [isRescheduleModalVisible, setRescheduleModalVisible] = useState(false);
 
-    const handleCancel = () => setCancelModalVisible(true);
-    const handleAccept = () => setAcceptModalVisible(true);
-    const handleReschedule = () => setRescheduleModalVisible(true);
+    // const handleCancel = () => setCancelModalVisible(true);
+    // const handleAccept = () => setAcceptModalVisible(true);
+    // const handleReschedule = () => setRescheduleModalVisible(true);
 
     
 
@@ -35,9 +35,9 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
       isVisible={isVisible}
       onBackdropPress={onClose}
       style={styles.modal}
-      animationIn="slideInRight"
-      animationOut="slideOutRight"
-      swipeDirection={['right']}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      swipeDirection={['down']}
       onSwipeComplete={onClose}
       coverScreen={true}
       propagateSwipe={true}
@@ -80,57 +80,10 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
          
         </View>
       )}
-         <View style = {styles.buttonContainer}>
-         {appointment && (
-  <>
-    {appointment.status === "Pending" && (
-      <>
-        <TouchableOpacity style={styles.button} onPress={handleCancel}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, { backgroundColor: sd.colors.blue }]} onPress={handleAccept}>
-          <Text style={styles.buttonText}>Accept</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, { backgroundColor: sd.colors.blue }]} onPress={handleReschedule}>
-          <Text style={styles.buttonText}>Reschedule</Text>
-        </TouchableOpacity>
-      </>
-    )}
-
-    {appointment.status === "Scheduled" && (
-      <>
-        <TouchableOpacity style={styles.button} onPress={handleCancel}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, { backgroundColor: sd.colors.blue }]} onPress={handleReschedule}>
-          <Text style={styles.buttonText}>Reschedule</Text>
-        </TouchableOpacity>
-            </>
-            )}
-        </>
-        )}
-
-          </View>
+         
       
 
-        <CancelModal
-            isVisible={isCancelModalVisible}
-            onCancel={onCancel}
-            onClose={() => setCancelModalVisible(false)}
-            appointment={appointment}
-          />
-        <RescheduleModal
-            isVisible={isRescheduleModalVisible}
-            onReschedule={onReschedule}
-            onClose={() => setRescheduleModalVisible(false)}
-            appointment={appointment}
-          />
-        <AcceptModal
-            isVisible={isAcceptModalVisible}
-            onAccept={onAccept}
-            onClose={() => setAcceptModalVisible(false)}
-            appointment={appointment}
-          />
+        
       
     </Modal>
   );

@@ -63,7 +63,7 @@ export default function App() {
     
       <StatusBar hidden={true}/>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="ptnmain" screenOptions={{ headerShown: false }}>
+        <Stack.Navigator initialRouteName="SigninPage" screenOptions={{ headerShown: false }}>
           <Stack.Screen name='landingpage' component={LandingPage} />
           <Stack.Screen name='SigninPage' component={SigninPage} />
           <Stack.Screen name='createaccount' component={CreateAccount}/>
@@ -91,7 +91,6 @@ export default function App() {
           <Stack.Screen name='doctornotification' component={DoctorNotification}/>
         </Stack.Navigator>   
       </NavigationContainer>  
-
     </>
   );
 }

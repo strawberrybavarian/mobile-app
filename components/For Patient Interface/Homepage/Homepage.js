@@ -89,24 +89,6 @@ const Homepage = () => {
 
     return (
         <View style={styles.mainContaineer}>
-            {/* <View style={styles.headercont}>
-                <Image
-                    source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
-                    style={{ width: 50, height: 50, borderRadius: 50 }}
-                />
-                <View style={styles.headerTextCont}>
-                    <View style={styles.textCont}>
-                    <Text style={{fontFamily: 'Poppins', fontSize: 12, }}>Welcome!</Text>
-                    </View>
-                    <View style={styles.textCont}>
-                    <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 17, }}>{patientData.patient_firstName} {patientData.patient_lastName}</Text>
-                    </View>
-                </View>
-
-                <TouchableOpacity style={styles.editButton}>
-                    <FontAwesome5 name="bell" size={25} style={{}}/>
-                </TouchableOpacity>
-            </View> */}
 
             <ScrollView    
                 style={styles.scrollContainer}
@@ -158,11 +140,11 @@ const Homepage = () => {
                 
                 <View style = {styles.optionsContainer}>
                     <View style = {styles.optionsRow}>
-                        <AnimatedButton label="Book an Appointment"/>
+                        <AnimatedButton label="Check-up"/>
                         <AnimatedButton label="X-ray" />
                     </View>
                     <View style = {styles.optionsRow}>
-                        <AnimatedButton label = "Other Services" />
+                        <AnimatedButton label = "EKG" />
                         <AnimatedButton label = "Other Services" />
                     </View>
                 </View>

@@ -77,24 +77,25 @@ const BookAppointment = ({ navigation , route}) => {
 
     try {
       const appointmentData = {
-        doctorId: item._id,  
+        doctor: item._id,  
         date: selectedDate,
         time: selectedHour,
         reason: reason,
         cancelReason: '',
         status: 'Scheduled',
         secretaryId: null,  
-        prescriptionId: null  
+        prescriptionId: null,
+        //appointment_type: null
       };
 
       const response = await axios.post(`${ip.address}/patient/api/${userId}/createappointment`, appointmentData);
       console.log('Appointment created:', response.data);
       Alert.alert('Success', 'Appointment created successfully');
-      navigation.navigate('upcoming');  
+      navigation.navigate('ptnmain');  
     } 
     catch (err) {
       console.error('Error creating appointment:', err);
-      Alert.alert('Error', 'Could not create appointment');
+      Alert.alert('Error', 'Could not create appointment', err);
     }
   };
 

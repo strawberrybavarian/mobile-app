@@ -10,6 +10,7 @@ import Header3, { Header1 } from '../../Headers/Headers';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
+import { useFocusEffect } from '@react-navigation/native';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
@@ -37,6 +38,8 @@ const PatientMain = () => {
   const [uname, setUname] = useState("");
   const [userId, setUserId] = useState("");
   const [patientData, setPatientData] = useState({});
+
+  
 
   useEffect(() => {
     const fetchUserId = async () => {

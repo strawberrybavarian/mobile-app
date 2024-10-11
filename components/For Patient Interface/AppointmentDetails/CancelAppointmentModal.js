@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import Modal from 'react-native-modal';
 
 const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
   const [cancelReason, setCancelReason] = useState('');
@@ -10,7 +11,20 @@ const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
   };
 
   return (
-    <Modal transparent={true} visible={isVisible} animationType="fade">
+    <Modal 
+      //transparent={true} 
+      isVisible={isVisible} 
+      //animationType="fade"
+      animationIn={'fadeIn'}
+      animationOut={'fadeOut'}
+      onBackdropPress={closeModal}
+      onSwipeComplete={closeModal}
+      propagateSwipe={true}
+      style = {styles.modal}
+      coverScreen = {true}
+      hideModalContentWhileAnimating={true}
+      useNativeDriver={true}
+      >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.title}>Reason for Cancellation</Text>
@@ -33,6 +47,12 @@ const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
 };
 
 const styles = StyleSheet.create({
+  modal : {
+    margin: 0,  // Ensures the modal takes up the entire screen
+    justifyContent: 'center',
+    height: '100%',
+    flex: 1,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',

@@ -10,10 +10,10 @@ const styles = StyleSheet.create({
     },
     
     scrollContainer: {
-        flex: 1,
-        backgroundColor: '#f8f8f8',
-        padding: 10,
-        paddingBottom: 120,
+        flex: 5,
+        backgroundColor: sd.colors.white,
+        padding: 20,
+        //paddingBottom: 120,
         marginVertical: 10,
     },
     infocont: {
@@ -26,15 +26,19 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     modalContainer: {
-        flex: 1,
+        //flex: 1,
+        height:'80%',
         backgroundColor: '#fff',
         // padding: 20,
-        width: '100%',
+        //width: '100%',
     },
     modalActions: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-evenly',
+        alignContent: 'center',
         marginVertical: 10,
+        //position: 'absolute',
+        bottom: 0,
     },
     modal: {
         justifyContent: 'flex-end',
@@ -53,7 +57,7 @@ const styles = StyleSheet.create({
 
     //info
     infotitle: {
-        fontSize: sd.fontSizes.large,
+        fontSize: sd.fontSizes.medium,
         fontFamily: 'Poppins-Medium',
         marginRight: 10,
     },
@@ -70,8 +74,9 @@ const styles = StyleSheet.create({
         borderBottomWidth: StyleSheet.hairlineWidth
     },
     infotext: {
-        fontSize: sd.fontSizes.large,
-    fontFamily: 'Poppins-Light',
+        fontSize: sd.fontSizes.medium,
+        fontFamily: 'Poppins-Light',
+        marginHorizontal: 5,
     },
 
     //body
@@ -82,7 +87,7 @@ const styles = StyleSheet.create({
     },
     modalButton: {
         padding: 10,
-        borderRadius: 20,
+        borderRadius: 50,
     },
 
     //navbar

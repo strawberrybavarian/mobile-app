@@ -15,7 +15,6 @@ const DoctorUpcoming = () => {
   const [allAppointments, setAllAppointments] = useState([]);
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'pending', title: 'Pending' },
     { key: 'scheduled', title: 'Scheduled' },
     { key: 'completed', title: 'Completed' },
     { key: 'cancelled', title: 'Cancelled' },
@@ -99,16 +98,6 @@ const DoctorUpcoming = () => {
   };
 
   const renderScene = SceneMap({
-    pending: () => (
-      <AppointmentList 
-        appointments={filterAppointmentsByStatus('Pending')} 
-        status="Pending" 
-        setSelectedAppointment={(appointment) => {
-          setSelectedAppointment(appointment);
-          setModalVisible(true); // Open the modal
-        }}
-      />
-    ),
     scheduled: () => (
       <AppointmentList 
         appointments= {filterAppointmentsByStatus('Scheduled')} 

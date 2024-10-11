@@ -74,37 +74,10 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
           </Pressable>
 
           <Pressable
-            onPressIn={handlePressIn(scaleAnim2, 'My Patients')}
+            onPressIn={handlePressIn(scaleAnim2, 'Appointment')}
             onPressOut={handlePressOut(scaleAnim2)}
           >
             <Animated.View style={{ transform: [{ scale: scaleAnim2 }] }}>
-              <View style={styles.IconBehavior}>
-                <Entypo
-                  style={{ color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3' }}
-                  name="users"
-                  size={30}
-                />
-                <Text
-                  style={[
-                    styles.texts,
-                    {
-                      color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3',
-                      fontFamily: 'Poppins',
-                      marginBottom: 2,
-                    },
-                  ]}
-                >
-                  My Patients
-                </Text>
-              </View>
-            </Animated.View>
-          </Pressable>
-
-          <Pressable
-            onPressIn={handlePressIn(scaleAnim3, 'Appointment')}
-            onPressOut={handlePressOut(scaleAnim3)}
-          >
-            <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
               <View style={styles.IconBehavior}>
                 <FontAwesome6
                   style={{ color: activeTab === 'Appointment' ? sd.colors.blue : '#98A3B3' }}
@@ -123,6 +96,33 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                   ]}
                 >
                   Appointment
+                </Text>
+              </View>
+            </Animated.View>
+          </Pressable>
+
+          <Pressable
+            onPressIn={handlePressIn(scaleAnim3, 'My Patients')}
+            onPressOut={handlePressOut(scaleAnim3)}
+          >
+            <Animated.View style={{ transform: [{ scale: scaleAnim3 }] }}>
+              <View style={styles.IconBehavior}>
+                <Entypo
+                  style={{ color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3' }}
+                  name="users"
+                  size={30}
+                />
+                <Text
+                  style={[
+                    styles.texts,
+                    {
+                      color: activeTab === 'My Patients' ? sd.colors.blue : '#98A3B3',
+                      fontFamily: 'Poppins',
+                      marginBottom: 2,
+                    },
+                  ]}
+                >
+                  My Patients
                 </Text>
               </View>
             </Animated.View>

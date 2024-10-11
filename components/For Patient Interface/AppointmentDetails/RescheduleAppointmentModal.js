@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { styles } from './ModalStyles'; // Importing styles from a separate file
 import moment from 'moment'; // moment.js for date manipulation
+import Modal from 'react-native-modal';
 
 const RescheduleModal = ({ isVisible, closeModal, onReschedule }) => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -42,7 +43,19 @@ const RescheduleModal = ({ isVisible, closeModal, onReschedule }) => {
   };
 
   return (
-    <Modal transparent={true} visible={isVisible} animationType="fade">
+    <Modal 
+      //transparent={true} 
+      isVisible={isVisible} 
+      animationIn={'fadeIn'}
+      animationOut={'fadeOut'}
+      onBackdropPress={closeModal}
+      onSwipeComplete={closeModal}
+      propagateSwipe={true}
+      style = {styles.modal}
+      coverScreen = {true}
+      hideModalContentWhileAnimating={true}
+      useNativeDriver={true}
+      >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.title}>Reschedule Appointment</Text>

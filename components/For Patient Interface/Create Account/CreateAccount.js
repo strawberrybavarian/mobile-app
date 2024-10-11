@@ -152,6 +152,7 @@ const CreateAccount = ({ navigation }) => {
         alert("Last Name cannot be empty.");
         return;
       }
+      console.log("First Name:", firstname);
     } else if (currentStep === 2) {
       if (!dob || !gender) {
         alert("Please enter valid DOB and select gender.");
@@ -202,13 +203,13 @@ const CreateAccount = ({ navigation }) => {
     ) {
         try {
           const patientUser = {
-              patient_firstName: firstname,
-              patient_middleInitial: middleinitial,
-              patient_lastName: lastname,
-              patient_email: email,
-              patient_password: password,
+              patient_firstName: firstname.trim(),
+              patient_middleInitial: middleinitial.trim(),
+              patient_lastName: lastname.trim(),
+              patient_email: email.trim(),
+              patient_password: password.trim(),
               patient_dob: dob,
-              patient_contactNumber: contactNumber,
+              patient_contactNumber: contactNumber.trim(),
               patient_gender: gender,
           };
           console.log(patientUser);
@@ -234,30 +235,31 @@ const CreateAccount = ({ navigation }) => {
 
   const capitalizeWords = (text) => {
     return text
-      .trim()
+      
       .replace(/\s+/g, ' ')
       .toLowerCase()
       .replace(/\b\w/g, char => char.toUpperCase());
   };
 
   const validateFirstName = (text) => {
-    const capitalized = capitalizeWords(text);
-    if (!capitalized) {
+    //const capitalized = capitalizeWords(text);
+    if (!text) {
       setfirstnameError("First name cannot be empty.");
     } else {
       setfirstnameError("");
     }
+    //text.trim();
     setFirstName(capitalized);
   };
 
   const validateLastName = (text) => {
-    const capitalized = capitalizeWords(text);
-    if (!capitalized) {
+    //onst capitalized = capitalizeWords(text);
+    if (!text) {
       setlastnameError("Last name cannot be empty.");
     } else {
       setlastnameError("");
     }
-    setLastName(capitalized);
+    setLastName(text);
   };
 
   const validateMiddleInitial = (text) => {
@@ -266,10 +268,10 @@ const CreateAccount = ({ navigation }) => {
   };
 
   const validateEmail = (text) => {
-    const lowercased = text.trim().toLowerCase();
+    //const lowercased = text.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(lowercased)) {
+    if (!emailRegex.test(text)) {
       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
     } else {
       setEmailError("");
@@ -338,7 +340,9 @@ const CreateAccount = ({ navigation }) => {
         <ProgressBar 
           progress={progress} 
           color= {sd.colors.blue} 
-          style={styles.progressBar} />
+          style={styles.progressBar}
+          
+          />
       </View>
 
       {/* Step 1: Names */}

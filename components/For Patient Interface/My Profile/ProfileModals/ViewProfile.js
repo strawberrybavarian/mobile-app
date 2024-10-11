@@ -25,6 +25,10 @@ const ViewProfile = ({ isVisible, closeModal }) => {
         fetchUserId();
     }, []);
 
+    const editProfile = () => {
+
+    }
+
     useEffect(() => {
         if (userId) {
             axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
@@ -131,14 +135,16 @@ const ViewProfile = ({ isVisible, closeModal }) => {
                                 </>
                             )}
                         </View>
-
-                        <Button
-                            mode="contained"
-                            onPress={toggleEditMode}
-                            buttonColor={sd.colors.blue}
-                        >
-                            {isDisabled ? 'Edit' : 'Save'}
-                        </Button>
+                        
+                        <View style = {styles.buttonCont}>
+                            <Button
+                                mode="contained"
+                                onPress={toggleEditMode}
+                                buttonColor={sd.colors.blue}
+                            >
+                                {isDisabled ? 'Edit' : 'Save'}
+                            </Button>
+                        </View>
                     </>
                 ) : (
                     <Text>Loading...</Text>
@@ -192,6 +198,9 @@ const styles = StyleSheet.create({
         fontSize: sd.fontSizes.medium,
         marginBottom: 10,
     },
+    buttonCont : {
+        padding : 10
+    }
 });
 
 export default ViewProfile;

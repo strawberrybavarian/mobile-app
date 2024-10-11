@@ -7,6 +7,7 @@ import CancelAppointmentModal from './CancelAppointmentModal';
 import RescheduleModal from './RescheduleAppointmentModal';
 import Entypo from "@expo/vector-icons/Entypo";
 import Modal from 'react-native-modal';
+import sd from '../../../utils/styleDictionary';
 
 const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
     const [cancelReason, setCancelReason] = useState('');
@@ -76,59 +77,44 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
         <Modal
             isVisible={isVisible} 
             onBackdropPress={closeModal}
+            onSwipeComplete={closeModal}
+            swipeDirection='down'
             style={styles.modal}
-            animationIn="slideInRight"
-            animationOut="slideOutRight"
+            animationIn="slideInUp"
+            animationOut="slideOutDown"
             propagateSwipe={true}
             coverScreen={true}
-
+            hideModalContentWhileAnimating={true}
+            useNativeDriver={true}
         >
             <View style={styles.modalContainer}>
-                <ScrollView style={styles.scrollContainer}>
-                    <TouchableOpacity 
-                        onPress={closeModal}
-                        style={styles.arrowButton}
-                    >
-                        <Entypo name="chevron-right" size={20} color="black" />
-                    </TouchableOpacity>
+                <View style={styles.scrollContainer}>
+                    
                     <Info title="Date" infocontent={new Date(appointmentData.date).toLocaleDateString('en-US')} />
                     <Info title="Time" infocontent={appointmentData.time} />
                     <Info title="Doctor" infocontent={`Dr. ${appointmentData.doctor.dr_firstName} ${appointmentData.doctor.dr_lastName}`} />
                     <Info title="Primary Concern" infocontent={appointmentData.reason} />
                     <Info title="Status" infocontent={appointmentData.status} />
-                </ScrollView>
+                </View>
                 {isButtonVisible && 
                 <View style={styles.modalActions}>
-                    <Button title="Cancel Appointment" onPress={() => setCancelModalVisible(true)} color="red" />
-                    <Button title="Reschedule Appointment" onPress={() => setRescheduleModalVisible(true)} color="blue" />
+                    <Button title="Cancel Appointment" onPress={() => setCancelModalVisible(true)} color= {sd.colors.red} style = {styles.modalButton} />
+                    <Button title="Reschedule Appointment" onPress={() => setRescheduleModalVisible(true)} color={sd.colors.blue} />
                 </View>
                 }
 
                 {/* Cancel Appointment Modal */}
-                <Modal
+                <CancelAppointmentModal 
+                    closeModal={() => setCancelModalVisible(false)}
+                    onCancel={handleCancel}
                     isVisible={isCancelModalVisible}
-                    onBackdropPress={() => setCancelModalVisible(false)}
-                    animationIn="slideInUp"
-                    animationOut="slideOutDown"
-                >
-                    <CancelAppointmentModal 
-                        closeModal={() => setCancelModalVisible(false)}
-                        onCancel={handleCancel}
-                    />
-                </Modal>
-
-                {/* Reschedule Appointment Modal */}
-                <Modal
+                />
+                <RescheduleModal
+                    closeModal={() => setRescheduleModalVisible(false)}
+                    onReschedule={handleReschedule}
                     isVisible={isRescheduleModalVisible}
-                    onBackdropPress={() => setRescheduleModalVisible(false)}
-                    animationIn="slideInUp"
-                    animationOut="slideOutDown"
-                >
-                    <RescheduleModal
-                        closeModal={() => setRescheduleModalVisible(false)}
-                        onReschedule={handleReschedule}
-                    />
-                </Modal>
+                />
+
             </View>
         </Modal>
     );

@@ -25,7 +25,7 @@ const SearchForAppointment = ({ navigation, route }) => {
   // const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const { specpec } = route.params || {};
-  //console.log("specpec = " + specpec, typeof (specpec));
+  console.log("specpec = " + specpec, typeof (specpec));
 
   // Get all doctors
   
@@ -168,6 +168,7 @@ const SearchForAppointment = ({ navigation, route }) => {
             onPress={() => navigation.goBack()}>
             <Entypo name="chevron-thin-left" style={styles.arrowText} size={11} />
           </TouchableOpacity>
+          
         </View>
 
         {/* search bar */}
@@ -186,7 +187,11 @@ const SearchForAppointment = ({ navigation, route }) => {
       
 
       <ScrollView style={styles.container}>
+          
         <View style={styles.appointmentBox}>
+          <Text>
+            {specpec ? specpec + ' Department' : 'All Doctors'}
+          </Text>
           <FlatList
             data={doctorFiltered}
             renderItem={renderItem}
@@ -213,8 +218,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   container: {
-  
-
     flex: 1,
  
   },
@@ -235,7 +238,7 @@ const styles = StyleSheet.create({
   },
 
   arrowCont:{
-   
+    //flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center'
   },
@@ -250,7 +253,7 @@ const styles = StyleSheet.create({
 
     flexDirection: "row",
     padding: 20,
-    marginTop: 40,
+    marginTop: 20,
    
   },
   searchInputContainer: {

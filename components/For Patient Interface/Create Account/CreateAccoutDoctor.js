@@ -35,7 +35,7 @@ const CreateAccount = ({ navigation }) => {
     .catch((err) => {
       console.log('error here');
     });
-  },[email])
+  },[])
 
   const checkIfEmailExists = (email) => {
     return existingEmail.some(existing => existing === email);

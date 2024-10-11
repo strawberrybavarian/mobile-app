@@ -16,6 +16,7 @@ import axios from "axios";
 import { getData, storeData } from "../../storageUtility";
 import { ip } from "../../../ContentExport";
 import { Dropdown } from "react-native-element-dropdown"; // Import Dropdown
+import { CommonActions } from "@react-navigation/native";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -87,6 +88,12 @@ const SigninPage = ({ navigation }) => {
               Alert.alert("Successfully logged in");
               console.log("Logging in as Patient");
               storeData("userId", userId);
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: "ptnmain" }],
+                })
+              )
               navigation.navigate("ptnmain"); // Navigate to patient's homepage
             } else {
               Alert.alert("Invalid email or password. Please try again.");
@@ -112,6 +119,12 @@ const SigninPage = ({ navigation }) => {
   
             Alert.alert("Successfully logged in");
             storeData("userId", userId);
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [{ name: "doctormain" }],
+              })
+            )
             navigation.navigate("doctormain");
           }
         } 
@@ -131,17 +144,17 @@ const SigninPage = ({ navigation }) => {
 
   const validateEmail = (text) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    const lowerCaseText = text.toLowerCase(); // Convert the input to lowercase
+    const trimtext = text.trim(); // Remove leading and trailing whitespaces
+    //const lowerCaseText = trimtext.toLowerCase(); // Convert the input to lowercase
   
-    if (!lowerCaseText) {
+    if (!trimtext) {
       setEmailError("Email cannot be empty");
-    } else if (!emailRegex.test(lowerCaseText)) {
+    } else if (!emailRegex.test(trimtext)) {
       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
     } else {
       setEmailError("");
     }
-    setEmail(lowerCaseText); // Set the lowercase email
+    setEmail(trimtext); // Set the lowercase email
   };
   
   const validatePassword = (text) => {

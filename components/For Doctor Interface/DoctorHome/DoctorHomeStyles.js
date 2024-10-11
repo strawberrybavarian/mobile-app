@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
     marginTop: -20,
     paddingLeft: 20,
     paddingRight: 20,
+    backgroundColor: sd.colors.white,
   },
   
   postContainer: {
@@ -40,7 +41,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Poppins',
   },
   announcementContainer: {
-    backgroundColor: '#F9F5FF',
+    backgroundColor: sd.colors.white,
     marginBottom: 15,
     borderRadius: 10,
     shadowColor: '#000',

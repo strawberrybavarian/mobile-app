@@ -76,7 +76,7 @@ const DoctorSpecialty = () => {
         fetchData()
 
       }, [userId])
-  )
+  ) //deprecated
 
   const filteredSpecialties = specialtiesData.filter(specialty =>
     specialty.name.toLowerCase().includes(search.toLowerCase())

@@ -12,6 +12,7 @@ import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import AppointmentDetails from '../AppointmentDetails/AppointmentDetails';
 import CancelAppointmentModal from '../AppointmentDetails/CancelAppointmentModal';
 import Modal from 'react-native-modal';  // Use react-native-modal
+import { StyleSheet } from 'react-native';
 
 const filterAppointments = (appointments, status) => {
     
@@ -33,22 +34,15 @@ const AppointmentList = ({ appointments, status, setSelectedAppointment }) => {
                             onPress={() => setSelectedAppointment(appointment)}  // Open modal instead of navigating
                         >
                             <View style={styles.container1}>
-                                <Image
-                                    style={styles.filter1}
-                                    source={require("../../../assets/pictures/Doc.png")}
-                                /> 
-                                <View>
-                                    <Text style={styles.doctorName}>Dr. {appointment.doctor.dr_firstName} {appointment.doctor.dr_lastName}</Text>
-                                    <View style={styles.statusContainer}>
-                                        <Text style={styles.specialization}>
-                                            {getSpecialtyDisplayName(appointment.doctor.dr_specialty)} | 
-                                        </Text>
-                                        <View style={styles.status}>
-                                            <Text style={{ color: '#E59500', fontFamily: 'Poppins', fontSize: 11 }}>
-                                                {appointment.status}
-                                            </Text>
-                                        </View>
-                                    </View>
+                                <View style={styles.datecontainer}>
+                                    <Text style={styles.monthText}>{new Date(appointment.date).toLocaleString('en-US', { month: 'short' })}</Text>
+                                    <Text style={styles.dateText}>{new Date(appointment.date).toLocaleString('en-US', { day: '2-digit' })}</Text>
+                                </View>
+                                <View style={{ borderRightColor: 'black', borderRightWidth: StyleSheet.hairlineWidth, height: '100%', marginHorizontal: 10 }}></View>
+                                <View style={styles.infoCont}>
+                                    <Text style={styles.doctorName}>
+                                        Dr. {appointment.doctor.dr_firstName} {appointment.doctor.dr_lastName}
+                                    </Text>
                                     <Text style={styles.dateTime}>
                                         {new Date(appointment.date).toLocaleDateString('en-US')} | {appointment.time}
                                     </Text>
@@ -76,8 +70,9 @@ const Upcoming = () => {
             const id = await getData('userId');
             if (id) {
                 setUserId(id);
-                const response = await axios.get(`${ip.address}/patient/api/${id}/allappt`);
-                setAllAppointments(response.data.appointments);
+                const response = await axios.get(`${ip.address}/patient/api/onepatient/${id}`);
+                console.log(response.data.thePatient.patient_appointments)
+                setAllAppointments(response.data.thePatient.patient_appointments);
             } else {
                 console.log('User not found');
             }

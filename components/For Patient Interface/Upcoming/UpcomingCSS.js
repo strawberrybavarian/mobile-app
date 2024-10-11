@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import sd from '../../../utils/styleDictionary';
 
 const styles = StyleSheet.create({
   //container
@@ -34,6 +35,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
+  tabBar : {
+    backgroundColor: sd.colors.blue,
+  },
   tab: {
     marginBottom: 10,
     padding: 10,
@@ -51,27 +55,22 @@ const styles = StyleSheet.create({
     // backgroundColor: '#ffffff',
     width: '100%',
     // padding: 10,
+    marginTop: 10,
     marginBottom: 12,
     alignItems: 'center',
     // 
   },
   container1: { 
     flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    width: '100%',
   },
   cardcont: {
-    margin: 6,
-    width: '90%',
-    marginHorizontal: 100,
     padding: 25,
-    backgroundColor: '#ffffff',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
-    borderRadius: 20,
+    backgroundColor: 'white',
+    marginHorizontal: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    ...sd.shadows.large
   },
   status: {
     backgroundColor: 'rgba(240, 182, 75, 0.30)',
@@ -89,28 +88,15 @@ const styles = StyleSheet.create({
     color: 'red',
     fontFamily: 'Poppins-SemiBold'
   },
-  cancelButton: {
-    padding: 10,
-    height: 45,
-    borderColor: "red",
-    borderRadius: 40,
-    borderWidth: 1,
-    alignItems: 'center',
+  infoCont: {
     justifyContent: 'center',
-    marginTop: 12,
+    marginLeft: 10,
+    flex: 4,
   },
-  buttonsContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-evenly',
-    borderTopWidth: 1,
-    borderColor: 'rgba(158, 150, 150, .3)'
-  },
-  
   doctorName: {
-    fontSize: 20,
-    fontFamily:'Poppins-SemiBold',
+    fontSize: sd.fontSizes.large,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   specialization: {
     fontSize: 14,
@@ -118,8 +104,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dateTime: {
-    fontSize: 12,
-    marginBottom: 20,
+    fontSize: 13,
+    color: '#888',
+  },
+  dateText: {
+    fontSize: sd.fontSizes.xl,
+    fontFamily: 'Poppins-Bold',
+    color: 'white',
+  },
+  datecontainer: {
+    alignItems: 'center',
+    marginRight: 10,
+    backgroundColor: sd.colors.blue,
+    flex: 1,
+    padding: 10,
+    borderRadius: 100,
+  },
+  monthText: {
+    fontSize: sd.fontSizes.medium,
+    fontFamily: 'Poppins-SemiBold',
+    color: 'white',
   },
   filter1: {
     height: 100,
@@ -143,10 +147,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-SemiBold'
   },
   noAppointments: {
-    fontSize: 16,
-    fontFamily: 'Poppins',
     textAlign: 'center',
-    marginVertical: 20,
+    color: '#555',
+    marginTop: 20,
   },
 
   //navbar

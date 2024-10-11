@@ -31,9 +31,10 @@ const DoctorHome = ({ navigation }) => {
 
   return (
     <>
-      <Text style={{ paddingLeft: 5, fontFamily: 'Poppins-SemiBold', fontSize: 20, paddingVertical: 20, marginLeft: 20 }}>Post Announcement</Text>
       <View style={styles.container}>
         {/* Post Announcement Container */}
+        <Text style={{ paddingLeft: 5, fontFamily: 'Poppins-SemiBold', fontSize: 20, paddingVertical: 20, marginLeft: 20 }}>Post Announcement</Text>
+
         <View style={styles.postContainer}>
           <TextInput
             style={styles.postInput}

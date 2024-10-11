@@ -2,6 +2,12 @@ import { StyleSheet } from 'react-native';
 import sd from '../../../utils/styleDictionary';
 
 export const styles = StyleSheet.create({
+  modal : {
+    margin: 0,  // Ensures the modal takes up the entire screen
+    justifyContent: 'center',
+    height: '100%',
+    flex: 1,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -33,16 +39,18 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   dropdownContainer: {
-    // width: '100%',
+    flex : 1,
     marginBottom: 15,
     marginHorizontal: 5,
   },
   dropdown: {
-    height: 40,
+    flex : 1,
+    height: 100,
+    //width: '100%',
     borderColor: '#d3d3d3',
     borderWidth: 1,
     borderRadius: 5,
-    paddingHorizontal: 8,
+    padding: 20,
   },
   dropdownStyle: {
     backgroundColor: 'white',

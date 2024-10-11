@@ -10,8 +10,9 @@ const sd = {
         textSecondary: '#757575',
         blue: '#2F88D4',
         lightBlue: '#92A3FD',
-        red: '#E45155',
+        red: '#dc3545',
         white: '#FFFFFF',
+        green : '#28a745'
     },
     fonts: {
         bold: 'Poppins-Bold',
