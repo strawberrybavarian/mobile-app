@@ -33,3 +33,14 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+node_modules/
+coverage/
+build/
+.DS_Store/
+.env/
+
+# amplify
+.amplify
+amplify_outputs*
+amplifyconfiguration*

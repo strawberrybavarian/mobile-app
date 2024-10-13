@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, TextInput } from 'react-native';
 import Modal from 'react-native-modal';
 import axios from 'axios';
 import { ip } from '../../../../ContentExport';
 import { getData } from '../../../storageUtility';
 import sd from '../../../../utils/styleDictionary';
 import { Entypo } from '@expo/vector-icons';
-import { Button, TextInput } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
 const ViewProfile = ({ isVisible, closeModal }) => {
     const [userId, setUserId] = useState('');
@@ -60,6 +60,21 @@ const ViewProfile = ({ isVisible, closeModal }) => {
         }
     };
 
+    const textBox = (label, value) => {
+        return (
+            <View style = {styles.infoRow}>
+                <Text style={styles.infoLabel}>{label}</Text>
+                <View style={{flex:2}}>
+                    <TextInput
+                        value={value}
+                        editable={!isDisabled}
+                        style={isDisabled ? styles.infoText : [styles.infoText, {borderBottomWidth: 1, borderColor: sd.colors.blue, color: 'black'}]} 
+                    />
+                </View>
+            </View>
+        );
+    };
+
     return (
         <Modal 
             isVisible={isVisible} 
@@ -95,45 +110,10 @@ const ViewProfile = ({ isVisible, closeModal }) => {
                         </View>
 
                         <View style={styles.infoCont}>
-                            {isDisabled ? (
-                                <>
-                                    <Text style={styles.infoText}>First Name: {patient.patient_firstName}</Text>
-                                    <Text style={styles.infoText}>Middle Initial: {patient.patient_middleInitial || ''}</Text>
-                                    <Text style={styles.infoText}>Last Name: {patient.patient_lastName}</Text>
-                                    <Text style={styles.infoText}>Email: {patient.patient_email}</Text>
-                                </>
-                            ) : (
-                                <>
-                                    <TextInput
-                                        mode='outlined'
-                                        label="First Name"
-                                        value={patient.patient_firstName}
-                                        disabled={isDisabled}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                    <TextInput
-                                        mode='outlined'
-                                        label="Middle Initial"
-                                        value={patient.patient_middleInitial ? patient.patient_middleInitial : ''}
-                                        disabled={isDisabled}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                    <TextInput
-                                        mode='outlined'
-                                        label="Last Name"
-                                        value={patient.patient_lastName}
-                                        disabled={isDisabled}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                    <TextInput
-                                        mode='outlined'
-                                        label="Email"
-                                        value={patient.patient_email}
-                                        disabled={isDisabled}
-                                        style={{ marginBottom: 10 }}
-                                    />
-                                </>
-                            )}
+                            {textBox('First Name', patient.patient_firstName)}
+                            {textBox('Middle Initial', patient.patient_middleInitial)}
+                            {textBox('Last Name', patient.patient_lastName)}
+                            {textBox('Contact Number', patient.patient_contactNumber)}               
                         </View>
                         
                         <View style = {styles.buttonCont}>
@@ -194,9 +174,33 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 20,
     },
+    infoRow: {
+        marginBottom: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        verticalAlign: 'center',
+        justifyContent: 'flex-start',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        paddingBottom: 10,
+    },
+    infoLabel: {
+        fontSize: sd.fontSizes.medium,
+        fontFamily: sd.fonts.semiBold,
+        alignSelf: 'center',
+        width: '40%',
+        //marginBottom: 10,
+    },
     infoText: {
         fontSize: sd.fontSizes.medium,
-        marginBottom: 10,
+        fontFamily: sd.fonts.medium,
+        textAlign: 'left',
+        padding: 10,
+        paddingLeft: 20,
+        color: 'black',
+        borderBottomWidth: 1,
+        borderColor: sd.colors.white,
+        
+        //marginBottom: 10,
     },
     buttonCont : {
         padding : 10

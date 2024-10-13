@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
         elevation: 5,
     },
     patientName: {
-        fontSize: 20,
+        fontSize: sd.fontSizes.medium,
         fontWeight: 'bold',
         color: sd.colors.black,
     },
@@ -33,6 +33,16 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: sd.colors.black,
     },
+    title: {
+        fontSize: sd.fontSizes.large,
+        fontFamily: sd.fonts.medium,
+        margin: 10,
+    },
+
+
+
+
+
     // medicalRecord: {
     //     flex: 1,
     //     backgroundColor: sd.colors.white,

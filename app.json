@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "hp-management-patient",
-    "slug": "hp-management-patient",
+    "slug": "molino-polyclinic",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -30,6 +30,12 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4750c497-c0c6-4d53-83ef-25ae9e0ce760"
+      }
+    },
+    "owner": "strawberry-bavarian"
   }
 }
