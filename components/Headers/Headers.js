@@ -4,8 +4,9 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import styles from './HeaderStyle';
-import { getData } from '/Users/elijahcruz/Desktop/hp-management-patient/components/storageUtility.js';
+
 import { ip } from '../../ContentExport';
+import { getData } from '../storageUtility';
 
 const Header3 = () => {
     const [search, setSearch] = useState('');
@@ -28,7 +29,7 @@ const Header3 = () => {
     useEffect(() => {
       const fetchPatient = async () => {
         try {
-          const response = await axios.get(`${ip.address}/patient/api/onepatient/${userId}`);
+          const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`);
           console.log(response.data.thePatient);
           setPatient(response.data.thePatient);
         } catch (error) {

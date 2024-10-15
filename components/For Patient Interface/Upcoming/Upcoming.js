@@ -70,7 +70,7 @@ const Upcoming = () => {
             const id = await getData('userId');
             if (id) {
                 setUserId(id);
-                const response = await axios.get(`${ip.address}/patient/api/onepatient/${id}`);
+                const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${id}`);
                 console.log(response.data.thePatient.patient_appointments)
                 setAllAppointments(response.data.thePatient.patient_appointments);
             } else {

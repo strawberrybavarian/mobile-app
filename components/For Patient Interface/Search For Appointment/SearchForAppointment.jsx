@@ -30,7 +30,7 @@ const SearchForAppointment = ({ navigation, route }) => {
   // Get all doctors
   
   useEffect(() => {
-    axios.get(`${ip.address}/doctor/api/alldoctor`)
+    axios.get(`${ip.address}/api/doctor/api/alldoctor`)
       .then((res) => {
         if (Array.isArray(res.data.theDoctor)) {
           setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array

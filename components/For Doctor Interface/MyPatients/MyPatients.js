@@ -22,7 +22,7 @@ const MyPatients = () => {
     try {
       const userId = await getData('userId');
       if (userId) {
-        const response = await axios.get(`${ip.address}/doctor/api/getallpatients/${userId}`);
+        const response = await axios.get(`${ip.address}/api/doctor/api/getallpatients/${userId}`);
         console.log(response.data);
         setPatients(response.data);
       }

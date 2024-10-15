@@ -53,7 +53,7 @@ const ProfileForm = ({ navigation }) => {
 
   useEffect(() => {
     const fetchData = () => {
-    axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+    axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
       .then(res => {
         console.log(res.data.thePatient);
         setPatientData(res.data.thePatient);
@@ -71,7 +71,7 @@ const ProfileForm = ({ navigation }) => {
   }, [patientData]);
 
   const handleSaveProfile = () => {
-    axios.put(`${ip}/patient/api/${userId}/updatedetails`, {
+    axios.put(`${ip}/api/patient/api/${userId}/updateinfo`, {
       patient_firstName: firstName,
       patient_lastName: lastName,
       patient_dob: selectedDate,
@@ -89,7 +89,7 @@ const ProfileForm = ({ navigation }) => {
   };
 
   const handleUpdate = () => {
-    axios.put(`${ip.address}/patient/api/${userId}/updatedetails`, patientData)
+    axios.put(`${ip.address}/api/patient/api/${userId}/updateinfo`, patientData)
       .then((res) => {
         console.log('Profile updated successfully:', res.data);
 

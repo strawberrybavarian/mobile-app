@@ -23,7 +23,7 @@ const CreateAccount = ({ navigation }) => {
 
   //get all emails
   useEffect(() => {
-    axios.get(`${ip.address}/doctor/api/allemail`)
+    axios.get(`${ip.address}/api/doctor/api/allemails`)
     .then((res) => {
       if (Array.isArray(res.data)) {
         setExistingEmail(res.data); 
@@ -211,22 +211,22 @@ const CreateAccount = ({ navigation }) => {
               dr_gender: gender,
           };
           console.log(doctorUser);
-          const response = await axios.post(`${ip.address}/doctor/api/signup`, doctorUser);
+          const response = await axios.post(`${ip.address}/api/doctor/api/signup`, doctorUser);
           if (response.status === 200) {
               console.log(response.data);
-              window.alert("Successfully registered Doctor");
+              Alert.alert("Successfully registered Doctor");
               navigation.navigate('SigninPage');
           } else {
               console.error(response.data);
-              window.alert('Registration failed. Please try again.');
+              Alert.alert('Registration failed. Please try again.');
           }
         }
          catch (err) {
             console.error(err);
-            window.alert('An error occurred during registration. Please try again.');
+            Alert.alert('An error occurred during registration. Please try again.');
         }
     } else {
-        window.alert('There are some errors in the form.');
+        Alert.alert('There are some errors in the form.');
     }
 };
 

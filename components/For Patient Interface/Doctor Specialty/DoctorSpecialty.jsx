@@ -61,7 +61,7 @@ const DoctorSpecialty = () => {
     useFocusEffect(
       useCallback(() => {
         const fetchData = () => {
-          axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+          axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
             .then(res => {
               console.log(res.data.thePatient);
               const patient = res.data.thePatient;

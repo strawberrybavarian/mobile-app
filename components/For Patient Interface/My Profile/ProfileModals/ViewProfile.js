@@ -31,7 +31,7 @@ const ViewProfile = ({ isVisible, closeModal }) => {
 
     useEffect(() => {
         if (userId) {
-            axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+            axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
                 .then(res => {
                     setPatient(res.data.thePatient);
                 })

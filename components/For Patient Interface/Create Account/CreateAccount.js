@@ -6,15 +6,21 @@ import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { Dropdown } from 'react-native-element-dropdown';
 import styles from './CreateAccountStyles';
-import { ProgressBar } from 'react-native-paper';
 import sd from '../../../utils/styleDictionary';
+import * as Validation from './Validations.js';
+import * as Progress from 'react-native-progress';
 
 const CreateAccount = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [firstname, setFirstName] = useState('');
+  const [lastname, setLastName] = useState('');
+  const [middleinitial, setMiddleInitial] = useState('');
   const [existingEmail, setExistingEmail] = useState([]);
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
 
   // Validation states
   const [firstnameError, setfirstnameError] = useState('');
+  const [middleInitialError, setMiddleInitialError] = useState('');
   const [lastnameError, setlastnameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [contactNumberError, setContactNumberError] = useState('');
@@ -24,31 +30,25 @@ const CreateAccount = ({ navigation }) => {
   const [dobError, setDobError] = useState('');
 
   //get all emails
-  useEffect(() => { 
-    axios.get(`${ip.address}/patient/api/allemail`)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setExistingEmail(res.data);
-          console.log('Emails set:', res.data);
-        } else {
-          console.error('Expected an array but got:', typeof res.data, res.data);
-        }
-      })
-      .catch((err) => {
-        console.log('Error fetching emails:', err);
-      });
-  }, [email]);
+  // useEffect(() => { 
+  //   axios.get(`${ip.address}/api/patient/allemail`)
+  //     .then((res) => {
+  //       if (Array.isArray(res.data)) {
+  //         setExistingEmail(res.data);
+  //         console.log('Emails set:', res.data);
+  //       } else {
+  //         console.error('Expected an array but got:', typeof res.data, res.data);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log('Error fetching emails:', err);
+  //     });
+  // }, [email]);
 
   const checkIfEmailExists = (email) => {
     return existingEmail.some(existing => existing === email);
   };
 
-  // Step 1: Names
-  const [firstname, setFirstName] = useState('');
-  const [lastname, setLastName] = useState('');
-  const [middleinitial, setMiddleInitial] = useState('');
-
-  // Step 2: DOB and Gender
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const genderOptions = [
@@ -61,14 +61,20 @@ const CreateAccount = ({ navigation }) => {
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+
+  const [showPassword, setShowPassword] = useState(true);
+
+
   // Populate years from current year to past (e.g., last 100 years)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, index) => {
     const year = new Date().getFullYear() - index;
     return { label: String(year), value: year };
   });
-
-
 
   // Populate months (1 to 12)
   const months = [
@@ -129,47 +135,74 @@ const CreateAccount = ({ navigation }) => {
   }, [selectedDay, selectedMonth, selectedYear, currentYear]);
 
 
-  // Step 3: Contact Information and Passwords
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showPassword, setShowPassword] = useState(true);
-
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  useEffect(() => {
+    setfirstnameError(Validation.validateFirstName(firstname) || ''); // Set error if exists
+    setMiddleInitialError(Validation.validateMiddleInitial(middleinitial) || '');
+    setlastnameError(Validation.validateLastName(lastname) || '');
+  }, [firstname, middleinitial, lastname]);
+
+  useEffect(() => {
+    setEmailError(Validation.validateEmail(existingEmail, email) || '');
+    setContactNumberError(Validation.validateContactNumber(contactNumber) || '');
+    setPasswordError(Validation.validatePassword(password) || '');
+    setConfirmPasswordError(Validation.validateConfirmPassword(password, confirmPassword) || '');
+  }, [email, contactNumber, password, confirmPassword]);
+
+  useEffect(() => {
+    setGenderError(Validation.validateGender(gender) || '');
+    setDobError(Validation.validateDob(selectedDay, selectedMonth, selectedYear, currentYear) || '');
+  }, [dob, gender])
+
   const handleNextStep = () => {
+    let hasError = false; // Flag to track overall error state
+
     if (currentStep === 1) {
-      if (!firstname) {
-        alert("First Name cannot be empty.");
-        return;
-      }
-      if (!lastname) {
-        alert("Last Name cannot be empty.");
-        return;
-      }
-      console.log("First Name:", firstname);
-    } else if (currentStep === 2) {
-      if (!dob || !gender) {
-        alert("Please enter valid DOB and select gender.");
-        return;
-      }
-    } else if (currentStep === 3) {
-      if (!email || !password || !confirmPassword || !contactNumber) {
-        alert("Please fill in all required fields.");
-        return;
-      }
-      if (password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return;
-      }
+        
+        // Check if there are any errors
+        if (firstnameError || middleInitialError || lastnameError) {
+            alert("Please fill in all required fields.");
+            setIsErrorVisible(true);
+            return;
+        } else {
+            setIsErrorVisible(false);
+            setCurrentStep(currentStep + 1);
+        }
+    } 
+    else if (currentStep === 2) {
+        // setDobError(Validation.validateDob(selectedDay, selectedMonth, selectedYear, currentYear) || '');
+        // setGenderError(Validation.validateGender(gender) || '');
+
+        // Check for errors
+        if (dobError || genderError) {
+            alert("Please fill in all required fields.");
+            setIsErrorVisible(true);
+            return;
+        } else {
+            setIsErrorVisible(false);
+            setCurrentStep(currentStep + 1);
+        }
+    } 
+    else if (currentStep === 3) {
+        // setEmailError(Validation.validateEmail(existingEmail, email) || '');
+        // setContactNumberError(Validation.validateContactNumber(contactNumber) || '');
+        // setPasswordError(Validation.validatePassword(password) || '');
+        // setConfirmPasswordError(Validation.validateConfirmPassword(password, confirmPassword) || '');
+
+        // Check for errors
+        if (emailError || contactNumberError || passwordError || confirmPasswordError) {
+            alert("Please fill in all required fields.");
+            setIsErrorVisible(true);
+            return;
+        } else {
+            setIsErrorVisible(false);
+            registerUser(); // Only proceed to register if no errors
+        }
     }
-    setCurrentStep(currentStep + 1);
-  };
+};
 
   const handlePrevStep = () => {
     setCurrentStep(currentStep - 1);
@@ -178,57 +211,53 @@ const CreateAccount = ({ navigation }) => {
   const registerUser = async (e) => {
     e.preventDefault();
 
-    if (firstname.length == 0 || lastname.length == 0 || email.length == 0 || password.length == 0 || confirmPassword.length == 0) {
-        alert('Please fill in all required fields.');
-        return;
-    }
+    console.log('Registering user...');
+    console.log('First Name:', firstname);
+    console.log('Middle Initial:', middleinitial);
+    console.log('Last Name:', lastname);
+    console.log('Email:', email);
+    console.log('Contact Number:', contactNumber);
 
-    if (checkIfEmailExists(email)) {
-        setEmailError('Email already exists.');
-        alert('Email already exists.');
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        alert('Passwords do not match.');
-        return;
-    }
+    console.log('errors:', firstnameError, middleInitialError, lastnameError, emailError, contactNumberError, passwordError, confirmPasswordError, genderError, dobError);
 
     if (
         firstnameError === '' &&
         lastnameError === '' &&
         emailError === '' &&
         passwordError === '' &&
-        confirmPasswordError === ''
+        confirmPasswordError === '' &&
+        genderError === '' &&
+        dobError === '' 
     ) {
         try {
           const patientUser = {
-              patient_firstName: firstname.trim(),
-              patient_middleInitial: middleinitial.trim(),
-              patient_lastName: lastname.trim(),
-              patient_email: email.trim(),
-              patient_password: password.trim(),
+              patient_firstName: capitalizeWords(firstname),
+              patient_middleInitial: capitalizeWords(middleinitial),
+              patient_lastName: capitalizeWords(lastname),
+              patient_email: email.trim().toLocaleLowerCase(),
+              patient_password: password,
               patient_dob: dob,
               patient_contactNumber: contactNumber.trim(),
               patient_gender: gender,
           };
           console.log(patientUser);
-          const response = await axios.post(`${ip.address}/patient/api/signup`, patientUser);
-          if (response.status === 200) {
+          const response = await axios.post(`${ip.address}/api/patient/api/signup`, patientUser);
+          if (response.status === 201) {
               console.log(response.data);
-              window.alert("Successfully registered Patient");
+              Alert.alert("Successfully registered Patient");
               navigation.navigate('SigninPage');
           } else {
               console.error(response.data);
-              window.alert('Registration failed. Please try again.');
+              Alert.alert('Registration failed. Please try again.');
           }
         }
          catch (err) {
             console.error(err);
-            window.alert('An error occurred during registration. Please try again.');
+            Alert.alert('An error occurred during registration. Please try again.');
         }
     } else {
-        window.alert('There are some errors in the form.');
+        Alert.alert('There are some errors in the form.');
+        setIsErrorVisible(true);
     }
 };
 
@@ -239,87 +268,6 @@ const CreateAccount = ({ navigation }) => {
       .replace(/\s+/g, ' ')
       .toLowerCase()
       .replace(/\b\w/g, char => char.toUpperCase());
-  };
-
-  const validateFirstName = (text) => {
-    //const capitalized = capitalizeWords(text);
-    if (!text) {
-      setfirstnameError("First name cannot be empty.");
-    } else {
-      setfirstnameError("");
-    }
-    //text.trim();
-    setFirstName(capitalized);
-  };
-
-  const validateLastName = (text) => {
-    //onst capitalized = capitalizeWords(text);
-    if (!text) {
-      setlastnameError("Last name cannot be empty.");
-    } else {
-      setlastnameError("");
-    }
-    setLastName(text);
-  };
-
-  const validateMiddleInitial = (text) => {
-    const trimmedInitial = text.trim().replace('.', '');
-    setMiddleInitial(trimmedInitial.toUpperCase());
-  };
-
-  const validateEmail = (text) => {
-    //const lowercased = text.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(text)) {
-      setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-    } else {
-      setEmailError("");
-    }
-    setEmail(lowercased);
-  };
-
-  const validateContactNumber = (text) => {
-    const trimmed = text.trim();
-    const contactNumberRegex = /^09\d{9}$/;
-
-    if (!trimmed) {
-      setContactNumberError("Contact number cannot be empty.");
-    } else if (!contactNumberRegex.test(trimmed)) {
-      setContactNumberError("Contact number must start with 09 and contain 11 digits.");
-    } else {
-      setContactNumberError("");
-    }
-    setContactNumber(trimmed);
-  };
-
-  const validatePassword = (text) => {
-    const trimmed = text.trim();
-    if (trimmed.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-    } else {
-      setPasswordError("");
-    }
-    setPassword(trimmed);
-  };
-
-  const validateConfirmPassword = (text) => {
-    const trimmed = text.trim();
-    if (password !== trimmed) {
-      setConfirmPasswordError("Passwords do not match");
-    } else {
-      setConfirmPasswordError("");
-    }
-    setConfirmPassword(trimmed);
-  };
-
-  const validateGender = (value) => {
-    if (!value) {
-      setGenderError("Please select a gender.");
-    } else {
-      setGenderError("");
-    }
-    setGender(value);
   };
 
   const stepText = (title, subtitle) => {
@@ -337,11 +285,13 @@ const CreateAccount = ({ navigation }) => {
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       {/* Progress Indicator */}
       <View style={styles.progressContainer}>
-        <ProgressBar 
+        <Progress.Bar 
           progress={progress} 
+          width={null}
           color= {sd.colors.blue} 
           style={styles.progressBar}
-          
+          visible = {true}
+          borderRadius = {10}
           />
       </View>
 
@@ -352,24 +302,28 @@ const CreateAccount = ({ navigation }) => {
           <TextInput
             style={styles.textInput}
             placeholder="First Name"
+            placeholderTextColor={sd.colors.grey}
             value={firstname}
-            onChangeText={validateFirstName}
+            onChangeText={setFirstName}
           />
-          {firstnameError ? <Text style = { styles.errorText }>{firstnameError}</Text> : null}
+          {firstnameError && isErrorVisible ? <Text style = { styles.errorText }>{firstnameError}</Text> : null}
           <TextInput
             style={styles.textInput}
             placeholder="Middle Initial"
+            placeholderTextColor={sd.colors.grey}
             value={middleinitial}
-            onChangeText={validateMiddleInitial}
+            onChangeText={setMiddleInitial}
           />
+          {middleInitialError && isErrorVisible ? <Text style = { styles.errorText }>{middleInitialError}</Text> : null}
           
           <TextInput
             style={styles.textInput}
             placeholder="Last Name"
+            placeholderTextColor={sd.colors.grey}
             value={lastname}
-            onChangeText={validateLastName}
+            onChangeText={setLastName}
           />
-          {lastnameError ? <Text style = { styles.errorText }>{lastnameError}</Text> : null}
+          {lastnameError && isErrorVisible ? <Text style = { styles.errorText }>{lastnameError}</Text> : null}
         </View>
       )}
 
@@ -383,6 +337,7 @@ const CreateAccount = ({ navigation }) => {
           <Dropdown
             data={years}
             placeholder="Year"
+            placeholderTextColor={sd.colors.grey}
             value={selectedYear}
             onChange={item => {
               console.log("Selected Year:", item.value);
@@ -397,6 +352,7 @@ const CreateAccount = ({ navigation }) => {
           <Dropdown
             data={months}
             placeholder="Month"
+            placeholderTextColor={sd.colors.grey}
             value={selectedMonth}
             onChange={item => {
               console.log("Selected Month:", item.value);
@@ -411,6 +367,7 @@ const CreateAccount = ({ navigation }) => {
           <Dropdown
             data={days}
             placeholder="Day"
+            placeholderTextColor={sd.colors.grey}
             value={selectedDay}
             onChange={item => {
               console.log("Selected Day:", item.value);
@@ -422,7 +379,7 @@ const CreateAccount = ({ navigation }) => {
             style={styles.dropdown}
           />
           </View>
-          { dobError ? <Text style = { styles.errorText }>{dobError}</Text> : null }
+          { dobError && isErrorVisible ? <Text style = { styles.errorText }>{dobError}</Text> : null }
             
           {/* Gender Picker */}
           <View style={styles.pickerContainer}>
@@ -433,11 +390,12 @@ const CreateAccount = ({ navigation }) => {
               data={genderOptions}
               labelField="label"
               valueField="value"
+              placeholderTextColor={sd.colors.grey}
               placeholder="Select Gender"
               value={gender}
-              onChange={item => validateGender(item.value)}
+              onChange={item => setGender(item.value)}
             />
-            {genderError ? <Text style = { styles.errorText }>{genderError}</Text> : null}
+            {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
           </View>
         </View>
       )}
@@ -450,43 +408,47 @@ const CreateAccount = ({ navigation }) => {
           <TextInput
             style={styles.textInput}
             placeholder="Email"
+            placeholderTextColor={sd.colors.grey}
             value={email}
-            onChangeText={validateEmail}
+            onChangeText={setEmail}
           />
-          {emailError ? <Text style = { styles.errorText }>{emailError}</Text> : null}
+          {emailError && isErrorVisible ? <Text style = { styles.errorText }>{emailError}</Text> : null}
           <TextInput
             style={styles.textInput}
             placeholder="Contact Number"
+            placeholderTextColor={sd.colors.grey}
             value={contactNumber}
-            onChangeText={validateContactNumber}
+            onChangeText={setContactNumber}
           />
-          {contactNumberError ? <Text style = { styles.errorText }>{contactNumberError}</Text> : null}
+          {contactNumberError && isErrorVisible ? <Text style = { styles.errorText }>{contactNumberError}</Text> : null}
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
               placeholder="Password"
+              placeholderTextColor={sd.colors.grey}
               secureTextEntry={showPassword}
               value={password}
-              onChangeText={validatePassword}
+              onChangeText={setPassword}
             />
             <TouchableOpacity onPress={handleTogglePasswordVisibility}>
               <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
             </TouchableOpacity>
           </View>
-          {passwordError ? <Text style = { styles.errorText }>{passwordError}</Text> : null}
+          {passwordError && isErrorVisible ? <Text style = { styles.errorText }>{passwordError}</Text> : null}
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
               placeholder="Confirm Password"
+              placeholderTextColor={sd.colors.grey}
               secureTextEntry={showPassword}
               value={confirmPassword}
-              onChangeText={validateConfirmPassword}
+              onChangeText={setConfirmPassword}
             />
             <TouchableOpacity onPress={handleTogglePasswordVisibility}>
               <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
             </TouchableOpacity>
           </View>
-          {confirmPasswordError ? <Text style = { styles.errorText }>{confirmPasswordError}</Text> : null}
+          {confirmPasswordError  && isErrorVisible ? <Text style = { styles.errorText }>{confirmPasswordError}</Text> : null}
         </View>
       )}
 

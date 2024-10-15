@@ -8,6 +8,7 @@ import RescheduleModal from './RescheduleAppointmentModal';
 import Entypo from "@expo/vector-icons/Entypo";
 import Modal from 'react-native-modal';
 import sd from '../../../utils/styleDictionary';
+import { ip } from '../../../ContentExport';
 
 const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
     const [cancelReason, setCancelReason] = useState('');
@@ -29,7 +30,7 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
         try {
             const userId = await getData('userId');
             if (userId) {
-                axios.put(`http://localhost:8000/patient/api/${appointmentData._id}/updateappointment`, { cancelReason })
+                axios.put(`${ip.address}/api/patient/${appointmentData._id}/updateappointment`, { cancelReason })
                 .then((response) => {
                     console.log(response.data);
                     closeModal();
@@ -48,7 +49,7 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
             const userId = await getData('userId');
             if (userId) {
                 const rescheduleData = { newDate, newTime };
-                axios.put(`http://localhost:8000/doctor/${appointmentData._id}/rescheduleappointment`, rescheduleData)
+                axios.put(`${ip.address}/api/doctor/${appointmentData._id}/rescheduleappointment`, rescheduleData)
                 .then((response) => {
                     console.log(response.data);
                     closeModal();

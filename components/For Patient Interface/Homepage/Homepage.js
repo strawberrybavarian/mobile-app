@@ -38,7 +38,7 @@ const Homepage = () => {
 
     useEffect(() => {
         if (userId) {
-            axios.get(`${ip.address}/patient/api/onepatient/${userId}`)
+            axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
                 .then((res) => {
                     setPatientData(res.data.thePatient);
                     console.log(res.data.thePatient);
@@ -78,7 +78,7 @@ const Homepage = () => {
                     style={styles.optionBox}
                 >
                     <Image 
-                        source={require('/Users/elijahcruz/Desktop/hp-management-patient/assets/pictures/Stethoscope.png')}
+                        source={require('../../../assets/pictures/Stethoscope.png')}
                         style = {styles.optionImage}
                         />
                     <Text style={{ color: 'black' }}>{label}</Text> 

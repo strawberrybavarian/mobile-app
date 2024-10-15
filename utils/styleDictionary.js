@@ -8,6 +8,7 @@ const sd = {
         background: '#f8f8f8',
         textPrimary: '#212121',
         textSecondary: '#757575',
+        grey: '#BDBDBD',
         blue: '#2F88D4',
         lightBlue: '#92A3FD',
         red: '#dc3545',

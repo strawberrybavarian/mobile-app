@@ -88,7 +88,7 @@ const BookAppointment = ({ navigation , route}) => {
         //appointment_type: null
       };
 
-      const response = await axios.post(`${ip.address}/patient/api/${userId}/createappointment`, appointmentData);
+      const response = await axios.post(`${ip.address}/api/patient/api/${userId}/createappointment`, appointmentData);
       console.log('Appointment created:', response.data);
       Alert.alert('Success', 'Appointment created successfully');
       navigation.navigate('ptnmain');  

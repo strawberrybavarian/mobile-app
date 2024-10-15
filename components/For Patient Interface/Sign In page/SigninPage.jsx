@@ -17,15 +17,15 @@ import { getData, storeData } from "../../storageUtility";
 import { ip } from "../../../ContentExport";
 import { Dropdown } from "react-native-element-dropdown"; // Import Dropdown
 import { CommonActions } from "@react-navigation/native";
+import * as Validation from '../Create Account/Validations.js'
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-
-  const [allUsers, setAllUsers] = useState([]);
-
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
@@ -34,111 +34,97 @@ const SigninPage = ({ navigation }) => {
     setPasswordVisible(!passwordVisible);
   };
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       let response;
+  //       if (role === "Patient" ) {
+  //         response = await axios.get(`${ip.address}/api/patient/api/allpatient`);
+  //       } 
+  //       else if (role === "Doctor") {
+  //         response = await axios.get(`${ip.address}/api/doctor/api/alldoctor`);
+  //       }
+
+  //       if( response && response.data ){
+  //         const userData = response.data.thePatient || response.data.theDoctor;
+  //         setAllUsers(userData);
+  //       }
+
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [role]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let response;
-        if (role === "Patient" ) {
-          response = await axios.get(`${ip.address}/patient/api/allpatient`);
-        } 
-        else if (role === "Doctor") {
-          response = await axios.get(`${ip.address}/doctor/api/alldoctor`);
-        }
-
-        if( response && response.data ){
-          const userData = response.data.thePatient || response.data.theDoctor;
-          setAllUsers(userData);
-        }
-
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    fetchData();
-  }, [role]);
+    !email ? setEmailError("Email cannot be empty") : setEmailError("");
+    !password ? setPasswordError("Password cannot be empty") : setPasswordError("");
+    !role ? setRoleError("Please select a role") : setRoleError("");
+  }, [email, password, role]);
 
   const loginUser = async (e) => {
     e.preventDefault();
-    
-    // Log to ensure function is called
-    console.log("Login button clicked");
-  
-    if (!emailError && !passwordError && !roleError) {
-      console.log("No validation errors, proceeding...");
-  
-      if (allUsers && allUsers.length > 0) {
-        console.log("Users data:", allUsers);
-  
-        const user = allUsers.find((user) => {
-          if (role === "Patient") {
-            return user.patient_email === email;
-          } else if (role === "Doctor") {
-            return user.dr_email === email;
-          }
-          return false;
+
+    if (role === "Patient") {
+      try {
+        const response = await axios.post(`${ip.address}/api/patient/api/login`, {
+          email,
+          password,
         });
-  
-        console.log("Found user:", user);
-  
-        if (user) {
-          if (role === "Patient") {
-            const userId = user._id;
-            if (user.patient_password === password) {
-              Alert.alert("Successfully logged in");
-              console.log("Logging in as Patient");
-              storeData("userId", userId);
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 0,
-                  routes: [{ name: "ptnmain" }],
-                })
-              )
-              navigation.navigate("ptnmain"); // Navigate to patient's homepage
-            } else {
-              Alert.alert("Invalid email or password. Please try again.");
-            }
-          } else if (role === "Doctor") {
-            if (user.accountStatus === "Review") {
-              Alert.alert("Your account is under review and you cannot log in at this time.");
-              return;
-            }
-  
-            if (user.dr_password !== password) {
-              Alert.alert("Invalid email or password. Please try again.");
-              return;
-            }
-  
-            const userId = user._id;
-            try {
-              await axios.put(`${ip.address}/doctor/${userId}/status`, { status: "Online" });
-              console.log("Doctor status updated to Online.");
-            } catch (err) {
-              console.error("Error updating doctor status:", err);
-            }
-  
-            Alert.alert("Successfully logged in");
-            storeData("userId", userId);
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: "doctormain" }],
-              })
-            )
-            navigation.navigate("doctormain");
-          }
-        } 
-        else {
-          Alert.alert("User not found. Please check your credentials.");
-          console.log("No user found matching the email and role.");
+
+        if (response.data.patientData) {
+          const patientData = response.data.patientData;
+
+          // if (rememberMe) {
+          //   localStorage.setItem('patient', JSON.stringify(patientData));
+          // } else {
+          //   sessionStorage.setItem('patient', JSON.stringify(patientData));
+          // }
+
+          setPatient(patientData); // Update context with patient data
+          Alert.alert("Successfully logged in");
+
+          // Navigate to homepage
+          await axios.post(`${ip.address}/api/patient/session`, { userId: patientData._id, role: role });
+          storeData('userId', patientData._id);
+          navigation.navigate('ptnmain');
+        } else {
+          Alert.alert(response.data.message || "Invalid email or password. Please try again.");
         }
-      } else {
-        Alert.alert("No users found for the selected role.");
-        console.log("No users fetched for the selected role:", role);
+      } catch (err) {
+        console.error('Error logging in:', err);
+        Alert.alert("An error occurred while logging in.");
       }
-    } else {
-      console.log("Validation errors - emailError:", emailError, "passwordError:", passwordError, "roleError:", roleError);
-      Alert.alert("Please fill in all fields correctly");
+    } else if (role === "Physician") {
+      try {
+        const response = await axios.post(`${ip.address}/api/doctor/api/login`, {
+          email,
+          password,
+        });
+
+        if (response.data.doctorData) {
+          const doctorData = response.data.doctorData;
+
+          // if (rememberMe) {
+          //   localStorage.setItem('doctor', JSON.stringify(doctorData));
+          // } else {
+          //   sessionStorage.setItem('doctor', JSON.stringify(doctorData));
+          // }
+
+          setDoctor(doctorData);
+          Alert.alert("Successfully logged in");
+
+          await axios.post(`${ip.address}/api/doctor/session`, { userId: doctorData._id, role: role });
+          navigation.navigate('doctormain');
+        } else {
+          Alert.alert(response.data.message || "Invalid email or password. Please try again.");
+        }
+      } catch (err) {
+        console.error('Error logging in:', err);
+        Alert.alert("An error occurred while logging in.");
+      }
     }
   };    
 
@@ -206,10 +192,10 @@ const SigninPage = ({ navigation }) => {
                 style={styles.passwordInput}
                 placeholder="Email"
                 value={email}
-                onChangeText={validateEmail}
+                onChangeText={setEmail}
               />
             </View>
-            {emailError ? (
+            {emailError && isErrorVisible ? (
               <Text style={styles.errorMessage}>{emailError}</Text>
             ) : null}
 
@@ -219,7 +205,7 @@ const SigninPage = ({ navigation }) => {
                 placeholder="Password"
                 secureTextEntry={passwordVisible}
                 value={password}
-                onChangeText={validatePassword}
+                onChangeText={setPassword}
               />
 
               <View style={styles.eyeIconContainer}>
@@ -231,7 +217,7 @@ const SigninPage = ({ navigation }) => {
                 </TouchableWithoutFeedback>
               </View>
             </View>
-            {passwordError ? (
+            {passwordError && isErrorVisible ? (
               <Text style={styles.errorMessage}>{passwordError}</Text>
             ) : null}
 
@@ -240,16 +226,16 @@ const SigninPage = ({ navigation }) => {
                 style={styles.pickerItem}
                 data={[
                   { label: "Patient", value: "Patient" },
-                  { label: "Doctor", value: "Doctor" },
+                  { label: "Doctor", value: "Physician" },
                 ]}
                 labelField="label"
                 valueField="value"
                 placeholder="Select Role"
                 value={role}
-                onChange={(item) => validateRole(item.value)}
+                onChange={(item) => setRole(item.value)}
               />
             </View>
-            {roleError ? (
+            {roleError && isErrorVisible ? (
               <Text style={styles.errorMessage}>{roleError}</Text>
             ) : null}
 

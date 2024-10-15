@@ -50,7 +50,7 @@ const PatientMain = () => {
           setUserId(id);
           console.log(`Request URL: ${ip.address}/patient/api/onepatient/${id}`);
 
-          axios.get(`${ip.address}/patient/api/onepatient/${id}`)
+          axios.get(`${ip.address}/api/patient/api/onepatient/${id}`)
             .then(res => {
               console.log("API response: ", res.data);
               const patient = res.data?.thePatient;

@@ -26,7 +26,7 @@ const DoctorUpcoming = () => {
     try {
       const id = await getData('userId');
       if (id) {
-        const response = await axios.get(`${ip.address}/doctor/${id}/appointments`);
+        const response = await axios.get(`${ip.address}/api/doctor/${id}/appointments`);
         setAllAppointments(response.data);
         console.log('Fetched appointments:', response.data); // Debugging line
       }
@@ -51,7 +51,7 @@ const DoctorUpcoming = () => {
       const userId = await getData('userId');
       if (userId) {
         const rescheduleData = { newDate, newTime };
-        await axios.put(`${ip.address}/doctor/${appointment._id}/rescheduleappointment`, rescheduleData);
+        await axios.put(`${ip.address}/api/doctor/${appointment._id}/rescheduleappointment`, rescheduleData);
         fetchAppointments(); 
       }
     } catch (error) {
@@ -67,7 +67,7 @@ const DoctorUpcoming = () => {
     try {
       const userId = await getData('userId');
       if (userId) {
-        await axios.put(`${ip.address}/patient/api/${appointment._id}/updateappointment`, { cancelReason });
+        await axios.put(`${ip.address}/api/patient/${appointment._id}/updateappointment`, { cancelReason });
         fetchAppointments(); // Refresh the list
       }
     } catch (error) {
@@ -83,7 +83,7 @@ const DoctorUpcoming = () => {
     try {
       const userId = await getData('userId');
       if (userId) {
-        await axios.put(`${ip.address}/doctor/api/${appointment._id}/acceptpatient`);
+        await axios.put(`${ip.address}/api/doctor/api/${appointment._id}/acceptpatient`);
         fetchAppointments(); // Refresh the list after accepting
       }
     } catch (error) {

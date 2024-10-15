@@ -33,7 +33,7 @@ const DoctorHeader = () => {
     }, [])
 
     useEffect(() => {
-      axios.get(`${ip.address}/doctor/one/${userId}`)
+      axios.get(`${ip.address}/api/doctor/one/${userId}`)
         .then((response) => {
           console.log(response.data.doctor);
           setDoctorData(response.data.doctor);

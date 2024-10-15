@@ -8,13 +8,17 @@ const styles = StyleSheet.create({
       paddingBottom: 80, // Space above the buttonContainer to ensure scrolling space
     },
     progressContainer: {
+      //height: 10,  // Set a visible height
+      width: '100%', 
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: 20,
     },
     progressBar: {
-      height: 10,  // Set a visible height
-      borderRadius: 5,  // Optional: To make it rounded
+      flex: 1,  // Take up all available space
+      // width: '100%',  // Set a visible width
+      //borderRadius: 5,  // Optional: To make it rounded
+      borderWidth: 0,
       backgroundColor: 'lightgray',  // Optional: Add a background color to make it more visible
     },
     activeStep: {
