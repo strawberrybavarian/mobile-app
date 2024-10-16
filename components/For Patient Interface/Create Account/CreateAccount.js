@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
@@ -28,6 +28,23 @@ const CreateAccount = ({ navigation }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [genderError, setGenderError] = useState('');
   const [dobError, setDobError] = useState('');
+  const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('');
+  const genderOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Other', value: 'Other' },
+  ];
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+
+  const [showPassword, setShowPassword] = useState(true);
 
   //get all emails
   // useEffect(() => { 
@@ -48,26 +65,6 @@ const CreateAccount = ({ navigation }) => {
   const checkIfEmailExists = (email) => {
     return existingEmail.some(existing => existing === email);
   };
-
-  const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('');
-  const genderOptions = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' },
-    { label: 'Other', value: 'Other' },
-  ];
-
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
-  const [showPassword, setShowPassword] = useState(true);
-
 
   // Populate years from current year to past (e.g., last 100 years)
   const currentYear = new Date().getFullYear();
@@ -158,7 +155,6 @@ const CreateAccount = ({ navigation }) => {
   }, [dob, gender])
 
   const handleNextStep = () => {
-    let hasError = false; // Flag to track overall error state
 
     if (currentStep === 1) {
         
@@ -173,10 +169,6 @@ const CreateAccount = ({ navigation }) => {
         }
     } 
     else if (currentStep === 2) {
-        // setDobError(Validation.validateDob(selectedDay, selectedMonth, selectedYear, currentYear) || '');
-        // setGenderError(Validation.validateGender(gender) || '');
-
-        // Check for errors
         if (dobError || genderError) {
             alert("Please fill in all required fields.");
             setIsErrorVisible(true);
@@ -187,11 +179,6 @@ const CreateAccount = ({ navigation }) => {
         }
     } 
     else if (currentStep === 3) {
-        // setEmailError(Validation.validateEmail(existingEmail, email) || '');
-        // setContactNumberError(Validation.validateContactNumber(contactNumber) || '');
-        // setPasswordError(Validation.validatePassword(password) || '');
-        // setConfirmPasswordError(Validation.validateConfirmPassword(password, confirmPassword) || '');
-
         // Check for errors
         if (emailError || contactNumberError || passwordError || confirmPasswordError) {
             alert("Please fill in all required fields.");

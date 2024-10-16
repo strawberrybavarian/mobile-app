@@ -22,7 +22,7 @@ const Header3 = () => {
     useEffect(() => {
       getData('userId').then((id) => {
         setUserId(id);
-        console.log(id);
+        console.log('id:',id);
       });
     }, []);
 

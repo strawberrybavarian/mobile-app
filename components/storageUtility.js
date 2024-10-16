@@ -35,20 +35,6 @@ const getData = async (key) => {
     }
   }
 
-  // If the value doesn't exist, set a test value
-  if (value === null) {
-    const testValues = {
-      userId: '66cf343bdf339bc59f0b7985',  // patient
-      //userId: '66d14c4109ed9419b7f76b89',  // doctor
-    };
-
-    if (testValues[key]) {
-      await storeData(key, testValues[key]);
-      value = testValues[key];
-      console.log(`Set test data for ${key}: ${value}`);
-    }
-  }
-
   return value;
 };
 

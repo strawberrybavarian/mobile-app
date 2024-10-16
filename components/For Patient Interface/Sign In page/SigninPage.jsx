@@ -67,6 +67,8 @@ const SigninPage = ({ navigation }) => {
   const loginUser = async (e) => {
     e.preventDefault();
 
+    console.log(email, password, role);
+
     if (role === "Patient") {
       try {
         const response = await axios.post(`${ip.address}/api/patient/api/login`, {
@@ -74,92 +76,57 @@ const SigninPage = ({ navigation }) => {
           password,
         });
 
+        console.log("response pls ",response);
+
         if (response.data.patientData) {
+          console.log("patientData",response.data.patientData);
           const patientData = response.data.patientData;
 
-          // if (rememberMe) {
-          //   localStorage.setItem('patient', JSON.stringify(patientData));
-          // } else {
-          //   sessionStorage.setItem('patient', JSON.stringify(patientData));
-          // }
-
-          setPatient(patientData); // Update context with patient data
           Alert.alert("Successfully logged in");
 
-          // Navigate to homepage
-          await axios.post(`${ip.address}/api/patient/session`, { userId: patientData._id, role: role });
           storeData('userId', patientData._id);
           navigation.navigate('ptnmain');
-        } else {
+        }
+        else if (response.status === 401) {
+          Alert.alert("Invalid email or password. Please try again.");
+        }
+        else {
           Alert.alert(response.data.message || "Invalid email or password. Please try again.");
         }
-      } catch (err) {
-        console.error('Error logging in:', err);
+      } 
+      catch (err) {
+        console.error('Error logging in:', err.message);
         Alert.alert("An error occurred while logging in.");
       }
-    } else if (role === "Physician") {
+    } 
+    else if (role === "Doctor") {
       try {
         const response = await axios.post(`${ip.address}/api/doctor/api/login`, {
           email,
           password,
         });
-
+      
+        console.log('Response status:', response.status);
+        console.log('Response data:', response.data);
+      
         if (response.data.doctorData) {
           const doctorData = response.data.doctorData;
-
-          // if (rememberMe) {
-          //   localStorage.setItem('doctor', JSON.stringify(doctorData));
-          // } else {
-          //   sessionStorage.setItem('doctor', JSON.stringify(doctorData));
-          // }
-
-          setDoctor(doctorData);
           Alert.alert("Successfully logged in");
-
-          await axios.post(`${ip.address}/api/doctor/session`, { userId: doctorData._id, role: role });
+          storeData('userId', doctorData._id);
           navigation.navigate('doctormain');
+        } else if (response.status === 401) {
+          Alert.alert("Invalid email or password. Please try again.");
         } else {
           Alert.alert(response.data.message || "Invalid email or password. Please try again.");
         }
       } catch (err) {
-        console.error('Error logging in:', err);
+        console.error('Error logging in:', err.response.data);
         Alert.alert("An error occurred while logging in.");
-      }
+      }      
     }
   };    
 
-  const validateEmail = (text) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const trimtext = text.trim(); // Remove leading and trailing whitespaces
-    //const lowerCaseText = trimtext.toLowerCase(); // Convert the input to lowercase
   
-    if (!trimtext) {
-      setEmailError("Email cannot be empty");
-    } else if (!emailRegex.test(trimtext)) {
-      setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-    } else {
-      setEmailError("");
-    }
-    setEmail(trimtext); // Set the lowercase email
-  };
-  
-  const validatePassword = (text) => {
-    if (!text || text.length < 8) {
-      setPasswordError("Password must be at least 8 characters");
-    } else {
-      setPasswordError("");
-    }
-    setPassword(text);
-  };
-
-  const validateRole = (value) => {
-    if (!value) {
-      setRoleError("Please select a role");
-    } else {
-      setRoleError("");
-    }
-    setRole(value);
-  };
 
   return (
     <KeyboardAvoidingView
@@ -226,7 +193,7 @@ const SigninPage = ({ navigation }) => {
                 style={styles.pickerItem}
                 data={[
                   { label: "Patient", value: "Patient" },
-                  { label: "Doctor", value: "Physician" },
+                  { label: "Doctor", value: "Doctor" },
                 ]}
                 labelField="label"
                 valueField="value"

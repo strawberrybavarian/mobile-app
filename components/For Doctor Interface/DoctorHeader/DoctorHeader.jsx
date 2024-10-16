@@ -26,22 +26,22 @@ const DoctorHeader = () => {
     };
 
     useEffect(() => {
+      // Get user ID
       getData('userId').then((id) => {
-        setUserId(id);
-        console.log(id);
+        console.log('id: ', id);
+    
+        // Fetch doctor data once userId is set
+        axios.get(`${ip.address}/api/doctor/one/${id}`)
+          .then((response) => {
+            console.log(response.data.doctor);
+            setDoctorData(response.data.doctor);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       });
-    }, [])
-
-    useEffect(() => {
-      axios.get(`${ip.address}/api/doctor/one/${userId}`)
-        .then((response) => {
-          console.log(response.data.doctor);
-          setDoctorData(response.data.doctor);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }, [userId]);
+    }, []);
+    
  
  
     return (
@@ -54,7 +54,7 @@ const DoctorHeader = () => {
             />
             <View style={styles.textCont}>
                 <View style={styles.infoCont}>
-                <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 18, }}>Dr. {doctorData.dr_firstName} {doctorData.dr_lastName}</Text>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 18, }}>Dr. {doctorData.dr_firstName} {doctorData.dr_lastName}</Text>
                 </View>
                 <View style={styles.infoCont}>
                   <Text style={{fontFamily: 'Poppins', fontSize: 12 }}> 

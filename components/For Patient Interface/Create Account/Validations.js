@@ -213,3 +213,36 @@ export const validateConfirmPassword = (password, confirmPassword) => {
   //   }
   //   setGender(value);
   // };
+
+//   const validateEmail = (text) => {
+//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     const trimtext = text.trim(); // Remove leading and trailing whitespaces
+//     //const lowerCaseText = trimtext.toLowerCase(); // Convert the input to lowercase
+  
+//     if (!trimtext) {
+//       setEmailError("Email cannot be empty");
+//     } else if (!emailRegex.test(trimtext)) {
+//       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
+//     } else {
+//       setEmailError("");
+//     }
+//     setEmail(trimtext); // Set the lowercase email
+//   };
+  
+//   const validatePassword = (text) => {
+//     if (!text || text.length < 8) {
+//       setPasswordError("Password must be at least 8 characters");
+//     } else {
+//       setPasswordError("");
+//     }
+//     setPassword(text);
+//   };
+
+//   const validateRole = (value) => {
+//     if (!value) {
+//       setRoleError("Please select a role");
+//     } else {
+//       setRoleError("");
+//     }
+//     setRole(value);
+//   };

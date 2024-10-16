@@ -29,9 +29,9 @@ const sd = {
       large: 24,
     },
     borders: {
-      radiusSmall: 4,
-      radiusLarge: 8,
-      radiusXL: 14,
+      radiusSmall: 20,
+      radiusLarge: 30,
+      radiusXL: 50,
     },
     shadows: {
       small: {
