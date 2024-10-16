@@ -45,11 +45,11 @@ export const validateLastName = (text) => {
 export const validateContactNumber = (text) => {
     text = text.trim();
     if (!text){
-        return "Contact Number is required";
+        return "Contact number is required.";
     }
     const regex = /^09\d{9}$/;
     if (!regex.test(text)){
-        return "Contact Number must be 11 digits long and begin with 09.";
+        return "Contact number must be 11 digits long and begin with 09.";
     }
 
     return null; // Return null if validation passes
@@ -89,7 +89,7 @@ export const validateGender = (text) => {
     return null; // Return null if validation passes
 }
 
-export const validateEmail = (emails, text) => {
+export const validateEmail = ( text) => {
     text = text.trim();
     if (!text){
         return "Email is required";
@@ -98,10 +98,6 @@ export const validateEmail = (emails, text) => {
     if (!regex.test(text)){
         return "Invalid email format.";
     }
-    if (emails.includes(text)){
-        return "Email is already in use.";
-    }
-
     return null; // Return null if validation passes
 }
 
@@ -123,7 +119,7 @@ export const validatePassword = (text) => {
 export const validateConfirmPassword = (password, confirmPassword) => {
     confirmPassword = confirmPassword.trim();
     if (!confirmPassword){
-        return "Confirm Password is required";
+        return "Confirm Password is required.";
     }
     if (password !== confirmPassword){
         return "Passwords do not match.";

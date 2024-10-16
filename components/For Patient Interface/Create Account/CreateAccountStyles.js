@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
       flex: 1,
       padding: 20,
       paddingBottom: 80, // Space above the buttonContainer to ensure scrolling space
+      backgroundColor: '#fff',
     },
     progressContainer: {
       //height: 10,  // Set a visible height
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: '#ccc',
       borderRadius: 5,
-      marginBottom: 15,
+      marginVertical: 15,
       padding: 10,
     },
     passwordContainer: {

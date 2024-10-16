@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {useFonts} from 'expo-font';
 import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { CardStyleInterpolators } from '@react-navigation/stack';
 
 import SigninPage from './components/For Patient Interface/Sign In page/SigninPage'
 import MyProfile from './components/For Patient Interface/My Profile/MyProfile'
@@ -29,6 +30,7 @@ import DoctorNotification from './components/For Doctor Interface/DoctorNotifica
 import CreateAccountDoctor from './components/For Patient Interface/Create Account/CreateAccoutDoctor';
 import Homepage from './components/For Patient Interface/Homepage/Homepage';
 import PatientMain from './components/For Patient Interface/PatientMain/PatientMain';
+import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
 
 export default function App() {
   
@@ -72,6 +74,14 @@ export default function App() {
           {/* Patient */}
           <Stack.Screen name='home' component={Homepage}/>
           <Stack.Screen name='myprofilepage' component={MyProfile} />
+          <Stack.Screen 
+            name='viewprofile' 
+            component={ViewProfile}
+            options={{
+              gestureEnabled: true, // Enable gesture-based navigation if needed
+              cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Push animation
+            }}
+          />
           <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />
           <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} />

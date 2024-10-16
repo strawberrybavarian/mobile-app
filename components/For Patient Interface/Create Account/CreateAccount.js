@@ -9,14 +9,43 @@ import styles from './CreateAccountStyles';
 import sd from '../../../utils/styleDictionary';
 import * as Validation from './Validations.js';
 import * as Progress from 'react-native-progress';
+import { Divider } from 'react-native-paper';
 
 const CreateAccount = ({ navigation }) => {
+
   const [currentStep, setCurrentStep] = useState(1);
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [middleinitial, setMiddleInitial] = useState('');
-  const [existingEmail, setExistingEmail] = useState([]);
   const [isErrorVisible, setIsErrorVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [nationality, setNationality] = useState('Filipino');
+  const [civilStatus, setCivilStatus] = useState('Single');
+  const civilStatusOptions = [
+    { label: 'Single', value: 'Single' },
+    { label: 'Married', value: 'Married' },
+    { label: 'Widowed', value: 'Widowed' },
+    { label: 'Separated', value: 'Separated' },
+    { label: 'Divorced', value: 'Divorced' },
+  ]
+  const [address, setAddress] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+  });
+  const[image, setImage] = useState(null);
+  const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('');
+  const genderOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Other', value: 'Other' },
+  ];
 
   // Validation states
   const [firstnameError, setfirstnameError] = useState('');
@@ -28,43 +57,13 @@ const CreateAccount = ({ navigation }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [genderError, setGenderError] = useState('');
   const [dobError, setDobError] = useState('');
-  const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('');
-  const genderOptions = [
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' },
-    { label: 'Other', value: 'Other' },
-  ];
+  
+
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
   const [showPassword, setShowPassword] = useState(true);
-
-  //get all emails
-  // useEffect(() => { 
-  //   axios.get(`${ip.address}/api/patient/allemail`)
-  //     .then((res) => {
-  //       if (Array.isArray(res.data)) {
-  //         setExistingEmail(res.data);
-  //         console.log('Emails set:', res.data);
-  //       } else {
-  //         console.error('Expected an array but got:', typeof res.data, res.data);
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.log('Error fetching emails:', err);
-  //     });
-  // }, [email]);
-
-  const checkIfEmailExists = (email) => {
-    return existingEmail.some(existing => existing === email);
-  };
 
   // Populate years from current year to past (e.g., last 100 years)
   const currentYear = new Date().getFullYear();
@@ -143,7 +142,7 @@ const CreateAccount = ({ navigation }) => {
   }, [firstname, middleinitial, lastname]);
 
   useEffect(() => {
-    setEmailError(Validation.validateEmail(existingEmail, email) || '');
+    setEmailError(Validation.validateEmail(email) || '');
     setContactNumberError(Validation.validateContactNumber(contactNumber) || '');
     setPasswordError(Validation.validatePassword(password) || '');
     setConfirmPasswordError(Validation.validateConfirmPassword(password, confirmPassword) || '');
@@ -367,7 +366,12 @@ const CreateAccount = ({ navigation }) => {
           />
           </View>
           { dobError && isErrorVisible ? <Text style = { styles.errorText }>{dobError}</Text> : null }
-            
+          
+          <Divider 
+            style={{}} 
+            bold
+          />
+
           {/* Gender Picker */}
           <View style={styles.pickerContainer}>
             <Dropdown
@@ -382,8 +386,30 @@ const CreateAccount = ({ navigation }) => {
               value={gender}
               onChange={item => setGender(item.value)}
             />
-            {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
           </View>
+          {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
+
+          <Divider 
+            style={{}} 
+            bold
+          />
+
+          <View style = {styles.pickerContainer}>
+            <Dropdown
+              placeholderStyle={styles.dropdownPlaceholder}
+              selectedTextStyle={styles.dropdownText}
+              containerStyle={styles.dropdownContainer}
+              data={civilStatusOptions}
+              labelField="label"
+              valueField="value"
+              placeholderTextColor={sd.colors.grey}
+              placeholder="Select Gender"
+              value={civilStatus}
+              onChange={item => setCivilStatus(item.value)}
+            />
+          </View>
+
+
         </View>
       )}
  

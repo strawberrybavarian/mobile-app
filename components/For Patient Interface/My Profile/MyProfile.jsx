@@ -9,17 +9,17 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
 import ViewProfile from './ProfileModals/ViewProfile';
 
-
-const MyProfile = ({ navigation }) => {
+const MyProfile = () => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isAccountModalVisible, setAccountModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -77,7 +77,7 @@ const MyProfile = ({ navigation }) => {
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.settingsContainer}>
           <Text style={styles.settingsTitle}> Settings </Text>
-          {renderSettingOption("user", "Account", () => setAccountModalVisible(true))}
+          {renderSettingOption("user", "Account", () => {navigation.navigate("viewprofile")})}
           {renderSettingOption("map", "Activity Logs")}
           {renderSettingOption("globe", "Others")}
         </View>
@@ -91,10 +91,10 @@ const MyProfile = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      <ViewProfile 
+      {/* <ViewProfile 
         isVisible={isAccountModalVisible} 
         closeModal={() => setAccountModalVisible(false)} 
-      />
+      /> */}
     </>
   );
 };

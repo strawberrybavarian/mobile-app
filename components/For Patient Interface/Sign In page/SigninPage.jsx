@@ -91,7 +91,7 @@ const SigninPage = ({ navigation }) => {
           Alert.alert("Invalid email or password. Please try again.");
         }
         else {
-          Alert.alert(response.data.message || "Invalid email or password. Please try again.");
+          Alert.alert( "Invalid email or password. Please try again.");
         }
       } 
       catch (err) {
@@ -121,7 +121,9 @@ const SigninPage = ({ navigation }) => {
         }
       } catch (err) {
         console.error('Error logging in:', err.response.data);
-        Alert.alert("An error occurred while logging in.");
+        err.status === 401 ? 
+          Alert.alert("Invalid email or password. Please try again.") :
+          Alert.alert("An error occurred while logging in.");
       }      
     }
   };    

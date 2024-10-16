@@ -36,43 +36,52 @@ const PatientMain = () => {
   });
 
   const [uname, setUname] = useState("");
+  const [uImage, setUImage] = useState("");
   const [userId, setUserId] = useState("");
   const [patientData, setPatientData] = useState({});
 
   
 
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const id = await getData('userId');
-        console.log("PatientMain userId:", id);
-        if (id) {
-          setUserId(id);
-          console.log(`Request URL: ${ip.address}/patient/api/onepatient/${id}`);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserId = async () => {
+        try {
+          const id = await getData('userId');
+          console.log("PatientMain userId:", id);
+          if (id) {
+            setUserId(id);
+            console.log(`Request URL: ${ip.address}/patient/api/onepatient/${id}`);
 
-          axios.get(`${ip.address}/api/patient/api/onepatient/${id}`)
-            .then(res => {
-              console.log("API response: ", res.data);
-              const patient = res.data?.thePatient;
-              if (patient) {
-                setUname(patient.patient_firstName + " " + patient.patient_lastName);
-              } else {
-                console.log('Patient not found');
-              }
-            })
-            .catch(err => console.log(err));
+            axios.get(`${ip.address}/api/patient/api/onepatient/${id}`)
+              .then(res => {
+                console.log("API response: ", res.data);
+                const patient = res.data?.thePatient;
+                if (patient) {
+                  setUname(patient.patient_firstName + " " + patient.patient_lastName);
+                  setUImage(patient.patient_image);
+                } else {
+                  console.log('Patient not found');
+                }
+              })
+              .catch(err => console.log(err));
+          }
+        } catch (err) {
+          console.log(err);
         }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchUserId();
-  }, []);
+      };
+
+      fetchUserId();  // Call the function when the screen is focused
+
+      return () => {
+        // Optional cleanup if necessary
+      };
+    }, [])  // Empty dependency array ensures it runs on screen focus
+  );
   
 
   return (
     <>
-      <Header3 name = {uname} />
+      <Header3 name = {uname} imageUri = {uImage}/>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}

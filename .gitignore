@@ -40,6 +40,9 @@ build/
 .DS_Store/
 .env/
 
+android/
+ios/
+
 # amplify
 .amplify
 amplify_outputs*

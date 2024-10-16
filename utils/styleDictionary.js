@@ -9,6 +9,8 @@ const sd = {
         textPrimary: '#212121',
         textSecondary: '#757575',
         grey: '#BDBDBD',
+        lightGray: '#F5F5F5',
+        darkGray: '#424242',
         blue: '#2F88D4',
         lightBlue: '#92A3FD',
         red: '#dc3545',

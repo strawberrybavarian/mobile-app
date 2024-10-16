@@ -1,26 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert, TextInput } from 'react-native';
-import Modal from 'react-native-modal';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import { Button } from 'react-native-paper';
+import { Entypo } from '@expo/vector-icons';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../../ContentExport';
 import { getData } from '../../../storageUtility';
 import sd from '../../../../utils/styleDictionary';
-import { Entypo } from '@expo/vector-icons';
-import { Button } from 'react-native-paper';
+import EditProfile from './EditProfile/EditProfile';
 
-// All the other imports remain the same...
-
-const ViewProfile = ({ isVisible, closeModal }) => {
+const ViewProfile = () => {
     const [userId, setUserId] = useState('');
     const [patient, setPatient] = useState(null);
-    const [isDisabled, setIsDisabled] = useState(true);
+    const [isEditModalVisible, setEditModalVisible] = useState(false);
+    
+    const navigation = useNavigation();
 
-    const [firstName, setFirstName] = useState('');
-    const [middleInitial, setMiddleInitial] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [contactNumber, setContactNumber] = useState('');
-    const [email, setEmail] = useState('');
-
+    // Fetch user ID from storage
     useEffect(() => {
         const fetchUserId = async () => {
             try {
@@ -33,147 +29,102 @@ const ViewProfile = ({ isVisible, closeModal }) => {
         fetchUserId();
     }, []);
 
-    useEffect(() => {
-        if (userId) {
-            axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
-                .then(res => {
-                    setPatient(res.data.thePatient);
-                })
-                .catch(err => console.log(err));
-        }
-    }, [userId]);
+    // Fetch patient data from the API based on the userId
+    useFocusEffect(
+        useCallback(() => {
+            const fetchPatientData = async () => {
+                if (userId) {
+                    try {
+                        const res = await axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`);
+                        setPatient(res.data.thePatient);
+                        console.log(res.data.thePatient);
+                    } catch (err) {
+                        console.log(err);
+                    }
+                }
+            };
+            fetchPatientData();
+        }, [userId])
+    );
 
-    useEffect(() => {
-        if (patient) {
-            setFirstName(patient.patient_firstName);
-            setMiddleInitial(patient.patient_middleInitial);
-            setLastName(patient.patient_lastName);
-            setContactNumber(patient.patient_contactNumber);
-            setEmail(patient.patient_email);
-        }
-    }, [patient]);
+    // Toggle Edit Modal
+    const handleEditModal = () => {
+        setEditModalVisible(!isEditModalVisible);
+    };
 
-    const textBox = (label, value, onChangeText) => {
+    // Update patient data after editing
+    const handleProfileUpdate = (updatedData) => {
+        setPatient(updatedData); // Update the patient state with the new data
+    };
+
+    const textBox = (label, value) => {
         return (
             <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>{label}</Text>
                 <View style={{ flex: 2 }}>
-                    <TextInput
-                        value={value ? value : '---'}
-                        editable={!isDisabled}
-                        style={isDisabled ? styles.infoText : [styles.infoText, { borderWidth: 1, borderColor: sd.colors.blue, color: 'black', borderRadius: 15 }]}
-                        onChangeText={onChangeText}
-                    />
+                    <Text style={styles.infoText}>{value ? value : '---'}</Text>
                 </View>
             </View>
         );
     };
-    
-
-    const toggleEditMode = () => {
-        if (!isDisabled) {
-            Alert.alert(
-                "Save Changes",
-                "Do you want to save the changes?",
-                [
-                    { text: "Cancel", style: "cancel" },
-                    {
-                        text: "Save",
-                        onPress: async () => {
-                            try {
-                                const updatedData = {
-                                    patient_firstName: firstName,
-                                    patient_lastName: lastName,
-                                    patient_middleInitial: middleInitial,
-                                    patient_contactNumber: contactNumber,
-                                    patient_email: email
-                                };
-
-                                const response = await axios.put(`${ip.address}/api/patient/api/updateinfo/${userId}`, updatedData);
-
-                                if (response.data.success) {
-                                    Alert.alert("Profile Updated", response.data.message);
-                                    setPatient(updatedData);  // Update the local state with the new data
-                                } else {
-                                    Alert.alert("Update Failed", response.data.message);
-                                }
-
-                                setIsDisabled(true);
-                            } catch (error) {
-                                console.error('Error updating profile:', error);
-                                Alert.alert("An error occurred while updating the profile.");
-                            }
-                        }
-                    }
-                ]
-            );
-        } else {
-            setIsDisabled(false);
-        }
-    };
 
     return (
-        <Modal 
-            isVisible={isVisible} 
-            onBackdropPress={closeModal} 
-            onSwipeComplete={closeModal}
-            swipeDirection="right"
-            animationIn="slideInRight" 
-            animationOut="slideOutRight"
-            coverScreen={true}
-            style={styles.modal}
-            propagateSwipe={true}
-        >
-            <View style={styles.modalContent}>
-                <View style={styles.header}>
-                    <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={closeModal} style={{flex:1}}/>
-                    <Text style={styles.headerText}>View Profile</Text>
-                    <View style={{flex: 1}}></View>
-                </View>
-
-                {patient ? (
-                    <>
-                        <View style={styles.imageCont}>
-                            <Image 
-                                source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }} 
-                                style={styles.profileImage} 
-                            />
-                            <Button 
-                                mode="contained" 
-                                onPress={() => console.log('Edit Profile')}
-                                buttonColor={sd.colors.blue}
-                            >
-                                Upload Image
-                            </Button>
-                        </View>
-
-                        <View style={styles.infoCont}>
-                            {textBox('First Name', firstName, setFirstName)}
-                            {textBox('Middle Initial', middleInitial, setMiddleInitial)}
-                            {textBox('Last Name', lastName, setLastName)}
-                            {textBox('Contact Number', contactNumber, setContactNumber)}
-                            {textBox('Email Address', email, setEmail)}
-                            {textBox('Gender', patient.patient_gender)}
-                        </View>
-                        
-                        <View style = {styles.buttonCont}>
-                            <Button
-                                mode="contained"
-                                onPress={toggleEditMode}
-                                buttonColor={sd.colors.blue}
-                            >
-                                {isDisabled ? 'Edit' : 'Save'}
-                            </Button>
-                        </View>
-                    </>
-                ) : (
-                    <Text>Loading...</Text>
-                )}
+        <View style={styles.modalContent}>
+            <View style={styles.header}>
+                <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
+                <Text style={styles.headerText}>View Profile</Text>
+                <View style={{ flex: 1 }}></View>
             </View>
-        </Modal>
+
+            {patient ? (
+                <>
+                    <View style={styles.topCont}>
+                        <View style={styles.imageCont}>
+                            <Image
+                                source={patient.patient_image ? { uri: `${ip.address}/${patient.patient_image}`} : {uri : 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }}
+                                style={styles.profileImage}
+                            />
+                        </View>
+                        <View style={styles.nameCont}>
+                            <Text style={styles.infoText}>{patient.patient_firstName} {patient.patient_lastName}</Text>
+                            <Text style={[styles.infoText, { fontSize: sd.fontSizes.medium, fontFamily: sd.fonts.medium }]}>{patient.patient_email}</Text>
+                            <View style={styles.buttonCont}>
+                                <Button
+                                    mode='outlined'
+                                    textColor={sd.colors.blue}
+                                    onPress={handleEditModal}  // Open Edit Modal
+                                    uppercase
+                                    theme={{ colors: { outline: sd.colors.blue } }}
+                                    style={styles.button}
+                                >
+                                    Edit Profile
+                                </Button>
+                            </View>
+                        </View>
+                    </View>
+
+                    <View style={styles.infoCont}>
+                        {textBox('First Name', patient.patient_firstName)}
+                        {textBox('Middle Initial', patient.patient_middleInitial)}
+                        {textBox('Last Name', patient.patient_lastName)}
+                        {textBox('Contact Number', patient.patient_contactNumber)}
+                        {textBox('Email Address', patient.patient_email)}
+                        {textBox('Gender', patient.patient_gender)}
+                    </View>
+
+                    {/* Edit Profile Modal */}
+                    <EditProfile
+                        isVisible={isEditModalVisible}
+                        toggleModal={handleEditModal}
+                        setProfileData={handleProfileUpdate}  // Pass updated data to update patient state
+                    />
+                </>
+            ) : (
+                <Text>Loading...</Text>
+            )}
+        </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     modal: {
@@ -196,45 +147,46 @@ const styles = StyleSheet.create({
         fontFamily: sd.fonts.bold,
         textAlign: 'center',
         flex: 1,
-        //marginRight: 30,
-        //marginLeft: 20,
+    },
+    topCont: {
+        flexDirection: 'row',
+        backgroundColor: sd.colors.white,
+        margin: 20,
+        ...sd.shadows.large,
+        borderRadius: 20,
+        marginBottom: 10,
     },
     imageCont: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginVertical: 20,
-        height: '20%',
-        paddingBottom: 50,
+        padding: 20,
+    },
+    nameCont: {
         backgroundColor: sd.colors.white,
+        justifyContent: 'center',
     },
     profileImage: {
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
         borderRadius: 80,
         borderColor: sd.colors.blue,
-        borderWidth: 4,
         marginBottom: 10,
     },
     infoCont: {
-        paddingHorizontal: 40,
-        marginBottom: 20,
+        margin: 20,
         backgroundColor: sd.colors.white,
+        borderRadius: 20,
+        padding: 20,
+        ...sd.shadows.large,
     },
     infoRow: {
-        //marginBottom: 10,
-        backgroundColor: sd.colors.white,
         height: 80,
         flexDirection: 'column',
-        //alignItems: 'center',
-        verticalAlign: 'center',
         justifyContent: 'flex-start',
-        //borderBottomWidth: StyleSheet.hairlineWidth,
         paddingBottom: 10,
     },
     infoLabel: {
         fontSize: sd.fontSizes.medium,
         fontFamily: sd.fonts.medium,
-        //alignSelf: 'center',
+        color: sd.colors.darkGray,
         width: '40%',
         marginBottom: 5,
     },
@@ -242,17 +194,17 @@ const styles = StyleSheet.create({
         fontSize: sd.fontSizes.large,
         fontFamily: sd.fonts.semiBold,
         textAlign: 'left',
-        padding: 10,
-        //paddingLeft: 20,
         color: 'black',
-        //borderBottomWidth: 1,
         borderColor: sd.colors.white,
-        
-        //marginBottom: 10,
     },
-    buttonCont : {
-        padding : 10
-    }
+    buttonCont: {
+        paddingVertical: 10,
+        backgroundColor: sd.colors.white,
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default ViewProfile;
