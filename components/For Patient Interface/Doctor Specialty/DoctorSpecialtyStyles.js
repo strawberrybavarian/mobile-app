@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     backgroundColor: '#ffffff',
     flex: 1,
+    //paddingBottom: 200,
   },
   searchContainer: {
     flexDirection: "row",
@@ -24,12 +25,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     flexDirection: 'column',
     padding: 10,
+    paddingBottom: 200
   },
   specialtyHeader: {
     paddingLeft: 20,
     marginLeft: 3,
     fontFamily: 'Poppins-SemiBold',
     fontSize: sd.fontSizes.xl,
+    color: sd.colors.blue,
   },
   specialtyButtonContainer: {
     flexDirection: 'row',
@@ -63,11 +66,12 @@ const styles = StyleSheet.create({
     height: 90,
   },
   buttonText: {
-    fontFamily: "Poppins",
-    fontSize: 15,
+    fontFamily: sd.fonts.light,
+    fontSize: sd.fontSizes.medium,
     textAlign: 'center',
     paddingVertical: 15,
     paddingHorizontal: 15,
+    color: sd.colors.darkBlue,
   },
 });
 

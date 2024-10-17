@@ -13,6 +13,7 @@ const sd = {
         darkGray: '#424242',
         blue: '#2F88D4',
         lightBlue: '#92A3FD',
+        darkBlue: '#192841',
         red: '#dc3545',
         white: '#FFFFFF',
         green : '#28a745'

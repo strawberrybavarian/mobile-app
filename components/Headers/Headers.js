@@ -60,8 +60,8 @@ const Header3 = ({name, imageUri}) => {
             <View style={styles.textCont}>
               <View style={styles.infoCont}>
                 {/* Optional chaining to prevent undefined errors */}
-                <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 18 }}>
-                  {name ? name : 'John Doe'}
+                <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 18, }}>
+                  {name ? name : 'Loading...'}
                 </Text>
               </View>
 

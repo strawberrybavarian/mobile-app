@@ -16,6 +16,8 @@ import Carousel, {
     ICarouselInstance,
     Pagination,
   } from "react-native-reanimated-carousel";
+import sd from '../../../utils/styleDictionary';
+import { Button, Card } from 'react-native-paper';
 
 const Homepage = () => {
 
@@ -121,7 +123,7 @@ const Homepage = () => {
                         <View
                             style={{
                                 flex: 1,
-                                // borderWidth: 1,
+                                borderRadius: sd.borders.radiusXL,
                                 justifyContent: 'center',
                                 
                             }}
@@ -130,6 +132,7 @@ const Homepage = () => {
                                 source={{ uri: imageArray[index] }}
                                 style={{ width: '100%', height: '100%' }}  // Ensure image fills the container
                                 resizeMode="cover"
+                                
                             />
                         </View>
                     )}
@@ -147,6 +150,13 @@ const Homepage = () => {
                         <AnimatedButton label = "EKG" />
                         <AnimatedButton label = "Other Services" />
                     </View>
+                    {/* <Button
+                        mode="contained"
+                        //style = {styles.optionBox}
+                        onPress={() => console.log('Check-up')}
+                    >
+                        Check-up
+                    </Button> */}
                 </View>
                
             </ScrollView>

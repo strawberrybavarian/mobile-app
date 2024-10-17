@@ -128,117 +128,20 @@ export const validateConfirmPassword = (password, confirmPassword) => {
     return null; // Return null if validation passes
 }
 
-// const validateFirstName = (text) => {
-  //   //const capitalized = capitalizeWords(text);
-  //   if (!text) {
-  //     setfirstnameError("First name cannot be empty.");
-  //   } else {
-  //     setfirstnameError("");
-  //   }
-  //   //text.trim();
-  //   setFirstName(text);
-  // };
+export const validateSpecialty = (text) => {
+    if (!text) {
+        return "Specialty is required.";
+    }
 
-  // const validateLastName = (text) => {
-  //   //onst capitalized = capitalizeWords(text);
-  //   if (!text) {
-  //     setlastnameError("Last name cannot be empty.");
-  //   } else {
-  //     setlastnameError("");
-  //   }
-  //   setLastName(text);
-  // };
+    return null; // Return null if validation passes
 
-  // const validateMiddleInitial = (text) => {
-  //   const trimmedInitial = text.trim().replace('.', '');
-  //   setMiddleInitial(trimmedInitial.toUpperCase());
-  // };
+}
 
-  // const validateEmail = (text) => {
-  //   //const lowercased = text.trim().toLowerCase();
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const validateLicenseNo = (text) => {
+    if (!text) {
+        return "License number is required.";
+    }
 
-  //   if (!emailRegex.test(text)) {
-  //     setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-  //   } else {
-  //     setEmailError("");
-  //   }
-  //   setEmail(text);
-  // };
+    return null; // Return null if validation passes
 
-  // const validateContactNumber = (text) => {
-  //   //const trimmed = text.trim();
-  //   const contactNumberRegex = /^09\d{9}$/;
-
-  //   if (!text) {
-  //     setContactNumberError("Contact number cannot be empty.");
-  //   } else if (!contactNumberRegex.test(text)) {
-  //     setContactNumberError("Contact number must start with 09 and contain 11 digits.");
-  //   } else {
-  //     setContactNumberError("");
-  //   }
-  //   setContactNumber(text);
-  // };
-  
-
-  // const validatePassword = (text) => {
-  //   const trimmed = text.trim();
-  //   if (trimmed.length < 8) {
-  //     setPasswordError("Password must be at least 8 characters");
-  //   } else {
-  //     setPasswordError("");
-  //   }
-  //   setPassword(trimmed);
-  // };
-
-  // const validateConfirmPassword = (text) => {
-  //   const trimmed = text.trim();
-  //   if (password !== trimmed) {
-  //     setConfirmPasswordError("Passwords do not match");
-  //   } else {
-  //     setConfirmPasswordError("");
-  //   }
-  //   setConfirmPassword(trimmed);
-  // };
-
-  // const validateGender = (value) => {
-  //   if (!value) {
-  //     setGenderError("Please select a gender.");
-  //   } else {
-  //     setGenderError("");
-  //   }
-  //   setGender(value);
-  // };
-
-//   const validateEmail = (text) => {
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     const trimtext = text.trim(); // Remove leading and trailing whitespaces
-//     //const lowerCaseText = trimtext.toLowerCase(); // Convert the input to lowercase
-  
-//     if (!trimtext) {
-//       setEmailError("Email cannot be empty");
-//     } else if (!emailRegex.test(trimtext)) {
-//       setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-//     } else {
-//       setEmailError("");
-//     }
-//     setEmail(trimtext); // Set the lowercase email
-//   };
-  
-//   const validatePassword = (text) => {
-//     if (!text || text.length < 8) {
-//       setPasswordError("Password must be at least 8 characters");
-//     } else {
-//       setPasswordError("");
-//     }
-//     setPassword(text);
-//   };
-
-//   const validateRole = (value) => {
-//     if (!value) {
-//       setRoleError("Please select a role");
-//     } else {
-//       setRoleError("");
-//     }
-//     setRole(value);
-//   };
+}

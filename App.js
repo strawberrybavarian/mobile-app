@@ -1,10 +1,10 @@
-import { StyleSheet, StatusBar} from 'react-native';
+import { StyleSheet, StatusBar, Platform} from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {useFonts} from 'expo-font';
 import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { CardStyleInterpolators } from '@react-navigation/stack';
+import { CardStyleInterpolators, TransitionSpecs } from '@react-navigation/stack';
 
 import SigninPage from './components/For Patient Interface/Sign In page/SigninPage'
 import MyProfile from './components/For Patient Interface/My Profile/MyProfile'
@@ -31,6 +31,8 @@ import CreateAccountDoctor from './components/For Patient Interface/Create Accou
 import Homepage from './components/For Patient Interface/Homepage/Homepage';
 import PatientMain from './components/For Patient Interface/PatientMain/PatientMain';
 import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
+import MedicalRecords from './components/For Patient Interface/My Profile/ProfileModals/MedicalRecords/MedicalRecords';
+import ViewDoctorProfile from './components/For Doctor Interface/Doctor Profile/DoctorProfile Screens/ViewDoctorProfile';
 
 export default function App() {
   
@@ -73,24 +75,70 @@ export default function App() {
 
           {/* Patient */}
           <Stack.Screen name='home' component={Homepage}/>
-          <Stack.Screen name='myprofilepage' component={MyProfile} />
+          <Stack.Screen 
+            name='myprofilepage' 
+            component={MyProfile} 
+            options={{
+              gestureEnabled: true, // Enable gesture navigation
+              cardStyleInterpolator: Platform.OS === 'android' 
+                ? ({ current, layouts }) => { // Android-specific right-to-left transition
+                    return {
+                      cardStyle: {
+                        transform: [
+                          {
+                            translateX: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [layouts.screen.width, 0], // Right-to-left animation
+                            }),
+                          },
+                        ],
+                      },
+                    };
+                  }
+                : undefined, // No custom animation for iOS
+              transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
+                open: TransitionSpecs.TransitionIOSSpec,
+                close: TransitionSpecs.TransitionIOSSpec,
+              },
+            }}
+          />
           <Stack.Screen 
             name='viewprofile' 
             component={ViewProfile}
             options={{
-              gestureEnabled: true, // Enable gesture-based navigation if needed
-              cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, // Push animation
+              gestureEnabled: true, // Enable gesture navigation
+              cardStyleInterpolator: Platform.OS === 'android' 
+                ? ({ current, layouts }) => { // Android-specific right-to-left transition
+                    return {
+                      cardStyle: {
+                        transform: [
+                          {
+                            translateX: current.progress.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [layouts.screen.width, 0], // Right-to-left animation
+                            }),
+                          },
+                        ],
+                      },
+                    };
+                  }
+                : undefined, // No custom animation for iOS
+              transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
+                open: TransitionSpecs.TransitionIOSSpec,
+                close: TransitionSpecs.TransitionIOSSpec,
+              },
             }}
           />
-          <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} />
+          {/* <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} /> */}
           <Stack.Screen name='searchappointment' component={SearchForAppointment} />
-          <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} />
+          {/* <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} /> */}
           <Stack.Screen name='bookappointment' component={BookAppointment} />
           <Stack.Screen name='profileform' component={ProfileForm} />
           <Stack.Screen name='upcoming' component={Upcoming}/>
           <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
           <Stack.Screen name='apptdetails' component={AppointmentDetails} />
           <Stack.Screen name='ptnmain' component={PatientMain} />
+          <Stack.Screen name='medicalrecords' component={MedicalRecords} />
 
 
           {/* Doctors */}
@@ -99,6 +147,7 @@ export default function App() {
           <Stack.Screen name='doctormain' component={DoctorMain}/>
           <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
           <Stack.Screen name='doctornotification' component={DoctorNotification}/>
+          <Stack.Screen name= 'viewdrprofile' component={ViewDoctorProfile}/>
         </Stack.Navigator>   
       </NavigationContainer>  
     </>

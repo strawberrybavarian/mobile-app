@@ -5,14 +5,14 @@ import { getData } from "../../storageUtility";
 import axios from "axios";
 import { ip } from "../../../ContentExport";
 import styles from "./NotificationsCSS";
+import Modal from 'react-native-modal';
+import { useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
 const Notifications = () => {
     return (
-        <ActionSheet>
-            <View style={styles.container}>
-                NOTIFICATiONS
-            </View>
-        </ActionSheet>
+        <>
+        </>
     )
 };
 

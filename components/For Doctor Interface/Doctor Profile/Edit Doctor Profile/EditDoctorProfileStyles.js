@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import sd from '../../../../../utils/styleDictionary';
+import sd from '../../../../utils/styleDictionary';
 
 export default styles = StyleSheet.create({
   modal:{

@@ -1,38 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
-import CalendarPicker from 'react-native-calendar-picker';
 import doctorImage1 from '../../../assets/pictures/Doc.png';
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
-import { TextInput } from 'react-native-paper';
-import { getSpecialtyCode, getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
+import { Card, DataTable, TextInput } from 'react-native-paper';
+import { getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
 import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
+import dayjs from 'dayjs';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import sd from '../../../utils/styleDictionary';
 
-const DoctorCard = ({ doctorName, specialty, rating, image }) => (
-  <View style={styles.doctorCardContainer}>
-    <Image source={image} style={styles.doctorCardImage} />
-    <View style={styles.doctorCardContent}>
-      <Text style={styles.doctorCardName}>{doctorName}</Text>
-      <Text style={styles.doctorCardSpecialty}>{specialty}</Text>
-      <View style={{ flexDirection: 'row' }}>
-        <FontAwesome5 name="thumbtack" size={12} style={styles.Icon} />
-        <Text style={styles.doctorCardSpecialty1}>NU Hospital</Text>
-      </View>
-    </View>
-  </View>
-);
-
-const BookAppointment = ({ navigation , route}) => {
-  //arrays
+const BookAppointment = ({ navigation, route }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
-  const [reason, setReason] = useState('')
-  const [userId, setUserId] = useState(null)
+  const [reason, setReason] = useState('');
+  const [userId, setUserId] = useState(null);
+  const [availability, setAvailability] = useState({});
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [bookedPatients, setBookedPatients] = useState({ morning: 0, afternoon: 0 }); // Track booked patients
 
-  const { item } = route.params || {}
+  const { item } = route.params || {};
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -48,15 +40,117 @@ const BookAppointment = ({ navigation , route}) => {
       }
     };
 
+    const fetchDoctorAvailability = async () => {
+      try {
+        const response = await axios.get(`${ip.address}/api/doctor/${item._id}/available`);
+        setAvailability(response.data.availability);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
     fetchUserId();
+    fetchDoctorAvailability();
   }, []);
 
+  const getAvailableTimes = (day) => {
+    const dayAvailability = availability[day];
+    if (!dayAvailability) return [];
+  
+    let times = [];
+  
+    // Check morning availability
+    if (dayAvailability.morning && dayAvailability.morning.available) {
+      const availableSlots = dayAvailability.morning.maxPatients - (bookedPatients.morning || 0); // Fallback to 0 if undefined
+      console.log('Morning slots:', { availableSlots }); // Debugging line
+  
+      if (availableSlots > 0) {
+        const startTime = formatTime(dayAvailability.morning.startTime);
+        const endTime = formatTime(dayAvailability.morning.endTime);
+        times.push({
+          label: "Morning",
+          timeRange: `${startTime} - ${endTime}`,
+          availableSlots,
+        });
+      }
+    }
+  
+    // Check afternoon availability
+    if (dayAvailability.afternoon && dayAvailability.afternoon.available) {
+      const availableSlots = dayAvailability.afternoon.maxPatients - (bookedPatients.afternoon || 0); // Fallback to 0 if undefined
+      console.log('Afternoon slots:', { availableSlots }); // Debugging line
+  
+      if (availableSlots > 0) {
+        const startTime = formatTime(dayAvailability.afternoon.startTime);
+        const endTime = formatTime(dayAvailability.afternoon.endTime);
+        times.push({
+          label: "Afternoon",
+          timeRange: `${startTime} - ${endTime}`,
+          availableSlots,
+        });
+      }
+    }
+  
+    return times;
+  };
+   
 
-  const drname = ("Dr. " + item.dr_firstName + " " + item.dr_lastName)
-  const dr_specialty = getSpecialtyDisplayName(item.dr_specialty);
+  const formatTime = (timeString) => {
+    const [hours, minutes] = timeString.split(":");
+    const time = new Date();
+    time.setHours(hours);
+    time.setMinutes(minutes);
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
+    return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  };
+
+  // Inside the component
+useEffect(() => {
+  // Inside the fetchBookedPatients function
+  const fetchBookedPatients = async () => {
+    try {
+      const response = await axios.get(`${ip.address}/api/appointments/${item._id}/count?date=${selectedDate}`);
+      const { morning = 0, afternoon = 0 } = response.data || {}; // Set default values
+  
+      console.log('Fetched booked patients:', { morning, afternoon }); // Debugging line
+      setBookedPatients({ morning, afternoon });
+  
+      const selectedDay = new Date(selectedDate).getDay();
+      const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+      const day = daysOfWeek[selectedDay];
+  
+      const times = getAvailableTimes(day);
+      setAvailableTimes(times);
+  
+      // Clear selected hour when the date changes
+      if (times.length > 0) {
+        setSelectedHour(null); // Clear selected hour to force re-selection
+      } else {
+        setSelectedHour(null); // Clear selected hour if no available times
+      }
+    } catch (err) {
+      console.log('Error fetching booked patients:', err);
+      setBookedPatients({ morning: 0, afternoon: 0 });
+    }
+  };
+  
+  if (selectedDate) {
+    fetchBookedPatients();
+    console.log('Selected date:', selectedDate);
+    console.log('Booked patients:', bookedPatients);
+    console.log('Availability:', availability);
+  } else {
+    setAvailableTimes([]); // Clear available times if no date is selected
+    setSelectedHour(null); // Clear selected hour as well
+  }
+}, [selectedDate, availability]); // Add availability as a dependency
+
+
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(false);
+    if (date) {
+      setSelectedDate(date);
+    }
   };
 
   const handleHourSelect = (hour) => {
@@ -64,262 +158,250 @@ const BookAppointment = ({ navigation , route}) => {
   };
 
   const handleReason = (input) => {
-    setReason(input)
-  }
+    setReason(input);
+  };
 
   const handleCreateAppointment = async () => {
-    console.log(selectedDate, selectedHour, reason)
-
     if (!selectedDate || !selectedHour || !reason || !userId) {
       Alert.alert('Validation Error', 'Please fill all fields');
       return;
     }
 
     try {
+      const formattedDate = dayjs(selectedDate).format('YYYY-MM-DD');
+      const formattedTime = dayjs(selectedHour).format('HH:mm');
+
       const appointmentData = {
-        doctor: item._id,  
-        date: selectedDate,
-        time: selectedHour,
-        reason: reason,
-        cancelReason: '',
-        status: 'Scheduled',
-        secretaryId: null,  
-        prescriptionId: null,
-        //appointment_type: null
+        doctor: item._id,
+        date: formattedDate,
+        time: formattedTime,
+        reason,
+        medium: 'in-person',
+        appointment_type: {
+          appointment_type: 'Consultation',
+          category: 'General Consultation',
+        },
       };
 
       const response = await axios.post(`${ip.address}/api/patient/api/${userId}/createappointment`, appointmentData);
       console.log('Appointment created:', response.data);
       Alert.alert('Success', 'Appointment created successfully');
-      navigation.navigate('ptnmain');  
+      navigation.navigate('ptnmain');
     } 
     catch (err) {
-      console.error('Error creating appointment:', err);
-      Alert.alert('Error', 'Could not create appointment', err);
+      console.error('Error creating appointment: ', err.response?.data?.status);
+      Alert.alert('Error', `${err.response?.data?.message || err.message} `);
     }
   };
 
-  const availableHours = ["8:00 AM to 11:00 AM", "3:00 PM to 4:00 PM"];
+  const renderAvailability = (day) => {
+    const dayAvailability = availability[day.toLowerCase()];
+    if (!dayAvailability) return { morning: 'Not available', afternoon: 'Not available' };
+
+    const formatTime = (time) => {
+      const [hour, minute] = time.split(':');
+      const parsedHour = parseInt(hour);
+      if (parsedHour === 12) return `${hour}:${minute} PM`;
+      if (parsedHour > 12) return `${parsedHour - 12}:${minute} PM`;
+      return `${hour}:${minute} AM`;
+    };
+
+    return {
+      morning: dayAvailability.morning?.available
+        ? `${formatTime(dayAvailability.morning.startTime)} - ${formatTime(dayAvailability.morning.endTime)}`
+        : 'Not available',
+      afternoon: dayAvailability.afternoon?.available
+        ? `${formatTime(dayAvailability.afternoon.startTime)} - ${formatTime(dayAvailability.afternoon.endTime)}`
+        : 'Not available',
+    };
+  };
+
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   return (
-    <>
-      <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <KeyboardAwareScrollView style={styles.scrollContainer}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.arrowButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Entypo name="chevron-thin-left" size={14} />
-          </TouchableOpacity>
-          <View style={{ justifyContent: 'center', width: "83%" }}>
-            <Text style={styles.title}>Book Appointment</Text>
-          </View>
+          <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
+          <Text style={styles.title}>Book Appointment</Text>
+          <View style={{ flex: 1 }} />
         </View>
 
-        <DoctorCard
-          doctorName = {drname}
-          specialty= {dr_specialty}
-          rating={4.5}
-          image={doctorImage1}
-        />
+        <Card style={{ marginVertical: 10, backgroundColor: sd.colors.white, borderColor: sd.colors.blue }} mode='outlined'>
+          <Card.Content>
+            <View style={{ flexDirection: 'row' }}>
+              <Image source={{ uri: `${ip.address}/${item.dr_image}` }} style={{ width: 50, height: 50, borderRadius: 50 }} />
+              <View style={{ marginLeft: 10 }}>
+                <Text style={styles.drName}>{`Dr. ${item.dr_firstName} ${item.dr_lastName}`}</Text>
+                <Text style={styles.drSpecialty}>{item.dr_specialty}</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        <Text style={styles.subtitle}>Availability</Text>
+
+        <Card style={{ marginVertical: 10, backgroundColor: sd.colors.white, borderColor: sd.colors.blue }} mode='outlined'>
+          <Card.Content>
+            <DataTable>
+              <DataTable.Header>
+                <DataTable.Title>Day</DataTable.Title>
+                <DataTable.Title>Morning </DataTable.Title>
+                <DataTable.Title>Afternoon </DataTable.Title>
+              </DataTable.Header>
+
+              {days.map((day) => {
+                const availability = renderAvailability(day);
+                return (
+                  <DataTable.Row key={day}>
+                    <DataTable.Cell>{day}</DataTable.Cell>
+                    <DataTable.Cell>{availability.morning}</DataTable.Cell>
+                    <DataTable.Cell>{availability.afternoon}</DataTable.Cell>
+                  </DataTable.Row>
+                );
+              })}
+            </DataTable>
+          </Card.Content>
+        </Card>
 
         <Text style={styles.subtitle}>Select a Date</Text>
-        <View style={styles.calendarContainer}>
-          <CalendarPicker
-            onDateChange={handleDateChange}
-            selectedDayColor="#92a3fd"
-            selectedDayTextColor="white"
-            todayBackgroundColor="transparent"
-            todayTextStyle={{ color: '#000' }}
-            textStyle={{ color: '#000', fontFamily: 'Poppins' }}
-            customDatesStyles={[
-              {
-                date: selectedDate,
-                style: { backgroundColor: 'red' },
-                textStyle: { color: 'white' },
-              },
-            ]}
-            dayShape="circle"
-            width={300}
-            height={300}
-            hideDayNames={true}
-          />
-        </View>
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {selectedDate ? dayjs(selectedDate).format('MMMM D, YYYY') : 'Choose a Date'}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <RNDateTimePicker value={selectedDate || new Date()} mode="date" display="default" onChange={handleDateChange} minimumDate={new Date()} />
+        )}
 
         <Text style={styles.subtitle}>Select Hour</Text>
-        <View style={styles.hourContainer}>
-          {availableHours.map((hour, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.hourOval,
-                selectedHour === hour && styles.selectedHour
-              ]}
-              onPress={() => handleHourSelect(hour)}
-            >
-              <Text style={[
-                styles.hourText,
-                selectedHour === hour && styles.selectedHourText,
-                styles.boldText,
-              ]}>
-                {hour}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {availableTimes.length != 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.timeSelection}>
+              {availableTimes.map((timeSlot, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.timeButton,
+                    selectedHour === timeSlot.timeRange && styles.selectedTimeButton,
+                  ]}
+                  onPress={() => handleHourSelect(timeSlot.timeRange)}>
+                  <Text style={styles.timeButtonText}>{timeSlot.timeRange}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        ) : (
+          <Text style={styles.noAvailableTimes}>No available times for the selected date</Text>
+        )}
 
-        <Text style={styles.subtitle}>Primary Concern</Text>
-        <View>
-          <TextInput
-            onChangeText={handleReason}
-            placeholder='State your reason here.'
-            value = {reason}
-            multiline = {true}
-          />
-        </View>
+        <Text style={styles.subtitle}>Reason for Appointment</Text>
+        <TextInput
+          mode="outlined"
+          multiline
+          value={reason}
+          onChangeText={handleReason}
+          style={styles.textArea}
+        />
 
-
-        <TouchableOpacity
-          style={styles.nextButton}
-          onPress={handleCreateAppointment}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
+        <TouchableOpacity style={styles.submitButton} onPress={handleCreateAppointment}>
+          <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
-      </ScrollView>
-      {/* <NavigationBar /> */}
-    </>
+      </KeyboardAwareScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: sd.colors.backgroundGray,
+  },
+  scrollContainer: {
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 30,
-  },
-  arrowButton: {
-    padding: 10,
-  },
-  arrowText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: "#9dceff"
+    marginBottom: 20,
   },
   title: {
-    fontSize: 20,
-    fontFamily: 'Poppins-SemiBold',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: sd.colors.blue,
+    flex: 2,
     textAlign: 'center',
   },
   subtitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: sd.colors.darkGray,
+  },
+  drName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: sd.colors.black,
+  },
+  drSpecialty: {
     fontSize: 14,
-    marginTop: 16,
-    marginBottom: 8,
-    marginLeft: 5,
-    fontFamily: 'Poppins-SemiBold'
+    color: sd.colors.gray,
   },
-  calendarContainer: {
-    backgroundColor: 'rgba(146, 163, 253, 0.10)',
-    borderRadius: 20,
+  dateButton: {
+    backgroundColor: sd.colors.lightBlue,
     padding: 10,
-    marginTop: 10,
-    width: '100%',
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 10,
   },
-  hourContainer: {
-    marginTop: 8,
+  dateButtonText: {
+    fontSize: 16,
+    color: sd.colors.darkBlue,
   },
-  hourOval: {
-    marginLeft: 5,
+  timeSelection: {
+    flexDirection: 'row',
+  },
+  timeButton: {
+    backgroundColor: sd.colors.lightBlue,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: '#9dceff',
-    borderRadius: 20,
-    alignItems: "center",
-    flexDirection: "row",
-    borderStyle: "solid",
-    flex: 1,
-    marginVertical: 5,
+    borderRadius: 10,
+    marginHorizontal: 5,
   },
-  selectedHour: {
-    backgroundColor: '#92a3fd',
+  selectedTimeButton: {
+    backgroundColor: sd.colors.darkBlue,
   },
-  hourText: {
-    color: '#92a3fd',
-    fontSize: 12,
-  },
-  selectedHourText: {
-    color: '#fff',
-  },
-  boldText: {
-    fontWeight: 'bold',
-  },
-  nextButton: {
-    backgroundColor: '#9dceff',
-    borderRadius: 20,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 10,
-    marginHorizontal: 16,
-  },
-  nextButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-
-  // DoctorCard styles
-  doctorCardContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(146, 163, 253, 0.10)',
-    padding: 16,
-    borderRadius: 20,
-    marginTop: 26,
-  },
-  doctorCardImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: 16,
-  },
-  doctorCardContent: {
-    justifyContent: 'center'
-  },
-  doctorCardName: {
-    fontSize: 15,
-    fontFamily: 'Poppins-SemiBold'
-  },
-  Icon: {
-    width: 20,
-    justifyContent: 'flex-start',
-    marginTop: 2,
-    color: '#666',
-  },
-  doctorCardSpecialty: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'Poppins'
-  },
-  doctorCardSpecialty1: {
-    fontSize: 12,
-    color: '#666',
-    fontFamily: 'Poppins',
-    marginLeft: 3,
-  },
-  doctorCardRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  doctorCardRatingText: {
-    marginLeft: 5,
+  timeButtonText: {
     fontSize: 16,
-    color: '#666',
+    color: sd.colors.white,
+  },
+  noAvailableTimes: {
+    color: sd.colors.red,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  textArea: {
+    backgroundColor: sd.colors.white,
+    borderRadius: 10,
+    borderColor: sd.colors.lightBlue,
+    borderWidth: 1,
+    padding: 10,
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  submitButton: {
+    backgroundColor: sd.colors.blue,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 20,
+    marginBottom: 100,
+  },
+  submitButtonText: {
+    fontSize: 18,
+    color: sd.colors.white,
+    fontWeight: 'bold',
   },
 });
 

@@ -120,10 +120,9 @@ const SigninPage = ({ navigation }) => {
           Alert.alert(response.data.message || "Invalid email or password. Please try again.");
         }
       } catch (err) {
-        console.error('Error logging in:', err.response.data);
         err.status === 401 ? 
           Alert.alert("Invalid email or password. Please try again.") :
-          Alert.alert("An error occurred while logging in.");
+          Alert.alert("Error logging in:" , err.response.data.message);
       }      
     }
   };    

@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
     carouselContainer: {
         height: Dimensions.get('window').height / 4, // Keep a fixed height for carousel
         backgroundColor: '#f8f8f8',
+        margin: 30,
+        borderRadius: sd.borders.radiusXL,
     },
     optionsContainer: {
         padding: 20,

@@ -8,6 +8,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { DoctorHomeStyles } from "../../For Doctor Interface/DoctorStyleSheet/DoctorCSS";
 import axios from "axios";
 import { ip } from "../../../ContentExport";
+import sd from "../../../utils/styleDictionary";
+import { useNavigation } from "@react-navigation/native";
+import { Divider, Searchbar } from "react-native-paper";
 
 //   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
 //   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
@@ -16,7 +19,7 @@ import { ip } from "../../../ContentExport";
 //   { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
 // ];
 
-const SearchForAppointment = ({ navigation, route }) => {
+const SearchForAppointment = ({ route }) => {
   const [searchText, setSearchText] = useState("");
   // const [appointments, setAppointments] = useState(dummyAppointments);
   const [allDoctorArray, setAllDoctorArray] = useState([]);
@@ -26,6 +29,8 @@ const SearchForAppointment = ({ navigation, route }) => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const { specpec } = route.params || {};
   console.log("specpec = " + specpec, typeof (specpec));
+
+  const navigation = useNavigation();
 
   // Get all doctors
   
@@ -59,8 +64,8 @@ const SearchForAppointment = ({ navigation, route }) => {
   const bookAppointmentButton = (item) => {
     navigation.navigate('aboutdoctor', { item });
     console.log(item)
-  }; //to be changed
-
+  };
+  
   // For search
   useEffect(() => {
     const filteredData = allDoctorArray.filter((item) =>
@@ -139,7 +144,7 @@ const SearchForAppointment = ({ navigation, route }) => {
   
     return (
       <TouchableOpacity style={styles.appointmentItem} onPress={() => bookAppointmentButton(item)}>
-        <Image source={doctorImage1} style={styles.doctorImage} />
+        <Image source={{uri: `${ip.address}/${item.dr_image}`}} style={styles.doctorImage} />
         <View style={styles.textContainer}>
           <Text style={styles.doctorName}>Dr. {item.dr_firstName} {item.dr_lastName}</Text>
           <Text style={styles.specialty}>{item.dr_specialty}</Text>
@@ -159,53 +164,41 @@ const SearchForAppointment = ({ navigation, route }) => {
 
   return (
     <>
-      <View style={styles.allSearch}>
+      <ScrollView
+        backgroundColor={sd.colors.white}
+      >
+          <View style={styles.headerCont}>
+              <Entypo name="chevron-thin-left" size={sd.fontSizes.large} color={sd.colors.blue} style={{flex:1}} onPress={()=>{navigation.goBack()}}/>
+              <Text style= {styles.headerText}>
+                {specpec ? specpec + ' Department' : 'All Doctors'}
+              </Text>
+              <View style = {{flex:1}}></View>
+          </View>
 
-        {/* arrow */}
-        <View style={styles.arrowCont}>
-          <TouchableOpacity
-            style={styles.arrowButton}
-            onPress={() => navigation.goBack()}>
-            <Entypo name="chevron-thin-left" style={styles.arrowText} size={11} />
-          </TouchableOpacity>
-          
-        </View>
-
-        {/* search bar */}
-        <View style={styles.searchInputContainer}>
-          <Image source={magnify} style={styles.magnifyIcon} />
-          <TextInput
-            style={[styles.searchInput]}
-            placeholder="Search your Doctor"
-            value={searchText}
-            onChangeText={(text) => setSearchText(text)}
-          />
-        </View>
-      </View>
-
-
-      
-
-      <ScrollView style={styles.container}>
-          
-        <View style={styles.appointmentBox}>
-          <Text>
-            {specpec ? specpec + ' Department' : 'All Doctors'}
-          </Text>
-          <FlatList
-            data={doctorFiltered}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <ScrollView style={styles.container}>   
+          <View style={styles.appointmentBox}>
+            <View style={styles.searchInputContainer}>
+              <Searchbar
+                placeholder="Search your Doctor"
+                onChangeText={(text) => setSearchText(text)}
+                value={searchText}
+                style={{ width: "100%", borderRadius: 20 }}
+              />
+            </View>
+            <Divider
+              bold
+              style={{ marginVertical: 10, marginTop: 20,  }}
+              theme = {{colors: {outlineVariant: sd.colors.blue}}}
+            />
+            <FlatList
+              data={doctorFiltered}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </ScrollView>
       </ScrollView>
-
-      {/* <View style={styles.navcontainer}>
-        <NavigationBar />
-      </View> */}
-
-      <View style={{ marginTop: 70 }}></View>
     </>
   );
 };
@@ -222,7 +215,6 @@ const styles = StyleSheet.create({
  
   },
   searchInput: {
- 
     fontSize: 15,
     height: 50,
     fontFamily: 'Poppins',
@@ -233,12 +225,21 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     paddingRight: 50,
   },
-  arrowButton: {
-     
+  headerCont: {
+    flexDirection: "row",
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: sd.colors.white,
+    //marginTop: 20,
+  },
+  headerText:{
+    fontSize: sd.fontSizes.large,
+    fontFamily: sd.fonts.semiBold,
+    color: sd.colors.blue,
   },
 
   arrowCont:{
-    //flexDirection: 'row',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center'
   },
@@ -248,23 +249,17 @@ const styles = StyleSheet.create({
   
     color: "#9dceff",
   },
-  allSearch: {
-
-
-    flexDirection: "row",
-    padding: 20,
-    marginTop: 20,
-   
-  },
+  
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 40,
+    //height: 40,
     justifyContent: 'center',
-    marginLeft: 12,
+    //marginLeft: 12,
     width:"90%",
     backgroundColor: 'rgba(255, 255, 255, 1)',
-    borderRadius: 14,
+    borderRadius: 50,
+    marginHorizontal: 10,
     overflow: 'hidden',
   },
   magnifyIcon: {
@@ -272,9 +267,6 @@ const styles = StyleSheet.create({
     height: 20,
     marginLeft: 55,
     marginRight: 10,
-
- 
-    
   },
   filterContainer: {
     marginBottom: 10,
@@ -310,24 +302,20 @@ const styles = StyleSheet.create({
   },
   appointmentItem: {
     backgroundColor: '#ffffff',
-    width: '100%',
+    //width: '100%',
     height: 110,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
+    margin: 12,
+    ...sd.shadows.large,
     alignSelf: 'center',
+    //marginHorizontal: 20,
   },
   appointmentBox:{
     width: '100%',
-    padding: 10,
+    paddingHorizontal: 20,
 
   },
   doctorImage: {

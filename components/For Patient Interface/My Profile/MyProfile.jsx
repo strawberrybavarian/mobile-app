@@ -13,6 +13,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
 import ViewProfile from './ProfileModals/ViewProfile';
+import { Card } from 'react-native-paper';
 
 const MyProfile = () => {
   const [userId, setUserId] = useState('');
@@ -63,13 +64,27 @@ const MyProfile = () => {
   };
 
   const renderSettingOption = (icon, label, onPress = () => {}) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress}>
-      <View style={styles.settingOptionContainer}>
-        <FontAwesome name={icon} size={18} style={styles.iconStyle} />
-        <Text style={styles.textProfile}>{label}</Text>
-      </View>
-      <Entypo name="chevron-thin-right" size={11} />
-    </TouchableOpacity>
+
+      <Card
+        mode='elevated'
+        onPressIn={onPress}
+        style={{ 
+          width: '100%', 
+          padding: 5,
+          paddingBottom : 10, 
+          marginVertical: 10,
+          backgroundColor: 'white',
+        }}
+      >
+        <Card.Content>
+          <View style={styles.settingOptionContainer}>
+            <FontAwesome name={icon} size={18} style={styles.iconStyle} />
+            <Text style={styles.textProfile}>{label}</Text>
+            <Entypo name='chevron-right' size={20} color={sd.colors.blue} />
+          </View>
+        </Card.Content>
+      </Card>
+
   );
 
   return (
@@ -78,15 +93,9 @@ const MyProfile = () => {
         <View style={styles.settingsContainer}>
           <Text style={styles.settingsTitle}> Settings </Text>
           {renderSettingOption("user", "Account", () => {navigation.navigate("viewprofile")})}
-          {renderSettingOption("map", "Activity Logs")}
-          {renderSettingOption("globe", "Others")}
-        </View>
-
-        <View style={styles.othersContainer}>
-          <Text style={styles.othersTitle}> Others </Text>
-          {renderSettingOption("exclamation-circle", "About Us")}
-          {renderSettingOption("headphones", "Customer Service")}
-          {renderSettingOption("users", "Invite Other")}
+          {renderSettingOption("book", "Medical Records", ()=> {navigation.navigate('medicalrecords')})}
+          {renderSettingOption("lock", "Two-Factor Authentication")}
+          {renderSettingOption("info", "About Us")}
           {renderSettingOption("sign-out", "Logout", logoutButton)}
         </View>
       </ScrollView>
@@ -176,7 +185,9 @@ const styles = StyleSheet.create({
   },
   settingsTitle: {
     fontFamily: sd.fonts.semiBold,
-    fontSize: sd.fontSizes.large,
+    fontSize: sd.fontSizes.xl,
+    color: sd.colors.blue,
+    marginBottom: 20,
   },
   othersContainer: {
     marginTop: 10,
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 10,
-    borderBottomWidth: 1,
+    //borderBottomWidth: 1,
     borderColor: "#E0E0E0",
   },
   settingOptionContainer: {
@@ -199,13 +210,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconStyle: {
-    marginRight: 10,
+    //marginRight: 10,
     color: sd.colors.blue,
+    flex: 1,
   },
   textProfile: {
-    fontFamily: sd.fonts.light,
+    flex: 4,
+    fontFamily: sd.fonts.medium,
     color: sd.colors.textPrimary,
-    fontSize: 14,
+    fontSize: sd.fontSizes.medium,
   },
 });
 

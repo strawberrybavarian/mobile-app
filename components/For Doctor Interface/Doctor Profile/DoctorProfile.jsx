@@ -20,6 +20,8 @@ const DoctorProfile = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
+  const navigation = useNavigation();
+
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -61,7 +63,7 @@ const DoctorProfile = () => {
     );
   };
 
-  const profileFormEdit = () => navigation.navigate('profileform');
+  //const profileFormEdit = () => navigation.navigate('profileform');
 
   const renderSettingOption = (icon, label, onPress = () => {}) => (
     <TouchableOpacity style={DoctorProfileStyles.settingItem} onPress={onPress}>
@@ -76,42 +78,11 @@ const DoctorProfile = () => {
   return (
     <>
       <ScrollView style={styles.scrollContainer}>
-        {/* <View style={styles.background}>
-          <View style={styles.container}>
-            <Text style={styles.title}>My Profile</Text>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <FontAwesome5 name="ellipsis-h" size={15} />
-            </TouchableOpacity>
-          </View> 
-
-          {/* <View style={styles.profileInfo}>
-            <Image
-              source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
-              style={styles.profileImage}
-            />
-            <View style={styles.profileDetails}>
-              <Text style={styles.nameText}>{firstName} {lastName}</Text>
-              <Text style={styles.textJoin}>Joined Since February 29, 2024</Text>
-              <Text style={styles.textJoin}>id: P0001</Text>
-            </View>
-
-            <TouchableOpacity style={styles.editButton} onPress={profileFormEdit}>
-              <LinearGradient
-                start={{ x: 1, y: 0 }}
-                end={{ x: 0, y: 2 }}
-                colors={["#92A3FD", "#9DCEFF"]}
-                style={styles.editButtonGradient}
-              >
-                <Text style={styles.textButton}>Edit</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View> 
-        </View> */}
 
         <View style={DoctorProfileStyles.container3}>
           <View style={DoctorProfileStyles.settings}>
             <Text style={{ fontFamily: 'Poppins', fontSize: 14 }}> Settings </Text>
-            {renderSettingOption("globe", "Language")}
+            {renderSettingOption("user", "Account", () => navigation.navigate('viewdrprofile'))}
             {renderSettingOption("map", "Activity Logs")}
             {renderSettingOption("globe", "Others")}
           </View>

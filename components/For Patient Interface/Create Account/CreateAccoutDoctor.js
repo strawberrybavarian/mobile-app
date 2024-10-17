@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
@@ -9,6 +9,7 @@ import styles from './CreateAccountStyles';
 import sd from '../../../utils/styleDictionary';
 import * as Validation from './Validations.js';
 import * as Progress from 'react-native-progress';
+import { Divider } from 'react-native-paper';
 
 const CreateAccount = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -16,6 +17,32 @@ const CreateAccount = ({ navigation }) => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [middleinitial, setMiddleInitial] = useState('');
+  const [email, setEmail] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [specialty, setSpecialty] = useState('');
+  const [licenseNo, setLicenseNo] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [civilStatus, setCivilStatus] = useState('');
+  const civilStatusOptions = [
+    { label: 'Single', value: 'Single' },
+    { label: 'Married', value: 'Married' },
+    { label: 'Widowed', value: 'Widowed' },
+    { label: 'Separated', value: 'Separated' },
+    { label: 'Divorced', value: 'Divorced' },
+  ]
+  const [address, setAddress] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+  });
+  const[image, setImage] = useState(null);
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
   const genderOptions = [
@@ -23,12 +50,7 @@ const CreateAccount = ({ navigation }) => {
     { label: 'Female', value: 'Female' },
     { label: 'Other', value: 'Other' },
   ];
-
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [specialty, setSpecialty] = useState('');
-  const [licenseNo, setLicenseNo] = useState('');
+  const [specialtyOptions, setSpecialtyOptions] = useState([]);
 
   // Validation states
   const [firstnameError, setfirstnameError] = useState('');
@@ -40,29 +62,10 @@ const CreateAccount = ({ navigation }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [dobError, setDobError] = useState('');
   const [genderError, setGenderError] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
+  const [specialtyError, setSpecialtyError] = useState('')
+  const [licenseNoError, setLicenseNoError] = useState('')
   const [showPassword, setShowPassword] = useState(true);
   const [isErrorVisible, setIsErrorVisible] = useState(false);
-
-  //get all emails
-  // useEffect(() => {
-  //   axios.get(`${ip.address}/api/doctor/api/allemails`)
-  //   .then((res) => {
-  //     if (Array.isArray(res.data)) {
-  //       setExistingEmail(res.data); 
-  //       console.log('Emails set:', res.data); 
-  //     } else {
-  //       console.error('Expected an array but got:', typeof res.data, res.data);
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     console.log('error here');
-  //   });
-  // },[])
 
   const checkIfEmailExists = (email) => {
     return existingEmail.some(existing => existing === email);
@@ -111,6 +114,17 @@ const CreateAccount = ({ navigation }) => {
     return { label: String(day), value: day };
   });
 
+  useEffect(()=>{
+    axios.get(`${ip.address}/api/admin/specialties`)
+    .then((res)=>{
+      console.log("Specialties: ",res.data)
+      setSpecialtyOptions(res.data)
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  },[])
+
   // Combine selected year, month, and day into a Date object
   useEffect(() => {
     if (selectedYear && selectedMonth && selectedDay) {
@@ -148,7 +162,7 @@ const CreateAccount = ({ navigation }) => {
   }, [firstname, middleinitial, lastname]);
 
   useEffect(() => {
-    setEmailError(Validation.validateEmail(existingEmail, email) || '');
+    setEmailError(Validation.validateEmail(email) || '');
     setContactNumberError(Validation.validateContactNumber(contactNumber) || '');
     setPasswordError(Validation.validatePassword(password) || '');
     setConfirmPasswordError(Validation.validateConfirmPassword(password, confirmPassword) || '');
@@ -157,7 +171,9 @@ const CreateAccount = ({ navigation }) => {
   useEffect(() => {
     setGenderError(Validation.validateGender(gender) || '');
     setDobError(Validation.validateDob(selectedDay, selectedMonth, selectedYear, currentYear) || '');
-  }, [dob, gender])
+    setSpecialtyError(Validation.validateSpecialty(specialty) || '')
+    setLicenseNoError(Validation.validateLicenseNo(licenseNo) || '')
+  }, [dob, gender, specialty, licenseNo])
 
   const handleNextStep = () => {
     if (currentStep === 1) {
@@ -179,21 +195,33 @@ const CreateAccount = ({ navigation }) => {
       } else {
           setIsErrorVisible(false);
           setCurrentStep(currentStep + 1);
+
       }
     }
     else if (currentStep === 3) {
-      // Check for errors
-      if (emailError || contactNumberError || passwordError || confirmPasswordError) {
-          alert("Please fill in all required fields.");
-          setIsErrorVisible(true);
-          return;
-      } else {
-          setIsErrorVisible(false);
-          registerUser(); // Only proceed to register if no errors
+      if(specialtyError || licenseNoError){
+        alert("Please fill in all required fields.");
+        setIsErrorVisible(true);
+        return;
+      }
+      else {
+        setIsErrorVisible(false);
+        setCurrentStep(currentStep + 1);
+
       }
     }
 
-    setCurrentStep(currentStep + 1);
+    else if (currentStep === 4) {
+      if (emailError || contactNumberError || passwordError || confirmPasswordError) {
+        alert("Please fill in all required fields.");
+        setIsErrorVisible(true);
+        return;
+      } else {
+        setIsErrorVisible(false);
+        registerUser();
+      }
+    }
+
   };
 
   const handlePrevStep = () => {
@@ -202,22 +230,6 @@ const CreateAccount = ({ navigation }) => {
 
   const registerUser = async (e) => {
     e.preventDefault();
-
-    // if (firstname.length == 0 || lastname.length == 0 || email.length == 0 || password.length == 0 || confirmPassword.length == 0) {
-    //     alert('Please fill in all required fields.');
-    //     return;
-    // }
-
-    // if (checkIfEmailExists(email)) {
-    //     setEmailError('Email already exists.');
-    //     alert('Email already exists.');
-    //     return;
-    // }
-
-    // if (password !== confirmPassword) {
-    //     alert('Passwords do not match.');
-    //     return;
-    // }
 
     if (
         firstnameError === '' &&
@@ -231,7 +243,7 @@ const CreateAccount = ({ navigation }) => {
               dr_firstName: capitalizeWords(firstname),
               dr_middleInitial: capitalizeWords(middleinitial),
               dr_lastName: capitalizeWords(lastname),
-              dr_email: email.trim().toLocaleLowerCase(),
+              dr_email: email.toLowerCase().trim(),
               dr_password: password,
               dr_dob: dob,
               dr_contactNumber: contactNumber.trim(),
@@ -265,86 +277,6 @@ const CreateAccount = ({ navigation }) => {
       .toLowerCase()
       .replace(/\b\w/g, char => char.toUpperCase());
   };
-
-  // const validateFirstName = (text) => {
-  //   const capitalized = capitalizeWords(text);
-  //   if (!capitalized) {
-  //     setfirstnameError("First name cannot be empty.");
-  //   } else {
-  //     setfirstnameError("");
-  //   }
-  //   setFirstName(capitalized);
-  // };
-
-  // const validateLastName = (text) => {
-  //   const capitalized = capitalizeWords(text);
-  //   if (!capitalized) {
-  //     setlastnameError("Last name cannot be empty.");
-  //   } else {
-  //     setlastnameError("");
-  //   }
-  //   setLastName(capitalized);
-  // };
-
-  // const validateMiddleInitial = (text) => {
-  //   const trimmedInitial = text.trim().replace('.', '');
-  //   setMiddleInitial(trimmedInitial.toUpperCase());
-  // };
-
-  // const validateEmail = (text) => {
-  //   const lowercased = text.trim().toLowerCase();
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  //   if (!emailRegex.test(lowercased)) {
-  //     setEmailError("Email format invalid. Example of valid format: xyz@abc.com");
-  //   } else {
-  //     setEmailError("");
-  //   }
-  //   setEmail(lowercased);
-  // };
-
-  // const validateContactNumber = (text) => {
-  //   const trimmed = text.trim();
-  //   const contactNumberRegex = /^09\d{9}$/;
-
-  //   if (!trimmed) {
-  //     setContactNumberError("Contact number cannot be empty.");
-  //   } else if (!contactNumberRegex.test(trimmed)) {
-  //     setContactNumberError("Contact number must start with 09 and contain 11 digits.");
-  //   } else {
-  //     setContactNumberError("");
-  //   }
-  //   setContactNumber(trimmed);
-  // };
-
-  // const validatePassword = (text) => {
-  //   const trimmed = text.trim();
-  //   if (trimmed.length < 8) {
-  //     setPasswordError("Password must be at least 8 characters");
-  //   } else {
-  //     setPasswordError("");
-  //   }
-  //   setPassword(trimmed);
-  // };
-
-  // const validateConfirmPassword = (text) => {
-  //   const trimmed = text.trim();
-  //   if (password !== trimmed) {
-  //     setConfirmPasswordError("Passwords do not match");
-  //   } else {
-  //     setConfirmPasswordError("");
-  //   }
-  //   setConfirmPassword(trimmed);
-  // };
-
-  // const validateGender = (value) => {
-  //   if (!value) {
-  //     setGenderError("Please select a gender.");
-  //   } else {
-  //     setGenderError("");
-  //   }
-  //   setGender(value);
-  // };
 
   const stepText = (title, subtitle) => {
     return (
@@ -401,6 +333,7 @@ const CreateAccount = ({ navigation }) => {
 
       {/* Step 2: DOB and Gender */}
       {currentStep === 2 && (
+      <ScrollView>
         <View style={styles.formContainer}>
           {stepText('Share more about yourself', "This will help us personalize your experience.")}
 
@@ -463,56 +396,154 @@ const CreateAccount = ({ navigation }) => {
               value={gender}
               onChange={item => setGender(item.value)}
             />
-            {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
           </View>
+          {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
         </View>
+
+        <Divider
+          bold
+        />
+
+        {/* Civil Status Picker */}
+        <View style={[styles.pickerContainer]}>
+              <Dropdown
+                placeholderStyle={styles.dropdownPlaceholder}
+                selectedTextStyle={styles.dropdownText}
+                containerStyle={styles.dropdownContainer}
+                data={civilStatusOptions}
+                labelField="label"
+                valueField="value"
+                placeholderTextColor={sd.colors.grey}
+                placeholder="Select Civil Status"
+                value={civilStatus}
+                onChange={item => setCivilStatus(item.value)}
+              />
+            </View>
+
+            <Divider bold />
+
+            {/* Address Fields */}
+            <View style={[styles.formContainer, { marginTop: 15 }]}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Street"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.street}
+                onChangeText={text => setAddress({ ...address, street: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Municipality"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.municipality}
+                onChangeText={text => setAddress({ ...address, municipality: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="State"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.state}
+                onChangeText={text => setAddress({ ...address, state: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Zipcode"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.zipcode}
+                onChangeText={text => setAddress({ ...address, zipcode: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Country"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.country}
+                onChangeText={text => setAddress({ ...address, country: text })}
+              />
+            </View>
+        </ScrollView>
       )}
  
-
-      {/* Step 3: Contact Information and Password */}
+      {/* Step 3: License Number and Specialty */}
       {currentStep === 3 && (
         <View style={styles.formContainer}>
-          {stepText('Almost done!', "Please enter your email and password.")}
+          {stepText('Professional Details', "Tell us about your medical practice.")}
+
+          {/* License Number */}
+          <TextInput
+            style={styles.textInput}
+            placeholder="License Number"
+            value={licenseNo}
+            onChangeText={setLicenseNo}
+          />
+          {licenseNoError && isErrorVisible ? <Text style={styles.errorText}>{licenseNoError}</Text> : null}
+
+          {/* Specialty Dropdown */}
+          <Dropdown
+            data={specialtyOptions}
+            placeholder="Select Specialty"
+            value={specialty}
+            onChange={item => setSpecialty(item.name)}
+            labelField="name"
+            valueField="name"
+            style={[styles.dropdown, {width: '100%'}]}
+          />
+          {specialtyError && isErrorVisible ? <Text style={styles.errorText}>{specialtyError}</Text> : null}
+        </View>
+      )}
+
+      {/* Step 4: Contact Information and Password */}
+      {currentStep === 4 && (
+        <View style={styles.formContainer}>
+          {stepText('Almost done!', "Please enter your contact information.")}
+
+          {/* Email */}
           <TextInput
             style={styles.textInput}
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
           />
-          {emailError && isErrorVisible ? <Text style = { styles.errorText }>{emailError}</Text> : null}
+          {emailError && isErrorVisible ? <Text style={styles.errorText}>{emailError}</Text> : null}
+
+          {/* Contact Number */}
           <TextInput
             style={styles.textInput}
             placeholder="Contact Number"
             value={contactNumber}
             onChangeText={setContactNumber}
           />
-          {contactNumberError && isErrorVisible ? <Text style = { styles.errorText }>{contactNumberError}</Text> : null}
+          {contactNumberError && isErrorVisible ? <Text style={styles.errorText}>{contactNumberError}</Text> : null}
+
+          {/* Password */}
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
               placeholder="Password"
-              secureTextEntry={showPassword}
               value={password}
               onChangeText={setPassword}
+              secureTextEntry={showPassword}
             />
-            <TouchableOpacity onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
+            <TouchableOpacity onPress={handleTogglePasswordVisibility} style={styles.togglePasswordButton}>
+              <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={18} color="gray" />
             </TouchableOpacity>
           </View>
-          {passwordError && isErrorVisible ? <Text style = { styles.errorText }>{passwordError}</Text> : null}
-          <View style={styles.passwordContainer}>
+          {passwordError && isErrorVisible ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+
+          {/* Confirm Password */}
+          <View style= {styles.passwordContainer}>
             <TextInput
               style={styles.passwordInput}
               placeholder="Confirm Password"
-              secureTextEntry={showPassword}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
+              secureTextEntry={showPassword}
             />
-            <TouchableOpacity onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
-            </TouchableOpacity>
+            {confirmPasswordError && isErrorVisible ? <Text style={styles.errorText}>{confirmPasswordError}</Text> : null}
           </View>
-          {confirmPasswordError && isErrorVisible ? <Text style = { styles.errorText }>{confirmPasswordError}</Text> : null}
         </View>
       )}
 
@@ -523,7 +554,7 @@ const CreateAccount = ({ navigation }) => {
             <Text style={styles.buttonText}>Back</Text>
           </TouchableOpacity>
         )}
-        {currentStep < 3 ? (
+        {currentStep < 4 ? (
           <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>
             <Text style={styles.buttonText}>Next</Text>
           </TouchableOpacity>

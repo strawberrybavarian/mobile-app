@@ -4,47 +4,48 @@ import { Button } from 'react-native-paper';
 import { Entypo } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
+import sd from '../../../../utils/styleDictionary'; 
 import { ip } from '../../../../ContentExport';
 import { getData } from '../../../storageUtility';
-import sd from '../../../../utils/styleDictionary';
-import EditProfile from './EditProfile/EditProfile';
+import EditDoctorProfile from '../Edit Doctor Profile/EditDoctorProfile';
 
-const ViewProfile = () => {
-    const [userId, setUserId] = useState('');
-    const [patient, setPatient] = useState(null);
+const ViewDoctorProfile = () => {
+    const [doctorId, setDoctorId] = useState('');
+    const [doctor, setDoctor] = useState(null);
     const [isEditModalVisible, setEditModalVisible] = useState(false);
     
     const navigation = useNavigation();
 
-    // Fetch user ID from storage
+    // Fetch doctor ID from storage
     useEffect(() => {
-        const fetchUserId = async () => {
+        const fetchDoctorId = async () => {
             try {
                 const id = await getData('userId');
-                id ? setUserId(id) : console.log('User not found');
+                console.log('id:',id);
+                setDoctorId(id) 
             } catch (err) {
                 console.log(err);
             }
         };
-        fetchUserId();
+        fetchDoctorId();
     }, []);
 
-    // Fetch patient data from the API based on the userId
+    // Fetch doctor data from the API based on the doctorId
     useFocusEffect(
         useCallback(() => {
-            const fetchPatientData = async () => {
-                if (userId) {
+            const fetchDoctorData = async () => {
+                if (doctorId) {
                     try {
-                        const res = await axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`);
-                        setPatient(res.data.thePatient);
-                        console.log(res.data.thePatient);
+                        const res = await axios.get(`${ip.address}/api/doctor/one/${doctorId}`);
+                        setDoctor(res.data.doctor);
+                        console.log('doctor: ',res.data.doctor);
                     } catch (err) {
                         console.log(err);
                     }
                 }
             };
-            fetchPatientData();
-        }, [userId, isEditModalVisible])
+            fetchDoctorData();
+        }, [doctorId, isEditModalVisible])
     );
 
     // Toggle Edit Modal
@@ -52,9 +53,9 @@ const ViewProfile = () => {
         setEditModalVisible(!isEditModalVisible);
     };
 
-    // Update patient data after editing
+    // Update doctor data after editing
     const handleProfileUpdate = (updatedData) => {
-        setPatient(updatedData); // Update the patient state with the new data
+        setDoctor(updatedData); // Update the doctor state with the new data
     };
 
     const textBox = (label, value) => {
@@ -72,22 +73,22 @@ const ViewProfile = () => {
         <View style={styles.modalContent}>
             <View style={styles.header}>
                 <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
-                <Text style={styles.headerText}>View Profile</Text>
+                <Text style={styles.headerText}>View Doctor Profile</Text>
                 <View style={{ flex: 1 }}></View>
             </View>
 
-            {patient ? (
+            {doctor ? (
                 <>
                     <View style={styles.topCont}>
                         <View style={styles.imageCont}>
                             <Image
-                                source={patient.patient_image ? { uri: `${ip.address}/${patient.patient_image}`} : {uri : 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }}
+                                source={doctor.dr_image ? { uri: `${ip.address}/${doctor.dr_image}`} : {uri : 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }}
                                 style={styles.profileImage}
                             />
                         </View>
                         <View style={styles.nameCont}>
-                            <Text style={styles.infoText}>{patient.patient_firstName} {patient.patient_lastName}</Text>
-                            <Text style={[styles.infoText, { fontSize: sd.fontSizes.medium, fontFamily: sd.fonts.medium }]}>{patient.patient_email}</Text>
+                            <Text style={styles.infoText}>{doctor.dr_firstName} {doctor.dr_lastName}</Text>
+                            <Text style={[styles.infoText, { fontSize: sd.fontSizes.medium, fontFamily: sd.fonts.medium }]}>{doctor.dr_email}</Text>
                             <View style={styles.buttonCont}>
                                 <Button
                                     mode='outlined'
@@ -104,22 +105,24 @@ const ViewProfile = () => {
                     </View>
 
                     <View style={styles.infoCont}>
-                        {textBox('First Name', patient.patient_firstName)}
-                        {textBox('Middle Initial', patient.patient_middleInitial)}
-                        {textBox('Last Name', patient.patient_lastName)}
-                        {textBox('Contact Number', patient.patient_contactNumber)}
-                        {textBox('Email Address', patient.patient_email)}
-                        {textBox('Gender', patient.patient_gender)}
-                        {textBox('Address', patient.patient_adress)}
+                        {textBox('First Name', doctor.dr_firstName)}
+                        {textBox('Middle Initial', doctor.dr_middleInitial)}
+                        {textBox('Last Name', doctor.dr_lastName)}
+                        {textBox('Contact Number', doctor.dr_contactNumber)}
+                        {textBox('Email Address', doctor.dr_email)}
+                        {textBox('Specialization', doctor.dr_specialty)}
+                        {textBox('License Number', doctor.dr_licenseNo)}
 
                     </View>
 
-                    {/* Edit Profile Modal */}
-                    <EditProfile
+                    {/* Edit Doctor Profile Modal */}
+                    <EditDoctorProfile
                         isVisible={isEditModalVisible}
                         toggleModal={handleEditModal}
-                        setProfileData={handleProfileUpdate}  // Pass updated data to update patient state
+                        doctor={doctor}
+                        handleProfileUpdate={handleProfileUpdate}  
                     />
+                    
                 </>
             ) : (
                 <Text>Loading...</Text>
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
         fontSize: sd.fontSizes.large,
         fontFamily: sd.fonts.bold,
         textAlign: 'center',
-        flex: 1,
+        flex: 2,
     },
     topCont: {
         flexDirection: 'row',
@@ -209,4 +212,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ViewProfile;
+export default ViewDoctorProfile;

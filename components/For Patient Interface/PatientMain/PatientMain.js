@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, BackHandler, Alert } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import Homepage from '../Homepage/Homepage';
 import Upcoming from '../Upcoming/Upcoming';
 import DoctorSpecialty from '../Doctor Specialty/DoctorSpecialty';
 import MyProfile from '../My Profile/MyProfile';
 import NavigationBar from '../Navigation/NavigationBar';
-import Header3, { Header1 } from '../../Headers/Headers';
+import Header3 from '../../Headers/Headers';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
@@ -16,10 +16,6 @@ const initialLayout = { width: Dimensions.get('window').width };
 
 const PatientMain = () => {
   const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    console.log("Initial Index (should be 0):", index);
-  }, []);
 
   const [routes] = useState([
     { key: 'home', title: 'Home' },
@@ -40,27 +36,20 @@ const PatientMain = () => {
   const [userId, setUserId] = useState("");
   const [patientData, setPatientData] = useState({});
 
-  
-
   useFocusEffect(
     useCallback(() => {
       const fetchUserId = async () => {
         try {
           const id = await getData('userId');
-          console.log("PatientMain userId:", id);
           if (id) {
             setUserId(id);
-            console.log(`Request URL: ${ip.address}/patient/api/onepatient/${id}`);
 
             axios.get(`${ip.address}/api/patient/api/onepatient/${id}`)
               .then(res => {
-                console.log("API response: ", res.data);
                 const patient = res.data?.thePatient;
                 if (patient) {
                   setUname(patient.patient_firstName + " " + patient.patient_lastName);
                   setUImage(patient.patient_image);
-                } else {
-                  console.log('Patient not found');
                 }
               })
               .catch(err => console.log(err));
@@ -70,32 +59,48 @@ const PatientMain = () => {
         }
       };
 
-      fetchUserId();  // Call the function when the screen is focused
+      fetchUserId();
+
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
       return () => {
-        // Optional cleanup if necessary
+        backHandler.remove();
       };
-    }, [])  // Empty dependency array ensures it runs on screen focus
+    }, [])
   );
-  
+
+  const handleBackPress = () => {
+    if (index === 0) {
+      // If the user is on the first tab (Home), show an alert or exit the app
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit the app?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'OK', onPress: () => BackHandler.exitApp() },
+        ],
+        { cancelable: false }
+      );
+      return true; // Prevent the default back behavior
+    } else {
+      setIndex(0); // Go back to the Home tab instead of exiting
+      return true;
+    }
+  };
 
   return (
     <>
-      <Header3 name = {uname} imageUri = {uImage}/>
+      <Header3 name={uname} imageUri={uImage} />
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
-        onIndexChange={(newIndex) => {
-          console.log("TabView onIndexChange:", newIndex);
-          setIndex(newIndex);
-        }}
+        onIndexChange={(newIndex) => setIndex(newIndex)}
         initialLayout={initialLayout}
         renderTabBar={() => null} // Hide default tab bar
       />
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
         <NavigationBar
           onTabChange={(tabName) => {
-            console.log("onTabChange called with:", tabName); // Check if this logs when pressed
             const newIndex = routes.findIndex(route => route.title === tabName);
             if (newIndex !== -1) {
               setIndex(newIndex);

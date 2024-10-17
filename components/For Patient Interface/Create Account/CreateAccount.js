@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
@@ -22,8 +22,8 @@ const CreateAccount = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [contactNumber, setContactNumber] = useState('');
-  const [nationality, setNationality] = useState('Filipino');
-  const [civilStatus, setCivilStatus] = useState('Single');
+  const [nationality, setNationality] = useState('');
+  const [civilStatus, setCivilStatus] = useState('');
   const civilStatusOptions = [
     { label: 'Single', value: 'Single' },
     { label: 'Married', value: 'Married' },
@@ -225,6 +225,10 @@ const CreateAccount = ({ navigation }) => {
               patient_dob: dob,
               patient_contactNumber: contactNumber.trim(),
               patient_gender: gender,
+              patient_civilstatus: civilStatus,
+              patient_address: address,
+              patient_nationality: nationality,
+              
           };
           console.log(patientUser);
           const response = await axios.post(`${ip.address}/api/patient/api/signup`, patientUser);
@@ -259,13 +263,13 @@ const CreateAccount = ({ navigation }) => {
   const stepText = (title, subtitle) => {
     return (
       <View style={styles.stepText}>
-        <Text style={{ fontSize: 32, fontFamily: 'Poppins-Bold', color: 'black' }}>{title}</Text>
-        <Text style={{ fontSize: 20, fontFamily: 'Poppins', color: '#666' }}>{subtitle}</Text>
+        <Text style={{ fontSize: sd.fontSizes.xl, fontFamily: sd.fonts.bold, color: sd.colors.blue }}>{title}</Text>
+        <Text style={{ fontSize: sd.fontSizes.large, fontFamily: 'Poppins', color: '#666' }}>{subtitle}</Text>
       </View>
     );
   };
 
-  const progress = currentStep / 4;
+  const progress = currentStep / 3;
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container}>
@@ -315,103 +319,144 @@ const CreateAccount = ({ navigation }) => {
 
       {/* Step 2: DOB and Gender */}
       {currentStep === 2 && (
-        <View style={styles.formContainer}>
-          {stepText('Share more about yourself', "This will help us personalize your experience.")}
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={styles.formContainer}>
+            {stepText('Share more about yourself.', "This will help us personalize your experience.")}
 
-          {/* Date of Birth Dropdowns */}
-          <View style={styles.datePickerContainer}>
-          <Dropdown
-            data={years}
-            placeholder="Year"
-            placeholderTextColor={sd.colors.grey}
-            value={selectedYear}
-            onChange={item => {
-              console.log("Selected Year:", item.value);
-              setSelectedYear(item.value); // Ensure the state is updated correctly
-            }}
-            labelField="label"
-            valueField="value"
-            selectedTextStyle={styles.dropdownText}
-            style={styles.dropdown}
-          />
+            {/* Date of Birth Dropdowns */}
+            <View style={styles.datePickerContainer}>
+              <Dropdown
+                data={years}
+                placeholder="Year"
+                placeholderTextColor={sd.colors.grey}
+                value={selectedYear}
+                onChange={item => {
+                  console.log("Selected Year:", item.value);
+                  setSelectedYear(item.value);
+                }}
+                labelField="label"
+                valueField="value"
+                selectedTextStyle={styles.dropdownText}
+                style={styles.dropdown}
+              />
 
-          <Dropdown
-            data={months}
-            placeholder="Month"
-            placeholderTextColor={sd.colors.grey}
-            value={selectedMonth}
-            onChange={item => {
-              console.log("Selected Month:", item.value);
-              setSelectedMonth(item.value); // Ensure the state is updated correctly
-            }}
-            labelField="label"
-            valueField="value"
-            selectedTextStyle={styles.dropdownText}
-            style={styles.dropdown}
-          />
+              <Dropdown
+                data={months}
+                placeholder="Month"
+                placeholderTextColor={sd.colors.grey}
+                value={selectedMonth}
+                onChange={item => {
+                  console.log("Selected Month:", item.value);
+                  setSelectedMonth(item.value);
+                }}
+                labelField="label"
+                valueField="value"
+                selectedTextStyle={styles.dropdownText}
+                style={styles.dropdown}
+              />
 
-          <Dropdown
-            data={days}
-            placeholder="Day"
-            placeholderTextColor={sd.colors.grey}
-            value={selectedDay}
-            onChange={item => {
-              console.log("Selected Day:", item.value);
-              setSelectedDay(item.value); // Ensure the state is updated correctly
-            }}
-            labelField="label"
-            valueField="value"
-            selectedTextStyle={styles.dropdownText}
-            style={styles.dropdown}
-          />
+              <Dropdown
+                data={days}
+                placeholder="Day"
+                placeholderTextColor={sd.colors.grey}
+                value={selectedDay}
+                onChange={item => {
+                  console.log("Selected Day:", item.value);
+                  setSelectedDay(item.value);
+                }}
+                labelField="label"
+                valueField="value"
+                selectedTextStyle={styles.dropdownText}
+                style={styles.dropdown}
+              />
+            </View>
+
+            {dobError && isErrorVisible ? <Text style={styles.errorText}>{dobError}</Text> : null}
+
+            <Divider bold />
+
+            {/* Gender Picker */}
+            <View style={styles.pickerContainer}>
+              <Dropdown
+                placeholderStyle={styles.dropdownPlaceholder}
+                selectedTextStyle={styles.dropdownText}
+                containerStyle={styles.dropdownContainer}
+                data={genderOptions}
+                labelField="label"
+                valueField="value"
+                placeholderTextColor={sd.colors.grey}
+                placeholder="Select Gender"
+                value={gender}
+                onChange={item => setGender(item.value)}
+              />
+            </View>
+
+            {genderError && isErrorVisible ? <Text style={styles.errorText}>{genderError}</Text> : null}
+
+            {/* Civil Status Picker */}
+            <View style={[styles.pickerContainer, { marginTop: 0 }]}>
+              <Dropdown
+                placeholderStyle={styles.dropdownPlaceholder}
+                selectedTextStyle={styles.dropdownText}
+                containerStyle={styles.dropdownContainer}
+                data={civilStatusOptions}
+                labelField="label"
+                valueField="value"
+                placeholderTextColor={sd.colors.grey}
+                placeholder="Select Civil Status"
+                value={civilStatus}
+                onChange={item => setCivilStatus(item.value)}
+              />
+            </View>
+
+            <Divider bold />
+
+            {/* Address Fields */}
+            <View style={[styles.formContainer, { marginTop: 15 }]}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Street"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.street}
+                onChangeText={text => setAddress({ ...address, street: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Municipality"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.municipality}
+                onChangeText={text => setAddress({ ...address, municipality: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="State"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.state}
+                onChangeText={text => setAddress({ ...address, state: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Zipcode"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.zipcode}
+                onChangeText={text => setAddress({ ...address, zipcode: text })}
+              />
+
+              <TextInput
+                style={styles.textInput}
+                placeholder="Country"
+                placeholderTextColor={sd.colors.darkGray}
+                value={address.country}
+                onChangeText={text => setAddress({ ...address, country: text })}
+              />
+            </View>
           </View>
-          { dobError && isErrorVisible ? <Text style = { styles.errorText }>{dobError}</Text> : null }
-          
-          <Divider 
-            style={{}} 
-            bold
-          />
-
-          {/* Gender Picker */}
-          <View style={styles.pickerContainer}>
-            <Dropdown
-              placeholderStyle={styles.dropdownPlaceholder}
-              selectedTextStyle={styles.dropdownText}
-              containerStyle={styles.dropdownContainer}
-              data={genderOptions}
-              labelField="label"
-              valueField="value"
-              placeholderTextColor={sd.colors.grey}
-              placeholder="Select Gender"
-              value={gender}
-              onChange={item => setGender(item.value)}
-            />
-          </View>
-          {genderError && isErrorVisible ? <Text style = { styles.errorText }>{genderError}</Text> : null}
-
-          <Divider 
-            style={{}} 
-            bold
-          />
-
-          <View style = {styles.pickerContainer}>
-            <Dropdown
-              placeholderStyle={styles.dropdownPlaceholder}
-              selectedTextStyle={styles.dropdownText}
-              containerStyle={styles.dropdownContainer}
-              data={civilStatusOptions}
-              labelField="label"
-              valueField="value"
-              placeholderTextColor={sd.colors.grey}
-              placeholder="Select Gender"
-              value={civilStatus}
-              onChange={item => setCivilStatus(item.value)}
-            />
-          </View>
-
-
-        </View>
+        </ScrollView>
       )}
+
  
 
       {/* Step 3: Contact Information and Password */}
