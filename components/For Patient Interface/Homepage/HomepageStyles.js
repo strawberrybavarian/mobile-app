@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         margin: 10,
         padding: 10,
         backgroundColor: '#f8f8f8',
-        borderRadius: sd.borders.radiusXL,
+        borderRadius: sd.borders.radiusLarge,
         ...sd.shadows.large,
         justifyContent: 'center',
         alignItems: 'center',
@@ -74,9 +74,9 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     optionImage: {
-        width: 50,
-        height: 50,
+        fontSize: sd.fontSizes.xxl,
         marginBottom: 10,
+        color: sd.colors.blue,
     },
 });
 

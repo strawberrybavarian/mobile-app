@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, ScrollView } from 'react-native';
 import { Button } from 'react-native-paper';
 import { Entypo } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { ip } from '../../../../ContentExport';
 import { getData } from '../../../storageUtility';
 import sd from '../../../../utils/styleDictionary';
 import EditProfile from './EditProfile/EditProfile';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ViewProfile = () => {
     const [userId, setUserId] = useState('');
@@ -69,12 +70,15 @@ const ViewProfile = () => {
     };
 
     return (
-        <View style={styles.modalContent}>
+        <SafeAreaView style={styles.modalContent}>
+        
             <View style={styles.header}>
                 <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
                 <Text style={styles.headerText}>View Profile</Text>
                 <View style={{ flex: 1 }}></View>
             </View>
+            
+            <ScrollView>
 
             {patient ? (
                 <>
@@ -124,7 +128,8 @@ const ViewProfile = () => {
             ) : (
                 <Text>Loading...</Text>
             )}
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 

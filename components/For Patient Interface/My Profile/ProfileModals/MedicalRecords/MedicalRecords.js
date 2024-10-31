@@ -15,6 +15,7 @@ import styles from './MedicalRecordsStyles';
 import MedicalHistory from './MedicalHistory';
 import Prescription from './Prescription';
 import Immunization from './Immunization';
+import LabResult from './LabResult';
 
 const MedicalRecords = () => {
     const [userId, setUserId] = useState('');
@@ -87,6 +88,12 @@ const MedicalRecords = () => {
                             value: 'Immunizations',
                             label: 'Immunizations',
                             //labelStyle: { color: sd.colors.black }
+                        },
+                        {
+                            text: 'Lab',
+                            value: 'Lab',
+                            label: 'Lab',
+                            //labelStyle: { color: sd.colors.black }
                         }
                     ]}
                     theme={{
@@ -109,11 +116,17 @@ const MedicalRecords = () => {
                     <Prescription
                         patient = {patient}
                     />
-                ) : value === 'Immunizations' ? (
+                ) : 
+                value === 'Immunizations' ? (
                     <Immunization
                         patient = {patient}
                     />
-                ) : null}
+                ) : 
+                value === 'LabResult' ? (
+                    <LabResult
+                        patient={patient}
+                    />
+                ) : (null)}
             </ScrollView>
         </View>
         </>

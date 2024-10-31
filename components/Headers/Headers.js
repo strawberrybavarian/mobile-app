@@ -3,10 +3,11 @@ import { View, Text, TouchableOpacity, Image, Pressable } from 'react-native';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import axios from 'axios';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import styles from './HeaderStyle';
+import headerStyles from './HeaderStyle';
 
 import { ip } from '../../ContentExport';
 import { getData } from '../storageUtility';
+import { useTheme } from 'react-native-paper';
 
 const Header3 = ({name, imageUri}) => {
     const [search, setSearch] = useState('');
@@ -20,30 +21,8 @@ const Header3 = ({name, imageUri}) => {
       navigation.navigate('doctornotification')
     };
 
-    // useEffect(() => {
-    //   getData('userId').then((id) => {
-    //     setUserId(id);
-    //     console.log('id:',id);
-    //   });
-    // }, []);
-
-  //   useFocusEffect(
-  //     useCallback(() => {
-  //         const fetchUserId = async () => {
-  //             try {
-  //                 const id = await getData('userId');
-  //                 if (id) {
-  //                     setUserId(id);
-  //                 } else {
-  //                     console.log('User not found');
-  //                 }
-  //             } catch (err) {
-  //                 console.log(err);
-  //             }
-  //         };
-  //         fetchUserId();
-  //     }, [])
-  // );    
+    const theme = useTheme();
+    const styles = headerStyles(theme);
 
     return (
       <>
@@ -73,7 +52,7 @@ const Header3 = ({name, imageUri}) => {
             </View>
 
             <TouchableOpacity style={styles.editButton} onPress={handleNotification}>
-              <FontAwesome5 name="bell" size={25} style={{}} />
+              <FontAwesome5 name="bell" size={25} style={{color: theme.colors.primary}} />
             </TouchableOpacity>
           </View>
         </View>

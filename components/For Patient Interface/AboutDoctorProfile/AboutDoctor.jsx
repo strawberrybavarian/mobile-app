@@ -5,56 +5,23 @@ import doctorImage1 from '../../../assets/pictures/Doc.png'
 import NavigationBar from '../Navigation/NavigationBar';
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { AboutDoctorStyle } from '../PatientStyleSheet/PatientCSS';
+import { AboutDoctorStyle } from './AboutDoctorStyles';
 import { DoctorNotificationStyle } from '../../For Doctor Interface/DoctorStyleSheet/DoctorCSS';
 import { useNavigation } from '@react-navigation/native';
-
-
+import { Card, Button, Avatar, useTheme } from 'react-native-paper';
+import sd from '../../../utils/styleDictionary';
 
 const AboutDoctor = ({navigation, route}) => {
     
     //const navigation = useNavigation();
 
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [specialty, setSpecialty] = useState('');
+    const [imageUri, setImageUri] = useState('');
+    const theme = useTheme();
+
 
     const { item } = route.params || {};
+
     console.log(item)
-
-    useEffect(() => {
-        setFirstName(item.dr_firstName)
-        setLastName(item.dr_lastName)
-
-        let placeholder;
-        switch (item.dr_specialty) {
-            case 'PrimaryCare':
-                placeholder = 'General';
-                break;
-            case 'Obgyn':
-                placeholder = 'OB-GYN';
-                break;
-            case 'Pedia':
-                placeholder = 'Pediatrics';
-                break;
-            case 'Cardio':
-                placeholder = 'Cardiology';
-                break;
-            case 'Opthal':
-                placeholder = 'Eye & Vision';
-                break;
-            case 'Derma':
-                placeholder = 'Dermatology';
-                break;
-            case 'Neuro':
-                placeholder = 'Neurology';
-                break;
-            case 'InternalMed':
-                placeholder = 'Gastroenterology';
-                break;
-        }
-        setSpecialty(placeholder)
-    },[])
 
     const backButton = () => {
         navigation.goBack()
@@ -79,7 +46,34 @@ const AboutDoctor = ({navigation, route}) => {
             </View>
             
             {/* Main Container */}
-            <View style={AboutDoctorStyle.mainContainer}>
+            {item && (
+            <Card 
+                style={styles.card}
+                mode='elevated'
+            >
+                <Card.Content style={styles.doctorInfo}>
+                <Avatar.Image size={80} source={{ uri: imageUri }} />
+                <View style={styles.doctorDetails}>
+                    <Text style={styles.drName}>{`Dr. ${item.dr_firstName} ${item.dr_lastName}`}</Text>
+                    <Text style={styles.drSpecialty}>{item.dr_specialty}</Text>
+                </View>
+                
+                </Card.Content>
+                <Card.Actions>
+                <Button
+                    mode = 'elevated'
+                    buttonColor={theme.colors.secondary}
+                    textColor={theme.colors.onPrimary}
+                    labelStyle = {{ fontFamily: sd.fonts.semiBold}}
+                    onPress = {() => navigation.navigate('aboutdoctor', {item})}
+                >
+                    View Profile
+                </Button>
+                </Card.Actions>
+            </Card>
+            )}
+
+            {/* <View style={AboutDoctorStyle.mainContainer}>
 
                 <View style={AboutDoctorStyle.containerCard}>
                     <View style={AboutDoctorStyle.doctorContainer}>
@@ -122,7 +116,7 @@ const AboutDoctor = ({navigation, route}) => {
             
             <View style={{paddingBottom:100}}>
 
-            </View>
+            </View> */}
            
 
         </ScrollView>

@@ -55,17 +55,19 @@ export const validateContactNumber = (text) => {
     return null; // Return null if validation passes
 }
 
-export const validateDob = (selectedDay, selectedMonth, selectedYear, currentYear) => {
-    if (!selectedDay || !selectedMonth || !selectedYear) {
+export const validateDob = (dob) => {
+    if (!dob) {
         return "Date of birth is required.";
     }
 
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // Months are 0-indexed in JS
-    const currentDay = currentDate.getDate();
+    const currentYear = currentDate.getFullYear();
+    const selectedYear = dob.getFullYear();
+    const selectedMonth = dob.getMonth() + 1; // Months are 0-indexed in JS
+    const selectedDay = dob.getDate();
 
     // Check if the selected year is in the future or the current year
-    if (selectedYear >= currentYear) {
+    if (selectedYear > currentYear) {
         return "Invalid date of birth.";
     }
 
@@ -73,17 +75,26 @@ export const validateDob = (selectedDay, selectedMonth, selectedYear, currentYea
     const age = currentYear - selectedYear;
 
     // Check if the person is under 18
-    if (age < 18 || (age === 18 && selectedMonth > currentMonth) || 
-        (age === 18 && selectedMonth === currentMonth && selectedDay > currentDay)) {
+    if (age < 18 || (age === 18 && selectedMonth > currentDate.getMonth() + 1) || 
+        (age === 18 && selectedMonth === currentDate.getMonth() + 1 && selectedDay > currentDay)) {
         return "You must be at least 18 years old.";
     }
 
     return null; // Return null if validation passes
 };
 
+
 export const validateGender = (text) => {
     if (!text){
         return "Gender is required";
+    }
+
+    return null; // Return null if validation passes
+}
+
+export const validateAddress = (text) => {
+    if (!text){
+        return "Address is required";
     }
 
     return null; // Return null if validation passes
@@ -145,3 +156,5 @@ export const validateLicenseNo = (text) => {
     return null; // Return null if validation passes
 
 }
+
+

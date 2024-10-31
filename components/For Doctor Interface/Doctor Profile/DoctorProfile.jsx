@@ -14,6 +14,7 @@ import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorProfile = () => {
   const [userId, setUserId] = useState('');
@@ -77,28 +78,29 @@ const DoctorProfile = () => {
 
   return (
     <>
-      <ScrollView style={styles.scrollContainer}>
+    <SafeAreaView style = {{flex : 1, }}>
+        <ScrollView style={styles.scrollContainer}>
 
-        <View style={DoctorProfileStyles.container3}>
-          <View style={DoctorProfileStyles.settings}>
-            <Text style={{ fontFamily: 'Poppins', fontSize: 14 }}> Settings </Text>
-            {renderSettingOption("user", "Account", () => navigation.navigate('viewdrprofile'))}
-            {renderSettingOption("map", "Activity Logs")}
-            {renderSettingOption("globe", "Others")}
+          <View style={DoctorProfileStyles.container3}>
+            <View style={DoctorProfileStyles.settings}>
+              <Text style={{ fontFamily: 'Poppins', fontSize: 14 }}> Settings </Text>
+              {renderSettingOption("user", "Account", () => navigation.navigate('viewdrprofile'))}
+              {renderSettingOption("map", "Activity Logs")}
+              {renderSettingOption("globe", "Others")}
+            </View>
           </View>
-        </View>
 
-        <View style={DoctorProfileStyles.container4}>
-          <View style={DoctorProfileStyles.settings4}>
-            <Text> Others </Text>
-            {renderSettingOption("exclamation-circle", "About Us")}
-            {renderSettingOption("headphones", "Customer Service")}
-            {renderSettingOption("envelope-open-text", "Invite Other")}
-            {renderSettingOption("sign-out", "Logout", logoutButton)}
+          <View style={DoctorProfileStyles.container4}>
+            <View style={DoctorProfileStyles.settings4}>
+              <Text> Others </Text>
+              {renderSettingOption("exclamation-circle", "About Us")}
+              {renderSettingOption("headphones", "Customer Service")}
+              {renderSettingOption("envelope-open-text", "Invite Other")}
+              {renderSettingOption("sign-out", "Logout", logoutButton)}
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      {/* <NavigationBar /> */}
+        </ScrollView>
+      </SafeAreaView>
     </>
   );
 };

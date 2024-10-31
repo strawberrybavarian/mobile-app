@@ -1,408 +1,466 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
-import doctorImage1 from '../../../assets/pictures/Doc.png';
-import NavigationBar from '../Navigation/NavigationBar';
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import axios from 'axios';
-import { Card, DataTable, TextInput } from 'react-native-paper';
-import { getSpecialtyDisplayName } from '../../For Doctor Interface/DoctorStyleSheet/DoctorSpecialtyConverter';
+import { Avatar, Button, Card, DataTable, Dialog, Portal, Paragraph, TextInput } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import  CalendarPicker from 'react-native-calendar-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
-import RNDateTimePicker from '@react-native-community/datetimepicker';
-import dayjs from 'dayjs';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import sd from '../../../utils/styleDictionary';
+import { formatTime } from '../../../utils/formatTime';
+import { useNavigation } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
+import BookAppointmentStyles from './BookAppointmentStyles';
+import { Entypo } from '@expo/vector-icons';
 
 const BookAppointment = ({ navigation, route }) => {
+  const [step, setStep] = useState(1);
+  const [date, setDate] = useState(""); // Automatically set today's date in useEffect
+  const [time, setTime] = useState("");
+  const [reason, setReason] = useState("");
+  const [patient, setPatient] = useState({});
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [availability, setAvailability] = useState({});
+  const [imageUri, setImageUri] = useState(null);
+  const [doctorName, setDoctorName] = useState("");
+  const [bookedPatients, setBookedPatients] = useState({
+    morning: 0,
+    afternoon: 0,
+  });
+  const [loading, setLoading] = useState(true); // Loading state
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
-  const [reason, setReason] = useState('');
-  const [userId, setUserId] = useState(null);
-  const [availability, setAvailability] = useState({});
-  const [availableTimes, setAvailableTimes] = useState([]);
+  const { item } = route.params;
+  const theme = useTheme();
+  const styles = BookAppointmentStyles(theme);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [bookedPatients, setBookedPatients] = useState({ morning: 0, afternoon: 0 }); // Track booked patients
+  const [visible, setVisible] = useState(false);
+  const showDialog = () => setVisible(true);
+  const hideDialog = () => setVisible(false);
 
-  const { item } = route.params || {};
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setShowDatePicker(false);
+  };
+
+  useEffect(() => {
+    console.log(item)
+    const today = new Date();
+
+    // Fetch doctor's availability and name
+    axios
+      .get(`${ip.address}/api/doctor/${item._id}`)
+      .then((response) => {
+        const doctor = response.data.doctor;
+        //console.log("Doctor API response:", response.data);
+        console.log("Doctor API bookedslots:", doctor.bookedSlots);
+        console.log("Doctor API availability:", doctor.availability);
+        setDoctorName(`${doctor.dr_firstName} ${doctor.dr_lastName}`);
+        setAvailability(doctor.availability || {});
+        setImageUri(`${ip.address}/${doctor.dr_image}`);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
-        const id = await getData('userId');
+        const id = await getData("userId");
         if (id) {
-          setUserId(id);
+          axios
+            .get(`${ip.address}/api/patient/api/onepatient/${id}`)
+            .then((res) => {
+              console.log(res.data.thePatient);
+              setPatient(res.data.thePatient);
+            })
+            .catch((err) => console.log(err));
         } else {
-          console.log('User not found');
+          console.log("User not found");
         }
       } catch (err) {
         console.log(err);
       }
-    };
-
-    const fetchDoctorAvailability = async () => {
-      try {
-        const response = await axios.get(`${ip.address}/api/doctor/${item._id}/available`);
-        setAvailability(response.data.availability);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+    }
 
     fetchUserId();
-    fetchDoctorAvailability();
-  }, []);
+  }, [])
 
-  const getAvailableTimes = (day) => {
+  useEffect(() => {
+    if (selectedDate) {
+      const fetchAppointments = async () => {
+        try {
+          setLoading(true); // Set loading before fetching data
+
+          const daysOfWeek = [
+            "sunday",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "saturday",
+          ];
+          const day = daysOfWeek[selectedDate.getDay()];
+  
+          // Fetch booked patients for the selected date
+          const response = await axios.get(
+            `${ip.address}/api/appointments/doctor/${item._id}/count?date=${selectedDate}`
+          );
+  
+          console.log("Booked patients API response:", response.data, selectedDate);
+          const { morning, afternoon } = response.data;
+  
+          setBookedPatients({ morning, afternoon });
+  
+          // Once booked patients are set, update the available times
+          const updatedTimes = getAvailableTimes(day, morning, afternoon);
+          setAvailableTimes(updatedTimes);
+  
+        } catch (err) {
+          console.log("Error fetching appointments:", err);
+        } finally {
+          setLoading(false); // Always set loading to false after fetching
+        }
+      };
+  
+      fetchAppointments(); // Invoke the async function
+      console.log('xxx:', availableTimes);
+    } else {
+      setAvailableTimes([]); // Reset if no date selected
+      setLoading(false); // Ensure loading state is set to false
+    }
+  }, [selectedDate, availability, item._id]);
+
+  const getAvailableTimes = (day, morningCount = 0, afternoonCount = 0) => {
     const dayAvailability = availability[day];
     if (!dayAvailability) return [];
-  
+
     let times = [];
-  
-    // Check morning availability
-    if (dayAvailability.morning && dayAvailability.morning.available) {
-      const availableSlots = dayAvailability.morning.maxPatients - (bookedPatients.morning || 0); // Fallback to 0 if undefined
-      console.log('Morning slots:', { availableSlots }); // Debugging line
-  
+
+    if (dayAvailability.morning?.available) {
+      const startTime = formatTime(dayAvailability.morning.startTime);
+      const endTime = formatTime(dayAvailability.morning.endTime);
+      const availableSlots = Math.max(
+        dayAvailability.morning.maxPatients - morningCount,
+        0
+      );
+
       if (availableSlots > 0) {
-        const startTime = formatTime(dayAvailability.morning.startTime);
-        const endTime = formatTime(dayAvailability.morning.endTime);
         times.push({
           label: "Morning",
           timeRange: `${startTime} - ${endTime}`,
           availableSlots,
+          period: "morning",
         });
       }
     }
-  
-    // Check afternoon availability
-    if (dayAvailability.afternoon && dayAvailability.afternoon.available) {
-      const availableSlots = dayAvailability.afternoon.maxPatients - (bookedPatients.afternoon || 0); // Fallback to 0 if undefined
-      console.log('Afternoon slots:', { availableSlots }); // Debugging line
-  
+
+    if (dayAvailability.afternoon?.available) {
+      const startTime = formatTime(dayAvailability.afternoon.startTime);
+      const endTime = formatTime(dayAvailability.afternoon.endTime);
+      const availableSlots = Math.max(
+        dayAvailability.afternoon.maxPatients - afternoonCount,
+        0
+      );
+
       if (availableSlots > 0) {
-        const startTime = formatTime(dayAvailability.afternoon.startTime);
-        const endTime = formatTime(dayAvailability.afternoon.endTime);
         times.push({
           label: "Afternoon",
           timeRange: `${startTime} - ${endTime}`,
           availableSlots,
+          period: "afternoon",
         });
       }
     }
-  
     return times;
   };
-   
-
-  const formatTime = (timeString) => {
-    const [hours, minutes] = timeString.split(":");
-    const time = new Date();
-    time.setHours(hours);
-    time.setMinutes(minutes);
-
-    return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
-  };
-
-  // Inside the component
-useEffect(() => {
-  // Inside the fetchBookedPatients function
-  const fetchBookedPatients = async () => {
-    try {
-      const response = await axios.get(`${ip.address}/api/appointments/${item._id}/count?date=${selectedDate}`);
-      const { morning = 0, afternoon = 0 } = response.data || {}; // Set default values
-  
-      console.log('Fetched booked patients:', { morning, afternoon }); // Debugging line
-      setBookedPatients({ morning, afternoon });
-  
-      const selectedDay = new Date(selectedDate).getDay();
-      const daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-      const day = daysOfWeek[selectedDay];
-  
-      const times = getAvailableTimes(day);
-      setAvailableTimes(times);
-  
-      // Clear selected hour when the date changes
-      if (times.length > 0) {
-        setSelectedHour(null); // Clear selected hour to force re-selection
-      } else {
-        setSelectedHour(null); // Clear selected hour if no available times
-      }
-    } catch (err) {
-      console.log('Error fetching booked patients:', err);
-      setBookedPatients({ morning: 0, afternoon: 0 });
-    }
-  };
-  
-  if (selectedDate) {
-    fetchBookedPatients();
-    console.log('Selected date:', selectedDate);
-    console.log('Booked patients:', bookedPatients);
-    console.log('Availability:', availability);
-  } else {
-    setAvailableTimes([]); // Clear available times if no date is selected
-    setSelectedHour(null); // Clear selected hour as well
-  }
-}, [selectedDate, availability]); // Add availability as a dependency
 
 
-  const handleDateChange = (event, date) => {
-    setShowDatePicker(false);
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-  const handleHourSelect = (hour) => {
-    setSelectedHour(hour);
-  };
-
-  const handleReason = (input) => {
-    setReason(input);
-  };
-
-  const handleCreateAppointment = async () => {
-    if (!selectedDate || !selectedHour || !reason || !userId) {
-      Alert.alert('Validation Error', 'Please fill all fields');
+  const createAppointment = () => {
+    if (!selectedDate || !selectedHour) {
+      Alert.alert("Invalid Selection", "Please select a valid date and time for the appointment.");
       return;
     }
-
-    try {
-      const formattedDate = dayjs(selectedDate).format('YYYY-MM-DD');
-      const formattedTime = dayjs(selectedHour).format('HH:mm');
-
-      const appointmentData = {
-        doctor: item._id,
-        date: formattedDate,
-        time: formattedTime,
-        reason,
-        medium: 'in-person',
-        appointment_type: {
-          appointment_type: 'Consultation',
-          category: 'General Consultation',
-        },
-      };
-
-      const response = await axios.post(`${ip.address}/api/patient/api/${userId}/createappointment`, appointmentData);
-      console.log('Appointment created:', response.data);
-      Alert.alert('Success', 'Appointment created successfully');
-      navigation.navigate('ptnmain');
-    } 
-    catch (err) {
-      console.error('Error creating appointment: ', err.response?.data?.status);
-      Alert.alert('Error', `${err.response?.data?.message || err.message} `);
-    }
+    showDialog();
   };
 
-  const renderAvailability = (day) => {
-    const dayAvailability = availability[day.toLowerCase()];
-    if (!dayAvailability) return { morning: 'Not available', afternoon: 'Not available' };
-
-    const formatTime = (time) => {
-      const [hour, minute] = time.split(':');
-      const parsedHour = parseInt(hour);
-      if (parsedHour === 12) return `${hour}:${minute} PM`;
-      if (parsedHour > 12) return `${parsedHour - 12}:${minute} PM`;
-      return `${hour}:${minute} AM`;
+  const confirmAppointment = () => {
+    const formData = {
+      doctor: item._id ,
+      date: selectedDate || null,
+      time: selectedHour || null,
+      reason,
+      appointment_type: {
+        appointment_type: "Consultation",
+        category: "General",
+      },
     };
 
-    return {
-      morning: dayAvailability.morning?.available
-        ? `${formatTime(dayAvailability.morning.startTime)} - ${formatTime(dayAvailability.morning.endTime)}`
-        : 'Not available',
-      afternoon: dayAvailability.afternoon?.available
-        ? `${formatTime(dayAvailability.afternoon.startTime)} - ${formatTime(dayAvailability.afternoon.endTime)}`
-        : 'Not available',
-    };
+    axios
+      .post(`${ip.address}/api/patient/api/${patient._id}/createappointment`, formData)
+      .then(() => {
+        Alert.alert("Success", "Appointment created successfully!");
+        hideDialog();
+
+        const updatedAvailableTimes = availableTimes.map((slot) => {
+          if (slot.timeRange === selectedHour) {
+            return { ...slot, availableSlots: slot.availableSlots - 1 };
+          }
+          return slot;
+        });
+
+        setAvailableTimes(updatedAvailableTimes);
+        const period = updatedAvailableTimes.find(
+          (slot) => slot.timeRange === selectedHour
+        )?.period;
+        setBookedPatients((prev) => ({
+          ...prev,
+          [period]: prev[period] + 1,
+        }));
+
+        navigation.navigate("ptnmain");
+      })
+      .catch((err) => {
+        if (err.response) {
+          Alert.alert("Error", err.response.data.message);
+        } else {
+          console.log(err);
+          Alert.alert("Error", "An error occurred while creating the appointment.");
+        }
+      });
+  };
+  
+  useEffect(() => {
+    axios
+        .get(`${ip.address}/api/doctor/${item._id}/available`)
+        .then((res) => {
+            setAvailability(res.data.availability);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+  }, [item]);
+
+  const renderAvailableHours = () => {
+    console.log('availableTimes:', availableTimes);
+    return availableTimes.map((slot, index) => (
+      <Button
+        key={index}
+        mode={selectedHour === slot.timeRange ? 'elevated' : 'outlined'}
+        buttonColor={selectedHour === slot.timeRange ? theme.colors.primary : theme.colors.surface}
+        textColor={selectedHour === slot.timeRange ? theme.colors.onPrimary : theme.colors.primary}
+        onPress={() =>
+          setSelectedHour(selectedHour === slot.timeRange ? null : slot.timeRange)
+        }      
+      >
+       {availableTimes.length > 0 ? slot.timeRange : 'No slots for this day.'}
+       {selectedHour === slot.timeRange ? <Entypo name = 'check' size={'large'} style = {{margin : 10}}/> : null}
+      </Button>
+    ));
   };
 
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const renderMorningAvailability = (day) => {
+    const dayAvailability = availability[day] || {};
+    return dayAvailability.morning?.available
+      ? `${formatTime(dayAvailability.morning.startTime)} - ${formatTime(dayAvailability.morning.endTime)}`
+      : "Not available";
+  };
+  
+  const renderAfternoonAvailability = (day) => {
+    const dayAvailability = availability[day] || {};
+    return dayAvailability.afternoon?.available
+      ? `${formatTime(dayAvailability.afternoon.startTime)} - ${formatTime(dayAvailability.afternoon.endTime)}`
+      : "Not available";
+  };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView style={styles.scrollContainer}>
+
+        {/* header */}
         <View style={styles.header}>
-          <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
+            <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
+          </TouchableOpacity>
           <Text style={styles.title}>Book Appointment</Text>
           <View style={{ flex: 1 }} />
         </View>
 
-        <Card style={{ marginVertical: 10, backgroundColor: sd.colors.white, borderColor: sd.colors.blue }} mode='outlined'>
-          <Card.Content>
-            <View style={{ flexDirection: 'row' }}>
-              <Image source={{ uri: `${ip.address}/${item.dr_image}` }} style={{ width: 50, height: 50, borderRadius: 50 }} />
-              <View style={{ marginLeft: 10 }}>
+        <View style = {{marginBottom: 10}}>
+
+        {/* doctor card */}
+
+        {item && (
+          <Card 
+            style={styles.card}
+            mode='elevated'
+          >
+            <Card.Content style={styles.doctorInfo}>
+              <Avatar.Image size={80} source={{ uri: imageUri }} />
+              <View style={styles.doctorDetails}>
                 <Text style={styles.drName}>{`Dr. ${item.dr_firstName} ${item.dr_lastName}`}</Text>
                 <Text style={styles.drSpecialty}>{item.dr_specialty}</Text>
               </View>
-            </View>
-          </Card.Content>
-        </Card>
+              
+            </Card.Content>
+            <Card.Actions>
+              <Button
+                mode = 'outlined'
+                //buttonColor={theme.colors.secondary}
+                textColor={theme.colors.onSurface}
+                labelStyle = {{ fontFamily: sd.fonts.semiBold}}
+                onPress = {() => navigation.navigate('aboutdoctor', {item})}
+              >
+                View Profile
+              </Button>
+            </Card.Actions>
+          </Card>
+        )}
+        </View>
+
+        {/* availability card */}
 
         <Text style={styles.subtitle}>Availability</Text>
-
-        <Card style={{ marginVertical: 10, backgroundColor: sd.colors.white, borderColor: sd.colors.blue }} mode='outlined'>
-          <Card.Content>
-            <DataTable>
-              <DataTable.Header>
-                <DataTable.Title>Day</DataTable.Title>
-                <DataTable.Title>Morning </DataTable.Title>
-                <DataTable.Title>Afternoon </DataTable.Title>
-              </DataTable.Header>
-
-              {days.map((day) => {
-                const availability = renderAvailability(day);
-                return (
-                  <DataTable.Row key={day}>
-                    <DataTable.Cell>{day}</DataTable.Cell>
-                    <DataTable.Cell>{availability.morning}</DataTable.Cell>
-                    <DataTable.Cell>{availability.afternoon}</DataTable.Cell>
-                  </DataTable.Row>
-                );
-              })}
+        <Card style={[styles.card, {padding: 0, marginBottom: 30}]}>
+          <Card.Content style={{paddingHorizontal:0, paddingVertical:0}}> 
+            <DataTable 
+              style={styles.dataTableView}
+              theme={{ colors: { text: theme.colors.onSurface } }}
+            >
+              <DataTable.Header
+                style={styles.dataTableHeaderView}
+                theme = {theme}
+              >
+                <DataTable.Title textStyle={[styles.dataTableHeaderText, {flex : 0.7}]}>Day</DataTable.Title>
+                <DataTable.Title textStyle={styles.dataTableHeaderText}>Morning</DataTable.Title>
+                <DataTable.Title textStyle={styles.dataTableHeaderText}>Afternoon</DataTable.Title>
+              </DataTable.Header> 
+              {days
+              .filter((day) => 
+                availability[day]?.morning?.available || availability[day]?.afternoon?.available
+              )
+              .map((day) => (
+                <DataTable.Row key={day} style={{height: 50}}>
+                  <DataTable.Cell style = {[styles.dataTableCell, {flex: 0.7}]}>
+                    <Text style = {styles.dataTableText}>
+                      {day.charAt(0).toUpperCase() + day.slice(1)}
+                    </Text>
+                  </DataTable.Cell>
+                  <DataTable.Cell style = {styles.dataTableCell}>
+                    <Text style = {styles.dataTableText}>
+                      {renderMorningAvailability(day)}
+                    </Text>
+                  </DataTable.Cell>
+                  <DataTable.Cell style = {styles.dataTableCell}>
+                    <Text style = {styles.dataTableText}>
+                      {renderAfternoonAvailability(day)}
+                    </Text>
+                  </DataTable.Cell>
+                </DataTable.Row>
+              ))}
             </DataTable>
           </Card.Content>
         </Card>
 
+        {/* date card */}
+
+        <View style = {{marginBottom: 10}}>
         <Text style={styles.subtitle}>Select a Date</Text>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {selectedDate ? dayjs(selectedDate).format('MMMM D, YYYY') : 'Choose a Date'}
-          </Text>
-        </TouchableOpacity>
+        <Button
+          mode='elevated'
+          onPress={() => setShowDatePicker(!showDatePicker)}
+          buttonColor= {theme.colors.primary}
+          textColor={theme.colors.onPrimary}
+          style = {{marginVertical: 10}}
+        >
+          {selectedDate ? new Date(selectedDate).toLocaleDateString() : 'Choose a Date'}
+        </Button>
+        
+        {showDatePicker ? (
+          <View style = {{padding : 20}}>
+            <CalendarPicker
+              initialDate={selectedDate ? selectedDate : new Date()}
+              onDateChange={handleDateChange}
+              selectedStartDate={selectedDate}
+              minDate={new Date()}
+              style = {{padding : 20, marginVertical: 10}}
+            />
+          </View>
+        ) : null}
+        </View>
 
-        {showDatePicker && (
-          <RNDateTimePicker value={selectedDate || new Date()} mode="date" display="default" onChange={handleDateChange} minimumDate={new Date()} />
-        )}
+        {/* hour card */}
 
-        <Text style={styles.subtitle}>Select Hour</Text>
-        {availableTimes.length != 0 ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.timeSelection}>
-              {availableTimes.map((timeSlot, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.timeButton,
-                    selectedHour === timeSlot.timeRange && styles.selectedTimeButton,
-                  ]}
-                  onPress={() => handleHourSelect(timeSlot.timeRange)}>
-                  <Text style={styles.timeButtonText}>{timeSlot.timeRange}</Text>
-                </TouchableOpacity>
-              ))}
+        <View style = {{marginBottom: 40}}>
+          <Text style={styles.subtitle}>Select Hour</Text>
+          {loading ? (
+            <Text>Loading available times...</Text>
+          ) : (
+            <View>{ 
+              availableTimes.length === 0 ? 
+              <Text style = {{color : theme.colors.error, fontSize: sd.fonts.small, fontFamily: sd.fonts.italic}}>No available slots for this day.</Text> :
+              renderAvailableHours()
+              }
             </View>
-          </ScrollView>
-        ) : (
-          <Text style={styles.noAvailableTimes}>No available times for the selected date</Text>
-        )}
+          )}
+        </View>
 
+        {/* reason card */}
+
+        <View style = {{marginBottom: 40}}>
         <Text style={styles.subtitle}>Reason for Appointment</Text>
         <TextInput
           mode="outlined"
           multiline
           value={reason}
-          onChangeText={handleReason}
+          onChangeText={setReason}
           style={styles.textArea}
         />
+        </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleCreateAppointment}>
-          <Text style={styles.submitButtonText}>Submit</Text>
-        </TouchableOpacity>
+        {/* submit button */}
+
+        <Button
+          mode='elevated'
+          buttonColor={theme.colors.primary}
+          textColor={theme.colors.onPrimary}
+          onPress={createAppointment}
+          style = {{marginVertical: 20, marginBottom: 100}}
+        >
+          Submit
+        </Button>
+
+        <Portal>
+          <Dialog visible={visible} onDismiss={hideDialog}>
+            <Dialog.Title>Confirm Appointment</Dialog.Title>
+            <Dialog.Content>
+              <Paragraph>Doctor: {doctorName}</Paragraph>
+              <Paragraph>Date: {selectedDate?.toLocaleDateString()}</Paragraph>
+              <Paragraph>Time: {selectedHour}</Paragraph>
+              <Paragraph>Reason: {reason}</Paragraph>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={hideDialog}>Cancel</Button>
+              <Button onPress={confirmAppointment}>Confirm</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </KeyboardAwareScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: sd.colors.backgroundGray,
-  },
-  scrollContainer: {
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: sd.colors.blue,
-    flex: 2,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginVertical: 10,
-    color: sd.colors.darkGray,
-  },
-  drName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: sd.colors.black,
-  },
-  drSpecialty: {
-    fontSize: 14,
-    color: sd.colors.gray,
-  },
-  dateButton: {
-    backgroundColor: sd.colors.lightBlue,
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: sd.colors.darkBlue,
-  },
-  timeSelection: {
-    flexDirection: 'row',
-  },
-  timeButton: {
-    backgroundColor: sd.colors.lightBlue,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    marginHorizontal: 5,
-  },
-  selectedTimeButton: {
-    backgroundColor: sd.colors.darkBlue,
-  },
-  timeButtonText: {
-    fontSize: 16,
-    color: sd.colors.white,
-  },
-  noAvailableTimes: {
-    color: sd.colors.red,
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  textArea: {
-    backgroundColor: sd.colors.white,
-    borderRadius: 10,
-    borderColor: sd.colors.lightBlue,
-    borderWidth: 1,
-    padding: 10,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  submitButton: {
-    backgroundColor: sd.colors.blue,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 20,
-    marginBottom: 100,
-  },
-  submitButtonText: {
-    fontSize: 18,
-    color: sd.colors.white,
-    fontWeight: 'bold',
-  },
-});
 
 export default BookAppointment;

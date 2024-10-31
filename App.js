@@ -5,6 +5,7 @@ import {useFonts} from 'expo-font';
 import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { CardStyleInterpolators, TransitionSpecs } from '@react-navigation/stack';
+import { lightTheme as theme } from './utils/theme';
 
 import SigninPage from './components/For Patient Interface/Sign In page/SigninPage'
 import MyProfile from './components/For Patient Interface/My Profile/MyProfile'
@@ -19,7 +20,6 @@ import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
 import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
 import AppointmentDetails from './components/For Patient Interface/AppointmentDetails/AppointmentDetails';
 
-
 //Doctors
 
 import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment'
@@ -33,6 +33,9 @@ import PatientMain from './components/For Patient Interface/PatientMain/PatientM
 import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
 import MedicalRecords from './components/For Patient Interface/My Profile/ProfileModals/MedicalRecords/MedicalRecords';
 import ViewDoctorProfile from './components/For Doctor Interface/Doctor Profile/DoctorProfile Screens/ViewDoctorProfile';
+import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
 
 export default function App() {
   
@@ -62,94 +65,101 @@ export default function App() {
   if (!fontsLoaded){
     return undefined
   }
+
+
   return (
     <>
     
       <StatusBar hidden={true}/>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="landingpage" screenOptions={{ headerShown: false }}>
-          <Stack.Screen name='landingpage' component={LandingPage} />
-          <Stack.Screen name='SigninPage' component={SigninPage} />
-          <Stack.Screen name='createaccount' component={CreateAccount}/>
-          <Stack.Screen name='createDoctorAccount' component={CreateAccountDoctor}/>
+      <SafeAreaProvider>
+        <PaperProvider theme={theme}>
 
-          {/* Patient */}
-          <Stack.Screen name='home' component={Homepage}/>
-          <Stack.Screen 
-            name='myprofilepage' 
-            component={MyProfile} 
-            options={{
-              gestureEnabled: true, // Enable gesture navigation
-              cardStyleInterpolator: Platform.OS === 'android' 
-                ? ({ current, layouts }) => { // Android-specific right-to-left transition
-                    return {
-                      cardStyle: {
-                        transform: [
-                          {
-                            translateX: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [layouts.screen.width, 0], // Right-to-left animation
-                            }),
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="doctormain" screenOptions={{ headerShown: false }}>
+              <Stack.Screen name='landingpage' component={LandingPage} />
+              <Stack.Screen name='SigninPage' component={SigninPage} />
+              <Stack.Screen name='createaccount' component={CreateAccount}/>
+              <Stack.Screen name='createDoctorAccount' component={CreateAccountDoctor}/>
+
+              {/* Patient */}
+              <Stack.Screen name='home' component={Homepage}/>
+              <Stack.Screen 
+                name='myprofilepage' 
+                component={MyProfile} 
+                options={{
+                  gestureEnabled: true, // Enable gesture navigation
+                  cardStyleInterpolator: Platform.OS === 'android' 
+                    ? ({ current, layouts }) => { // Android-specific right-to-left transition
+                        return {
+                          cardStyle: {
+                            transform: [
+                              {
+                                translateX: current.progress.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [layouts.screen.width, 0], // Right-to-left animation
+                                }),
+                              },
+                            ],
                           },
-                        ],
-                      },
-                    };
-                  }
-                : undefined, // No custom animation for iOS
-              transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
-                open: TransitionSpecs.TransitionIOSSpec,
-                close: TransitionSpecs.TransitionIOSSpec,
-              },
-            }}
-          />
-          <Stack.Screen 
-            name='viewprofile' 
-            component={ViewProfile}
-            options={{
-              gestureEnabled: true, // Enable gesture navigation
-              cardStyleInterpolator: Platform.OS === 'android' 
-                ? ({ current, layouts }) => { // Android-specific right-to-left transition
-                    return {
-                      cardStyle: {
-                        transform: [
-                          {
-                            translateX: current.progress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [layouts.screen.width, 0], // Right-to-left animation
-                            }),
+                        };
+                      }
+                    : undefined, // No custom animation for iOS
+                  transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
+                    open: TransitionSpecs.TransitionIOSSpec,
+                    close: TransitionSpecs.TransitionIOSSpec,
+                  },
+                }}
+              />
+              <Stack.Screen 
+                name='viewprofile' 
+                component={ViewProfile}
+                options={{
+                  gestureEnabled: true, // Enable gesture navigation
+                  cardStyleInterpolator: Platform.OS === 'android' 
+                    ? ({ current, layouts }) => { // Android-specific right-to-left transition
+                        return {
+                          cardStyle: {
+                            transform: [
+                              {
+                                translateX: current.progress.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [layouts.screen.width, 0], // Right-to-left animation
+                                }),
+                              },
+                            ],
                           },
-                        ],
-                      },
-                    };
-                  }
-                : undefined, // No custom animation for iOS
-              transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
-                open: TransitionSpecs.TransitionIOSSpec,
-                close: TransitionSpecs.TransitionIOSSpec,
-              },
-            }}
-          />
-          {/* <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} /> */}
-          <Stack.Screen name='searchappointment' component={SearchForAppointment} />
-          {/* <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} /> */}
-          <Stack.Screen name='bookappointment' component={BookAppointment} />
-          <Stack.Screen name='profileform' component={ProfileForm} />
-          <Stack.Screen name='upcoming' component={Upcoming}/>
-          <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
-          <Stack.Screen name='apptdetails' component={AppointmentDetails} />
-          <Stack.Screen name='ptnmain' component={PatientMain} />
-          <Stack.Screen name='medicalrecords' component={MedicalRecords} />
+                        };
+                      }
+                    : undefined, // No custom animation for iOS
+                  transitionSpec: Platform.OS === 'android' && { // Optional to adjust the duration
+                    open: TransitionSpecs.TransitionIOSSpec,
+                    close: TransitionSpecs.TransitionIOSSpec,
+                  },
+                }}
+              />
+              {/* <Stack.Screen name='doctorspecialty' component={DoctorSpecialty} /> */}
+              <Stack.Screen name='searchappointment' component={SearchForAppointment} />
+              {/* <Stack.Screen name='healthassess' component={HealthRiskAssessmentForm} /> */}
+              <Stack.Screen name='bookappointment' component={BookAppointment} />
+              <Stack.Screen name='profileform' component={ProfileForm} />
+              <Stack.Screen name='upcoming' component={Upcoming}/>
+              <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
+              <Stack.Screen name='apptdetails' component={AppointmentDetails} />
+              <Stack.Screen name='ptnmain' component={PatientMain} />
+              <Stack.Screen name='medicalrecords' component={MedicalRecords} />
 
 
-          {/* Doctors */}
-          
-          
-          <Stack.Screen name='doctormain' component={DoctorMain}/>
-          <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
-          <Stack.Screen name='doctornotification' component={DoctorNotification}/>
-          <Stack.Screen name= 'viewdrprofile' component={ViewDoctorProfile}/>
-        </Stack.Navigator>   
-      </NavigationContainer>  
+              {/* Doctors */}
+              
+              
+              <Stack.Screen name='doctormain' component={DoctorMain}/>
+              <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
+              <Stack.Screen name='doctornotification' component={DoctorNotification}/>
+              <Stack.Screen name= 'viewdrprofile' component={ViewDoctorProfile}/>
+            </Stack.Navigator>   
+          </NavigationContainer>
+        </PaperProvider>
+      </SafeAreaProvider>
     </>
   );
 }
@@ -157,8 +167,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#fff',
+
   }
   
 

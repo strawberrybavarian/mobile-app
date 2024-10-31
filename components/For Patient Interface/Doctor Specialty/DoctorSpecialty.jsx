@@ -121,7 +121,7 @@ const DoctorSpecialty = () => {
                 style={styles.specialtyButton}
               >
                 <View style={styles.specialtyContent}>
-                  <Image source={require('../../../assets/pictures/Pedia.png')} style={styles.specialtyImage} />
+                  <Image source={{uri : `${ip.address}/${specialty.imageUrl}`}} style={styles.specialtyImage} />
                   <Text style={styles.buttonText}>{specialty.name}</Text>
                 </View>
               </TouchableOpacity>

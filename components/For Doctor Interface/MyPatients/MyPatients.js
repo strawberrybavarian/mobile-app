@@ -3,37 +3,67 @@ import { View, Dimensions, BackHandler } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import axios from 'axios';
 import { getData } from '../../storageUtility';
-import { styles } from './MyPatientsStyles';
+import {MyPatientStyles} from './MyPatientsStyles';
 import { ip } from '../../../ContentExport';
 import PatientTab from './PatientTab';
 import MedicalRecord from './MedicalRecord';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
 
 const MyPatients = () => {
-  const [patients, setPatients] = useState([]);
+  const [pidArr, setPidArr] = useState([]);
+  const [patients, setPatients] = useState([]); // Store patients
+  const [patient, setPatient] = useState(null); // Store specific patient
   const [index, setIndex] = useState(0); // Manage tab index
   const [routes] = useState([
     { key: 'first', title: 'Patients' },
     { key: 'second', title: 'Medical Record' }
   ]);
 
+  const theme = useTheme()
+  const styles = MyPatientStyles(theme);
+
   // Fetch patients using the new route
   const fetchPatients = useCallback(async () => {
     try {
       const userId = await getData('userId');
+      console.log('uid:', userId)
       if (userId) {
-        const response = await axios.get(`${ip.address}/api/doctor/api/getallpatients/${userId}`);
-        console.log(response.data);
-        setPatients(response.data);
+        const response = await axios.get(`${ip.address}/api/doctor/one/${userId}`);
+        const appts = response.data.doctor.dr_appointments;
+        setPidArr(appts.map((appt) => appt.patient));
+        console.log ('your patients ', appts.map((appt) => appt.patient));
       }
     } catch (err) {
       console.error(err);
     }
   }, []);
 
-  useEffect(() => {
+  useEffect(() => { 
     fetchPatients();
   }, [fetchPatients]);
+
+  useEffect(() => {
+    pidArr.forEach((patient) => {
+      // Check if patient is already in the patients array
+      if (!patients.some((p) => p._id === patient)) {
+        axios
+          .get(`${ip.address}/api/patient/api/onepatient/${patient}`)
+          .then((res) => {
+            // Only add the new patient if it's not already in the array
+            setPatients((prevPatients) => {
+              if (!prevPatients.some((p) => p._id === res.data.thePatient._id)) {
+                return [...prevPatients, res.data.thePatient];
+              }
+              return prevPatients;
+            });
+          })
+          .catch((err) => console.log(err));
+      }
+    });
+    
+    console.log('unique patientss', patients);
+  }, [pidArr, patients]);
 
   // Scene Map to render tab components
   const renderScene = SceneMap({
@@ -41,11 +71,17 @@ const MyPatients = () => {
       <PatientTab 
         patients={patients} 
         viewDetails={viewDetails}
+        setPatient={setPatient}
       />,
-    second: MedicalRecord
+    second: () => 
+      <MedicalRecord
+        patient={patient}
+      />
   });
 
-  const viewDetails = (patient) => {
+  const viewDetails = () => {
+    // console.log('view detail', patient);
+    // setPatient(patient);
     setIndex(1);
   }
 

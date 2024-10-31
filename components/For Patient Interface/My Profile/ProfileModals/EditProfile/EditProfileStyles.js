@@ -1,22 +1,24 @@
 import { StyleSheet } from 'react-native';
 import sd from '../../../../../utils/styleDictionary';
 
-export default styles = StyleSheet.create({
+export default EditProfileStyles = (theme) => StyleSheet.create({
   modal:{
     flex: 1,
     margin: 0
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: theme.colors.background,
     padding: 20,
+    paddingTop: 40,
     borderRadius: 10,
-    alignItems: 'center',
+    //alignItems: 'center',
     flex: 1,
   },
   modalTitle: {
     fontSize: sd.fontSizes.medium,
     fontFamily: sd.fonts.bold,
     marginBottom: 20,
+    textAlign: 'center'
   },
   inputContainer: {
     width: '100%',
@@ -45,6 +47,7 @@ export default styles = StyleSheet.create({
   imageContainer: {
     position: 'relative',
     marginBottom: 20,
+    alignItems: 'center',
   },
   profileImage: {
     width: 120,

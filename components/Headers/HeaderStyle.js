@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import sd from '../../utils/styleDictionary';
+import { useTheme } from 'react-native-paper';
 
-export default styles = StyleSheet.create({
+
+
+export default headerStyles = (theme) => StyleSheet.create({
   mainContainer: {
-    paddingTop: 15,
+    //paddingTop: 15,
     paddingHorizontal: 15,
     width: '100%',
     height: 'auto',
-    ...sd.shadows.large,
-    backgroundColor: 'white',
+    ...sd.shadows.level1,
+    shadowOffset: { width: 0, height: 5 },
+    backgroundColor: theme.colors.background,
     zIndex: 100,
   },
   wrapper: {

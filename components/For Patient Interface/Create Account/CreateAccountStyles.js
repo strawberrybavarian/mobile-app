@@ -1,19 +1,21 @@
 import { StyleSheet } from 'react-native';
 import sd from '../../../utils/styleDictionary';
+import { Dimensions } from 'react-native';
 
-const styles = StyleSheet.create({
+const CreateAccountStyles = (theme) => StyleSheet.create({
     container: {
-      flex: 1,
-      padding: 20,
-      paddingBottom: 80, // Space above the buttonContainer to ensure scrolling space
-      backgroundColor: '#fff',
+      flex: 10,
+      //padding: 20,
+      //paddingBottom: 80, // Space above the buttonContainer to ensure scrolling space
+      backgroundColor: theme.colors.background,
     },
     progressContainer: {
       //height: 10,  // Set a visible height
       width: '100%', 
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 20,
+      marginVertical: 20,
+      paddingHorizontal: 20,
     },
     progressBar: {
       flex: 1,  // Take up all available space
@@ -23,10 +25,22 @@ const styles = StyleSheet.create({
       backgroundColor: 'lightgray',  // Optional: Add a background color to make it more visible
     },
     activeStep: {
-      backgroundColor: '#9DCEFF',
+      backgroundColor: theme.colors.background,
     },
     formContainer: {
-      marginBottom: 20,
+      //marginBottom: 20,
+      flex: 11,
+      paddingHorizontal: 20,
+    },
+    inputContainer: {
+      marginBottom: 10,
+    },
+    inputLabel:{
+      marginBottom: 5,
+      marginLeft: 10,
+      fontSize: sd.fontSizes.small,
+      fontFamily: sd.fonts.medium,
+      color: theme.colors.primary,
     },
     textInput: {
       borderWidth: 1,
@@ -34,6 +48,13 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       padding: 10,
       marginBottom: 10,
+      fontSize: 16,
+    },
+    calendarContainer:{
+      backgroundColor: theme.colors.background,
+      padding: 20,
+      marginHorizontal: 20,
+      borderRadius: 15,
     },
     dateInput: {
       borderBottomWidth: 1,
@@ -47,8 +68,8 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: '#ccc',
       borderRadius: 5,
-      marginVertical: 15,
-      padding: 10,
+      marginVertical: 5,
+      //padding: 10,
     },
     passwordContainer: {
       flexDirection: 'row',
@@ -60,27 +81,31 @@ const styles = StyleSheet.create({
     passwordInput: {
       flex: 1,
     },
-    buttonContainer: {
-      position: 'absolute',
-      bottom: 20, // Positioned at the bottom
-      left: 20, 
-      right: 20, 
+    buttonContainer: {   
+      justifyContent: 'space-evenly',
+      flex: 0.1,
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      margin: 20,
+      margin: 10,
+      backgroundColor: theme.colors.background,
     },
     backButton: {
-      backgroundColor: '#ccc',
+      backgroundColor: sd.colors.white,
       padding: 10,
       borderRadius: 5,
       flex: 1,
-      marginRight: 10,
+      marginVertical: 15,
+      //marginLeft: 10,
+      borderColor: sd.colors.blue,
+      borderWidth: 1,
+      alignItems: 'center',
     },
     nextButton: {
-      backgroundColor: '#9DCEFF',
+      backgroundColor: sd.colors.blue,
       padding: 10,
       borderRadius: 5,
       flex: 1,
+      marginVertical: 15,
+      alignItems: 'center',
       marginLeft: 10,
     },
     submitButton: {
@@ -99,16 +124,14 @@ const styles = StyleSheet.create({
       marginVertical: 20,
     },
     datePickerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
+        //flexDirection: 'row',
+        //justifyContent: 'space-between',
+        marginBottom: 10,
       },
     dropdown: {
-        width: '30%', // Adjusts the width of each dropdown
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 10,
+      height: Dimensions.get('window').height*0.5, 
+      padding: 10, 
+      borderRadius: 10
     },
     dropdownText: {
         fontSize: 16,
@@ -121,4 +144,4 @@ const styles = StyleSheet.create({
     },
   });
 
-  export default styles;
+  export default CreateAccountStyles;

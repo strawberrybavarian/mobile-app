@@ -9,6 +9,11 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
 import DoctorHeader from '../DoctorHeader/DoctorHeader';
 import { styles } from './DoctorHomeStyles';
+import Carousel, {
+  ICarouselInstance,
+  Pagination,
+} from "react-native-reanimated-carousel";
+import sd from '../../../utils/styleDictionary';
 
 
 const DoctorHome = ({ navigation }) => {
@@ -33,6 +38,7 @@ const DoctorHome = ({ navigation }) => {
     <>
       <View style={styles.container}>
         {/* Post Announcement Container */}
+        
         <Text style={{ paddingLeft: 5, fontFamily: 'Poppins-SemiBold', fontSize: 20, paddingVertical: 20, marginLeft: 20 }}>Post Announcement</Text>
 
         <View style={styles.postContainer}>

@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Platform, Alert, ScrollView, Dimensions } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { Dropdown } from 'react-native-element-dropdown';
-import styles from './CreateAccountStyles';
+import CreateAccountStyles from './CreateAccountStyles';
 import sd from '../../../utils/styleDictionary';
 import * as Validation from './Validations.js';
 import * as Progress from 'react-native-progress';
-import { Divider } from 'react-native-paper';
+import { Divider, Modal, Portal } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from 'react-native-paper';
+import { Calendar } from 'react-native-calendars'
+import CalendarPicker from 'react-native-calendar-picker';
 
 const CreateAccount = ({ navigation }) => {
 
@@ -31,13 +35,24 @@ const CreateAccount = ({ navigation }) => {
     { label: 'Separated', value: 'Separated' },
     { label: 'Divorced', value: 'Divorced' },
   ]
+
   const [address, setAddress] = useState({
-    street: "",
+    street: "", //barangay
     city: "",
-    state: "",
+    barangay: "", //province
+    region: "",
     zipCode: "",
-    country: "",
   });
+  const [regionArr, setRegionArr] = useState([]);
+  const [provinceArr, setProvinceArr] = useState([]);
+  const [cityArr, setCityArr] = useState([]);
+  const [barangayArr, setBarangayArr] = useState([]);
+  const [region, setRegion] = useState({ label : '', value: ''});
+  const [province, setProvince] = useState({});
+  const [city, setCity] = useState({});
+  const [barangay, setBarangay] = useState({})
+
+
   const[image, setImage] = useState(null);
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
@@ -46,6 +61,9 @@ const CreateAccount = ({ navigation }) => {
     { label: 'Female', value: 'Female' },
     { label: 'Other', value: 'Other' },
   ];
+
+  const theme = useTheme();
+  const styles = CreateAccountStyles(theme);
 
   // Validation states
   const [firstnameError, setfirstnameError] = useState('');
@@ -57,83 +75,141 @@ const CreateAccount = ({ navigation }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [genderError, setGenderError] = useState('');
   const [dobError, setDobError] = useState('');
+  const [addressEror, setAddressError] = useState('');
   
-
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
-
   const [showPassword, setShowPassword] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
 
-  // Populate years from current year to past (e.g., last 100 years)
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, index) => {
-    const year = new Date().getFullYear() - index;
-    return { label: String(year), value: year };
-  });
-
-  // Populate months (1 to 12)
-  const months = [
-    { label: 'January', value: 1 },
-    { label: 'February', value: 2 },
-    { label: 'March', value: 3 },
-    { label: 'April', value: 4 },
-    { label: 'May', value: 5 },
-    { label: 'June', value: 6 },
-    { label: 'July', value: 7 },
-    { label: 'August', value: 8 },
-    { label: 'September', value: 9 },
-    { label: 'October', value: 10 },
-    { label: 'November', value: 11 },
-    { label: 'December', value: 12 },
-  ];
-  
-  // Populate days (1 to 31 based on selected month and year)
-  const length = (() => {
-    if (selectedMonth === 2 && selectedYear % 4 === 0) {
-      return 29; // February in a leap year
-    } else if (selectedMonth === 2) {
-      return 28; // February in a non-leap year
-    } else if ([4, 6, 9, 11].includes(selectedMonth)) {
-      return 30; // April, June, September, November have 30 days
-    } else {
-      return 31; // All other months have 31 days
-    }
-  })();
-  
-  const days = Array.from({ length: length }, (_, index) => {
-    const day = index + 1;
-    return { label: String(day), value: day };
-  });
-
-  // Combine selected year, month, and day into a Date object
-  useEffect(() => {
-    if (selectedYear && selectedMonth && selectedDay) {
-      const dob = new Date(selectedYear, selectedMonth - 1, selectedDay);
-      setDob(dob);
-    }
-  }, [selectedYear, selectedMonth, selectedDay]);
-
-  useEffect(() => {
-    if (!selectedDay || !selectedMonth || !selectedYear) {
-      setDobError("Invalid date of birth");
-    } else {
-      const selectedDate = new Date(selectedYear, selectedMonth - 1, selectedDay);
-      const age = currentYear - selectedDate.getFullYear();
-      
-      // Check if the user is younger than 18
-      if (age < 18 || (age === 18 && new Date() < selectedDate.setFullYear(currentYear))) {
-        setDobError("You must be at least 18 years old.");
-      } else {
-        setDobError(""); // Clear the error when valid
-      }
-    }
-  }, [selectedDay, selectedMonth, selectedYear, currentYear]);
-
+  const handleDateSelect = (day) => {
+    setDob(day);
+    setDobError(''); 
+    //setShowCalendar(!showCalendar);
+  };
 
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  useEffect(()=>{
+    axios.get(`https://psgc.gitlab.io/api/regions/`)
+    .then(res => {
+      const formattedRegions = res.data.map((element) => ({
+        label: element.name,
+        value: element.code
+      }))
+
+      setRegionArr(formattedRegions);
+      console.log('res.data of region : ',res.data);
+    })
+    .catch(err => console.log(err));
+  },[])
+
+  const handleRegionChange = (item) => {
+    console.log('region:', item);
+    if (province.value) {
+      setProvince({});
+      setProvinceArr([]);
+    }
+    if (city.value) {
+      setCity({});
+      setCityArr([]);
+    }
+    if (barangay.value) {
+      setBarangay({});
+      setBarangayArr([]);
+    }
+    setRegion(prevRegion => ({ ...prevRegion, label: item.label, value: item.value }));
+    setAddress(prevAddress => ({ ...prevAddress, region: item.label }));
+  };
+
+  useEffect(() => {
+    // If NCR is selected, set provinces to empty and fetch cities directly
+    if (region.label === 'NCR') {
+      setProvinceArr([]); // Clear provinces array for NCR
+      axios
+        .get(`https://psgc.gitlab.io/api/regions/${region?.value}/cities-municipalities`)
+        .then(res => {
+          const formattedCities = res.data.map(element => ({
+            label: element.name,
+            value: element.code
+          }));
+          setCityArr(formattedCities);
+        })
+        .catch(err => console.log(err));
+    } else if (region?.value) {
+      // Fetch provinces for non-NCR regions
+      axios
+        .get(`https://psgc.gitlab.io/api/regions/${region.value}/provinces`)
+        .then(res => {
+          const formattedProvinces = res.data.map(element => ({
+            label: element.name,
+            value: element.code
+          }));
+          setProvinceArr(formattedProvinces);
+        })
+        .catch(err => console.log(err));
+    }
+  }, [region]);
+
+  const handleProvinceChange = (item) => {
+    console.log('province:', item);
+    if (city.value) {
+      setCity({})
+      setCityArr([]);
+    } ;
+    if (barangay.value) {
+      setBarangay({})
+      setBarangayArr([]);
+    };
+    setProvince(prevProvince => ({ ...prevProvince, label: item.label, value: item.value }));
+    setAddress(prevAddress => ({ ...prevAddress, barangay: item.label }));
+  };
+
+  useEffect(() => {
+    if (province?.value) {
+      // Fetch cities based on selected province
+      axios
+        .get(`https://psgc.gitlab.io/api/provinces/${province.value}/cities-municipalities`)
+        .then(res => {
+          const formattedCities = res.data.map(element => ({
+            label: element.name,
+            value: element.code
+          }));
+          setCityArr(formattedCities);
+        })
+        .catch(err => console.log(err));
+    }
+  }, [province]);
+
+  const handleCityChange = (item) => {
+    console.log('city:', item);
+    if (barangay.value) {
+      setBarangay({});
+      setBarangayArr([]);
+    }
+    setCity(prevCity => ({ ...prevCity, label: item.label, value: item.value }));
+    setAddress(prevAddress => ({ ...prevAddress, city: item.label }));
+  };
+
+  useEffect(()=>{
+    axios.get(`https://psgc.gitlab.io/api/cities-municipalities/${city?.value}/barangays`)
+    .then(res => {
+      const formattedBarangays = res.data.map((element) => ({
+        label: element.name,
+        value: element.code
+      }))
+      setBarangayArr(formattedBarangays);
+      console.log(res.data)
+    })
+    .catch(err => console.log(err));
+  }, [city])
+
+  const handleBarangayChange = (item) => {
+    console.log('barangay:', item);
+    setBarangay(prevBarangay => ({ ...prevBarangay, label: item.label, value: item.value }));
+    setAddress(prevAddress => ({ ...prevAddress, street: item.label }));
+  };
+    
 
   useEffect(() => {
     setfirstnameError(Validation.validateFirstName(firstname) || ''); // Set error if exists
@@ -150,8 +226,9 @@ const CreateAccount = ({ navigation }) => {
 
   useEffect(() => {
     setGenderError(Validation.validateGender(gender) || '');
-    setDobError(Validation.validateDob(selectedDay, selectedMonth, selectedYear, currentYear) || '');
-  }, [dob, gender])
+    setDobError(Validation.validateDob(dob) || '');
+    setAddressError(Validation.validateAddress(address) || '');
+  }, [dob, gender, address])
 
   const handleNextStep = () => {
 
@@ -269,51 +346,70 @@ const CreateAccount = ({ navigation }) => {
     );
   };
 
-  const progress = currentStep / 3;
+  const progress = (currentStep / 3) - 0.1;
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container}>
+     <SafeAreaView style = {{flex:1, backgroundColor: theme.colors.background}}>
       {/* Progress Indicator */}
       <View style={styles.progressContainer}>
-        <Progress.Bar 
-          progress={progress} 
-          width={null}
-          color= {sd.colors.blue} 
-          style={styles.progressBar}
-          visible = {true}
-          borderRadius = {10}
-          />
-      </View>
+          <Progress.Bar 
+            progress={progress} 
+            width={null}
+            color= {sd.colors.blue} 
+            style={styles.progressBar}
+            visible = {true}
+            borderRadius = {10}
+            />
+        </View>
 
+        <KeyboardAwareScrollView contentContainerStyle={styles.container}>
       {/* Step 1: Names */}
       {currentStep === 1 && (
         <View style={styles.formContainer}>
           {stepText('Tell us your name.', "We'll use this information to create your account.")}
-          <TextInput
-            style={styles.textInput}
-            placeholder="First Name"
-            placeholderTextColor={sd.colors.grey}
-            value={firstname}
-            onChangeText={setFirstName}
-          />
-          {firstnameError && isErrorVisible ? <Text style = { styles.errorText }>{firstnameError}</Text> : null}
-          <TextInput
-            style={styles.textInput}
-            placeholder="Middle Initial"
-            placeholderTextColor={sd.colors.grey}
-            value={middleinitial}
-            onChangeText={setMiddleInitial}
-          />
-          {middleInitialError && isErrorVisible ? <Text style = { styles.errorText }>{middleInitialError}</Text> : null}
           
-          <TextInput
-            style={styles.textInput}
-            placeholder="Last Name"
-            placeholderTextColor={sd.colors.grey}
-            value={lastname}
-            onChangeText={setLastName}
-          />
-          {lastnameError && isErrorVisible ? <Text style = { styles.errorText }>{lastnameError}</Text> : null}
+          {/* First Name */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>First Name</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="First Name"
+              placeholderTextColor={sd.colors.grey}
+              value={firstname}
+              onChangeText={setFirstName}
+              autoFocus
+              clearButtonMode='always'
+            />
+            {firstnameError && isErrorVisible && <Text style={styles.errorText}>{firstnameError}</Text>}
+          </View>
+
+          {/* Middle Initial */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Middle Initial</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Middle Initial"
+              placeholderTextColor={sd.colors.grey}
+              value={middleinitial}
+              onChangeText={setMiddleInitial}
+              clearButtonMode='always'
+            />
+            {middleInitialError && isErrorVisible && <Text style={styles.errorText}>{middleInitialError}</Text>}
+          </View>
+
+          {/* Last Name */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Last Name</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Last Name"
+              placeholderTextColor={sd.colors.grey}
+              value={lastname}
+              onChangeText={setLastName}
+              clearButtonMode='always'
+            />
+            {lastnameError && isErrorVisible && <Text style={styles.errorText}>{lastnameError}</Text>}
+          </View>
         </View>
       )}
 
@@ -323,220 +419,298 @@ const CreateAccount = ({ navigation }) => {
           <View style={styles.formContainer}>
             {stepText('Share more about yourself.', "This will help us personalize your experience.")}
 
-            {/* Date of Birth Dropdowns */}
-            <View style={styles.datePickerContainer}>
-              <Dropdown
-                data={years}
-                placeholder="Year"
-                placeholderTextColor={sd.colors.grey}
-                value={selectedYear}
-                onChange={item => {
-                  console.log("Selected Year:", item.value);
-                  setSelectedYear(item.value);
-                }}
-                labelField="label"
-                valueField="value"
-                selectedTextStyle={styles.dropdownText}
-                style={styles.dropdown}
-              />
-
-              <Dropdown
-                data={months}
-                placeholder="Month"
-                placeholderTextColor={sd.colors.grey}
-                value={selectedMonth}
-                onChange={item => {
-                  console.log("Selected Month:", item.value);
-                  setSelectedMonth(item.value);
-                }}
-                labelField="label"
-                valueField="value"
-                selectedTextStyle={styles.dropdownText}
-                style={styles.dropdown}
-              />
-
-              <Dropdown
-                data={days}
-                placeholder="Day"
-                placeholderTextColor={sd.colors.grey}
-                value={selectedDay}
-                onChange={item => {
-                  console.log("Selected Day:", item.value);
-                  setSelectedDay(item.value);
-                }}
-                labelField="label"
-                valueField="value"
-                selectedTextStyle={styles.dropdownText}
-                style={styles.dropdown}
-              />
+            {/* Date of Birth */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Date of Birth</Text>
+              <TouchableOpacity
+                style={styles.textInput}
+                onPress={() => setShowCalendar(!showCalendar)}
+                //disabled={showCalendar}
+              >
+                <Text>
+                  {dob ? dob.toLocaleDateString() : 'Select Date of Birth'}
+                </Text>
+              </TouchableOpacity>
+              <Portal>
+                <Modal
+                  visible={showCalendar}
+                  onDismiss={() => setShowCalendar(false)}
+                  contentContainerStyle={styles.calendarContainer}
+                  theme={{ 
+                    colors: { primary: theme.colors.primary },
+                  }}
+                >
+                  <CalendarPicker
+                    onDateChange={handleDateSelect}
+                    selectedStartDate={dob}
+                    selectedDayColor={theme.colors.primary}
+                    width = {(Dimensions.get('window').width)*0.8}
+                    initialDate={dob? dob : new Date()}
+                    textStyle = {styles.dateText}
+                    selectedDayTextColor = {theme.colors.onPrimary}
+                    monthTitleStyle = {[styles.dateText, {fontFamily: sd.fonts.semiBold}]} 
+                    yearTitleStyle = {[styles.dateText, {fontFamily: sd.fonts.semiBold}]}
+                    todayBackgroundColor={theme.colors.secondary}
+                    todayTextStyle={{color: theme.colors.onSecondary}}
+                    //scrollable
+                  />
+                </Modal>
+              </Portal>
+              {dobError && isErrorVisible && <Text style={styles.errorText}>{dobError}</Text>}
             </View>
 
-            {dobError && isErrorVisible ? <Text style={styles.errorText}>{dobError}</Text> : null}
-
-            <Divider bold />
-
-            {/* Gender Picker */}
-            <View style={styles.pickerContainer}>
-              <Dropdown
-                placeholderStyle={styles.dropdownPlaceholder}
-                selectedTextStyle={styles.dropdownText}
-                containerStyle={styles.dropdownContainer}
-                data={genderOptions}
-                labelField="label"
-                valueField="value"
-                placeholderTextColor={sd.colors.grey}
-                placeholder="Select Gender"
-                value={gender}
-                onChange={item => setGender(item.value)}
-              />
+            {/* Gender */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Gender</Text>
+              <View style = {styles.pickerContainer}>
+                <Dropdown
+                  placeholderStyle={styles.dropdownPlaceholder}
+                  selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdownContainer}
+                  data={genderOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={sd.colors.grey}
+                  placeholder="Select Gender"
+                  value={gender}
+                  onChange={item => setGender(item.value)}
+                  style={{ flex: 1, padding: 10 }}
+                />
+              </View>
+              {genderError && isErrorVisible && <Text style={styles.errorText}>{genderError}</Text>}
             </View>
 
-            {genderError && isErrorVisible ? <Text style={styles.errorText}>{genderError}</Text> : null}
-
-            {/* Civil Status Picker */}
-            <View style={[styles.pickerContainer, { marginTop: 0 }]}>
-              <Dropdown
-                placeholderStyle={styles.dropdownPlaceholder}
-                selectedTextStyle={styles.dropdownText}
-                containerStyle={styles.dropdownContainer}
-                data={civilStatusOptions}
-                labelField="label"
-                valueField="value"
-                placeholderTextColor={sd.colors.grey}
-                placeholder="Select Civil Status"
-                value={civilStatus}
-                onChange={item => setCivilStatus(item.value)}
-              />
+            {/* Civil Status */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Civil Status</Text>
+              <View style = {styles.pickerContainer}>
+                <Dropdown
+                  placeholderStyle={styles.dropdownPlaceholder}
+                  selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdownContainer}
+                  data={civilStatusOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={sd.colors.grey}
+                  placeholder="Select Civil Status"
+                  value={civilStatus}
+                  onChange={item => setCivilStatus(item.value)}
+                  style={{ flex: 1, padding: 10 }}
+                />
+              </View>
             </View>
 
             <Divider bold />
-
-            {/* Address Fields */}
-            <View style={[styles.formContainer, { marginTop: 15 }]}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Street"
-                placeholderTextColor={sd.colors.darkGray}
-                value={address.street}
-                onChangeText={text => setAddress({ ...address, street: text })}
-              />
-
-              <TextInput
-                style={styles.textInput}
-                placeholder="Municipality"
-                placeholderTextColor={sd.colors.darkGray}
-                value={address.municipality}
-                onChangeText={text => setAddress({ ...address, municipality: text })}
-              />
-
-              <TextInput
-                style={styles.textInput}
-                placeholder="State"
-                placeholderTextColor={sd.colors.darkGray}
-                value={address.state}
-                onChangeText={text => setAddress({ ...address, state: text })}
-              />
-
-              <TextInput
-                style={styles.textInput}
-                placeholder="Zipcode"
-                placeholderTextColor={sd.colors.darkGray}
-                value={address.zipcode}
-                onChangeText={text => setAddress({ ...address, zipcode: text })}
-              />
-
-              <TextInput
-                style={styles.textInput}
-                placeholder="Country"
-                placeholderTextColor={sd.colors.darkGray}
-                value={address.country}
-                onChangeText={text => setAddress({ ...address, country: text })}
-              />
+              
+            {/* Region */}
+            <View style={[styles.inputContainer, {marginTop : 10}]}>
+              <Text style={styles.inputLabel}>Region</Text>
+              <View style={styles.pickerContainer}>
+                <Dropdown
+                  //placeholderStyle={styles.dropdownPlaceholder}
+                  //selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdown}
+                  data={regionArr ? regionArr.map((element) => ({ label: element.label, value: element.value })) : []}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  placeholder="Select Region"
+                  value={region}
+                  onChange={handleRegionChange}
+                  style={{ flex: 1, padding: 10 }}
+                  mode='modal'
+                  search
+                  searchPlaceholder='Search Region'
+                  searchPlaceholderTextColor={theme.colors.onPrimaryContainer}
+                  inputSearchStyle = {{backgroundColor: theme.colors.primaryContainer}}
+                />
+              </View>
             </View>
-          </View>
+
+            {/* Province */}
+            {region.label !== 'NCR' ? 
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Province</Text>
+              <View style={styles.pickerContainer}>
+                <Dropdown
+                  //placeholderStyle={styles.dropdownPlaceholder}
+                  //selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdown}
+                  data={provinceArr ? provinceArr.map((element) => ({ label: element.label, value: element.value })) : "Please select a region."}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  placeholder="Select Province"
+                  value={province}
+                  onChange={handleProvinceChange}
+                  style={{ flex: 1, padding: 10 }}
+                  mode='modal'
+                  search
+                  searchPlaceholder='Search Province'
+                  searchPlaceholderTextColor={theme.colors.onPrimaryContainer}
+                  inputSearchStyle = {{backgroundColor: theme.colors.primaryContainer}}
+                  disable = {provinceArr.length === 0}
+                />
+              </View>
+            </View> : null}
+
+            {/* City */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>City</Text>
+              <View style={styles.pickerContainer}>
+                <Dropdown
+                  //placeholderStyle={styles.dropdownPlaceholder}
+                  //selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdown}
+                  data={cityArr ? cityArr.map((element) => ({ label: element.label, value: element.value })) : []}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  placeholder="Select City"
+                  value={city}
+                  onChange={handleCityChange}
+                  style={{ flex: 1, padding: 10 }}
+                  mode='modal'
+                  search
+                  searchPlaceholder='Search City'
+                  searchPlaceholderTextColor={theme.colors.onPrimaryContainer}
+                  inputSearchStyle = {{backgroundColor: theme.colors.primaryContainer}}
+                  disable = {cityArr.length === 0}
+                />
+              </View>
+            </View>
+
+            {/* Barangay */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Barangay</Text>
+              <View style={styles.pickerContainer}>
+                <Dropdown
+                  //placeholderStyle={styles.dropdownPlaceholder}
+                  //selectedTextStyle={styles.dropdownText}
+                  containerStyle={styles.dropdown}
+                  data={barangayArr ? barangayArr.map((element) => ({ label: element.label, value: element.value })) : []}
+                  labelField="label"
+                  valueField="value"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  placeholder="Select Barangay"
+                  value={barangay}
+                  onChange={handleBarangayChange}
+                  style={{  padding: 10, }}
+                  maxHeight={300}
+                  mode='modal'
+                  search
+                  searchPlaceholder='Search Barangay'
+                  searchPlaceholderTextColor={theme.colors.onPrimaryContainer}
+                  inputSearchStyle = {{backgroundColor: theme.colors.primaryContainer}}
+                  disable = {barangayArr.length === 0}
+                />
+              </View>
+            </View>
+
+            {addressEror && isErrorVisible && <Text style={styles.errorText}>{addressEror}</Text>}
+            </View>
         </ScrollView>
       )}
-
- 
 
       {/* Step 3: Contact Information and Password */}
       {currentStep === 3 && (
         <View style={styles.formContainer}>
           {stepText('Almost done!', "Please enter your email and password.")}
-          <TextInput
-            style={styles.textInput}
-            placeholder="Email"
-            placeholderTextColor={sd.colors.grey}
-            value={email}
-            onChangeText={setEmail}
-          />
-          {emailError && isErrorVisible ? <Text style = { styles.errorText }>{emailError}</Text> : null}
-          <TextInput
-            style={styles.textInput}
-            placeholder="Contact Number"
-            placeholderTextColor={sd.colors.grey}
-            value={contactNumber}
-            onChangeText={setContactNumber}
-          />
-          {contactNumberError && isErrorVisible ? <Text style = { styles.errorText }>{contactNumberError}</Text> : null}
-          <View style={styles.passwordContainer}>
+
+          {/* Email */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Email</Text>
             <TextInput
-              style={styles.passwordInput}
-              placeholder="Password"
+              style={styles.textInput}
+              placeholder="Email"
               placeholderTextColor={sd.colors.grey}
-              secureTextEntry={showPassword}
-              value={password}
-              onChangeText={setPassword}
+              value={email}
+              onChangeText={setEmail}
             />
-            <TouchableOpacity onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
-            </TouchableOpacity>
+            {emailError && isErrorVisible && <Text style={styles.errorText}>{emailError}</Text>}
           </View>
-          {passwordError && isErrorVisible ? <Text style = { styles.errorText }>{passwordError}</Text> : null}
-          <View style={styles.passwordContainer}>
+
+          {/* Contact Number */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Contact Number</Text>
             <TextInput
-              style={styles.passwordInput}
-              placeholder="Confirm Password"
+              style={styles.textInput}
+              placeholder="Contact Number"
               placeholderTextColor={sd.colors.grey}
-              secureTextEntry={showPassword}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              value={contactNumber}
+              onChangeText={setContactNumber}
+              keyboardType='phone-pad'
             />
-            <TouchableOpacity onPress={handleTogglePasswordVisibility}>
-              <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
-            </TouchableOpacity>
+            {contactNumberError && isErrorVisible && <Text style={styles.errorText}>{contactNumberError}</Text>}
           </View>
-          {confirmPasswordError  && isErrorVisible ? <Text style = { styles.errorText }>{confirmPasswordError}</Text> : null}
+
+          {/* Password */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                placeholderTextColor={sd.colors.grey}
+                secureTextEntry={showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={handleTogglePasswordVisibility}>
+                <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
+              </TouchableOpacity>
+            </View>
+            {passwordError && isErrorVisible && <Text style={styles.errorText}>{passwordError}</Text>}
+          </View>
+
+          {/* Confirm Password */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Confirm Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Confirm Password"
+                placeholderTextColor={sd.colors.grey}
+                secureTextEntry={showPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity onPress={handleTogglePasswordVisibility}>
+                <FontAwesome5 name={showPassword ? 'eye-slash' : 'eye'} size={15} />
+              </TouchableOpacity>
+            </View>
+            {confirmPasswordError && isErrorVisible && <Text style={styles.errorText}>{confirmPasswordError}</Text>}
+          </View>
         </View>
       )}
-
+    </KeyboardAwareScrollView>
+    
       {/* Navigation Buttons */}
       <View style={styles.buttonContainer}>
-        {/* Back Button - If on Step 1, go back to the previous screen */}
-        {currentStep === 1 ? (
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.buttonText}>Back</Text>
-          </TouchableOpacity>
-        ) : (
-          /* Back Button for other steps within the form */
-          <TouchableOpacity style={styles.backButton} onPress={handlePrevStep}>
-            <Text style={styles.buttonText}>Back</Text>
-          </TouchableOpacity>
-        )}
+          {/* Back Button - If on Step 1, go back to the previous screen */}
+          {currentStep === 1 ? (
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Text style={[styles.buttonText, {color: sd.colors.blue}]}>Back</Text>
+            </TouchableOpacity>
+          ) : (
+            /* Back Button for other steps within the form */
+            <TouchableOpacity style={styles.backButton} onPress={handlePrevStep}>
+              <Text style={[styles.buttonText, {color: sd.colors.blue}]}>Back</Text>
+            </TouchableOpacity>
+          )}
 
-        {/* Next/Submit Button */}
-        {currentStep < 3 ? (
-          <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.submitButton} onPress={registerUser}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-    </KeyboardAwareScrollView>
+          {/* Next/Submit Button */}
+          {currentStep < 3 ? (
+            <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>
+              <Text style={styles.buttonText}>Next</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={[styles.nextButton, {backgroundColor: theme.colors.secondary}]} onPress={registerUser}>
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+    </SafeAreaView>
   );
 };
 

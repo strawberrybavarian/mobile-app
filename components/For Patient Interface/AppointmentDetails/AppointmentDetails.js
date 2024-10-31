@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Button, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import styles from './AppointmentDetailsCSS';
 import axios from 'axios';
 import { getData } from '../../storageUtility';
@@ -9,6 +9,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import Modal from 'react-native-modal';
 import sd from '../../../utils/styleDictionary';
 import { ip } from '../../../ContentExport';
+import { Card, Button } from 'react-native-paper';
 
 const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
     const [cancelReason, setCancelReason] = useState('');
@@ -68,10 +69,23 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
             infocontent = 'N/A';
         }
         return (
-        <View style={styles.infocont}>
-            <Text style={styles.infotitle}>{title}</Text>
-            <Text style={styles.infotext}>{infocontent}</Text>
-        </View>
+        <>
+            <Card 
+                style={{
+                    marginBottom: 20,
+                    backgroundColor: sd.colors.white,
+                }}
+                mode='outlined'
+            >
+                <Card.Content>
+                    <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.infotitle}>{title}</Text>
+                    <Text style={styles.infotext}>{infocontent}</Text>
+                    <View style={{flex: 1, alignItems: 'flex-end'}}/>
+                    </View>
+                </Card.Content>
+            </Card>
+        </>
     )};
 
     return (
@@ -99,8 +113,26 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
                 </View>
                 {isButtonVisible && 
                 <View style={styles.modalActions}>
-                    <Button title="Cancel Appointment" onPress={() => setCancelModalVisible(true)} color= {sd.colors.red} style = {styles.modalButton} />
-                    <Button title="Reschedule Appointment" onPress={() => setRescheduleModalVisible(true)} color={sd.colors.blue} />
+                    <Button
+                        uppercase
+                        mode="contained"  // Use "contained" for filled button style
+                        onPress={() => setCancelModalVisible(true)}
+                        style={{
+                            backgroundColor: sd.colors.red, // Set background color from your color dictionary
+                            flex: 1,
+                            marginRight: 10, // Add spacing between buttons if needed
+                        }}>
+                        Cancel Appointment
+                    </Button>
+                    <Button
+                        uppercase
+                        mode="contained" // Use "contained" for filled button style
+                        onPress={() => setRescheduleModalVisible(true)}
+                        style={{
+                            backgroundColor: sd.colors.blue, // Set background color from your color dictionary
+                        }}>
+                        Reschedule 
+                    </Button>
                 </View>
                 }
 

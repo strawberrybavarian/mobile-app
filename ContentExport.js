@@ -5,7 +5,7 @@ alliah = '192.168.117.227'
 aws = '13.214.60.24'
 
 const ip = {
-    address: `http://${aws}:8000`, //Local IP Address 
+    address: `http://${home}:8000`, //Local IP Address 
 };
 // my iphone:
 // 172.20.10.2

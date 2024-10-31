@@ -49,7 +49,7 @@ const UploadImageModal = ({ isVisible, toggleModal, userId, setProfileImage }) =
     });
 
     try {
-      const response = await axios.post(`${ip.address}/api/patient/api/${userId}/updateimage`, formData, {
+      const response = await axios.post(`${ip.address}/api/doctor/api/${userId}/updateimage`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -57,9 +57,9 @@ const UploadImageModal = ({ isVisible, toggleModal, userId, setProfileImage }) =
 
       console.log(response.data);
 
-      if (response.data.updatedPatient) {
+      if (response.data.updatedDoctor) {
         Alert.alert("Image Uploaded", response.data.message);
-        setProfileImage(await response.data.updatedPatient.patient_image); // Update image in profile
+        setProfileImage(await response.data.updatedDoctor.dr_image); // Update image in profile
         toggleModal(); // Close modal
       } else {
         Alert.alert("Upload Failed", response.data.message);

@@ -39,11 +39,13 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         //position: 'absolute',
         bottom: 0,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
     modal: {
         justifyContent: 'flex-end',
         margin: 0,
-        flex: 1,
+        //flex: 1,
       },
 
     
@@ -60,6 +62,7 @@ const styles = StyleSheet.create({
         fontSize: sd.fontSizes.medium,
         fontFamily: 'Poppins-Medium',
         marginRight: 10,
+        flex: 1,
     },
 
     infobanner: {
@@ -77,6 +80,7 @@ const styles = StyleSheet.create({
         fontSize: sd.fontSizes.medium,
         fontFamily: 'Poppins-Light',
         marginHorizontal: 5,
+        flex: 2,
     },
 
     //body
@@ -84,6 +88,10 @@ const styles = StyleSheet.create({
         fontFamily:'Poppins-SemiBold',
         fontSize: 24,
         textAlign: 'center',
+    },
+    cancelButton: {
+        padding: 50,
+        borderRadius: 50,
     },
     modalButton: {
         padding: 10,

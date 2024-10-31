@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import sd from '../../../utils/styleDictionary';
 
 export const styles = StyleSheet.create({
@@ -52,4 +52,10 @@ export const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 10,
   },
+  carouselContainer: {
+    height: Dimensions.get('window').height / 4, // Keep a fixed height for carousel
+    backgroundColor: '#f8f8f8',
+    margin: 30,
+    borderRadius: sd.borders.radiusXL,
+},
 });

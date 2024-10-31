@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import sd from "../../../utils/styleDictionary";
 
-export const styles = StyleSheet.create({
+export const MyPatientStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: sd.colors.white,
@@ -10,9 +10,12 @@ export const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: sd.colors.white,
     },
+    bodyContainer: {
+        padding: 20,
+    },
     patientCard: {
         padding: 20,
-        margin: 10,
+        //margin: 10,
         borderRadius: 10,
         backgroundColor: sd.colors.white,
         shadowColor: sd.colors.black,
@@ -26,8 +29,8 @@ export const styles = StyleSheet.create({
     },
     patientName: {
         fontSize: sd.fontSizes.medium,
-        fontWeight: 'bold',
-        color: sd.colors.black,
+        fontFamily: sd.fonts.regular,
+        color: theme.colors.onSurface,
     },
     patientDetails: {
         fontSize: 16,

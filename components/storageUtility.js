@@ -54,4 +54,16 @@ const deleteData = async (key) => {
   }
 };
 
-export { storeData, getData, deleteData };
+const storeTheme = async (isDarkMode) => {
+  const themeValue = isDarkMode ? 'dark' : 'light';
+  await storeData('theme', themeValue);
+};
+
+// Function to get the stored theme preference
+const getStoredTheme = async () => {
+  const storedTheme = await getData('theme');
+  return storedTheme ? storedTheme : 'light'; // Default to light theme if none is set
+};
+
+
+export { storeData , getData , deleteData , storeTheme, getStoredTheme};

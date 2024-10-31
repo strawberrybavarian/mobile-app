@@ -11,7 +11,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
 
 
-const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
+const EditDoctorProfile = ({ isVisible, toggleModal }) => {
   const [userId, setUserId] = useState('');
   const [doctor, setDoctor] = useState(null);
   const [firstName, setFirstName] = useState('');
@@ -49,10 +49,11 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
       const fetchDoctorData = async () => {
         if (userId && userId !== prevUserIdRef.current) {
           try {
-            const response = await axios.get(`${ip.address}/api/doctor/api/onedoctor/${userId}`);
-            setDoctor(response.data.theDoctor);
-            setOriginalData(response.data.theDoctor);
-            setProfileImage(response.data.theDoctor.doctor_image); // Set profile image
+            const response = await axios.get(`${ip.address}/api/doctor/one/${userId}`);
+            console.log('doctor:', response.data);
+            setDoctor(response.data.doctor);
+            setOriginalData(response.data.doctor);
+            setProfileImage(response.data.doctor.dr_image); // Set profile image
             prevUserIdRef.current = userId; // Update the ref with the new userId
           } catch (error) {
             console.error("Error fetching doctor data:", error);
@@ -68,14 +69,12 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
   // Update state with doctor data once fetched
   useEffect(() => {
     if (doctor) {
-      setFirstName(doctor.doctor_firstName);
-      setLastName(doctor.doctor_lastName);
-      setSpecialization(doctor.doctor_specialization);
-      setHospitalAffiliation(doctor.doctor_hospitalAffiliation);
-      setYearsOfExperience(doctor.doctor_yearsOfExperience);
-      setLicenseNumber(doctor.doctor_licenseNumber);
-      setEmail(doctor.doctor_email);
-      setContactNumber(doctor.doctor_contactNumber);
+      setFirstName(doctor.dr_firstName);
+      setLastName(doctor.dr_lastName);
+      setSpecialization(doctor.dr_specialty);
+      setLicenseNumber(doctor.dr_licenseNo);
+      setEmail(doctor.dr_email);
+      setContactNumber(doctor.dr_contactNumber);
     }
   }, [doctor]);
 
@@ -85,27 +84,27 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
     try {
       // Prepare the updated data
       const updatedData = {
-        doctor_firstName: firstName,
-        doctor_lastName: lastName,
-        doctor_specialization: specialization,
-        doctor_hospitalAffiliation: hospitalAffiliation,
-        doctor_yearsOfExperience: yearsOfExperience,
-        doctor_licenseNumber: licenseNumber,
-        doctor_email: email,
-        doctor_contactNumber: contactNumber,
+        dr_firstName: firstName,
+        dr_lastName: lastName,
+        dr_specialty: specialization,
+        dr_licenseNo: licenseNumber,
+        dr_email: email,
+        dr_contactNumber: contactNumber,
       };
 
       // Update profile info
       const response = await axios.put(
-        `${ip.address}/api/doctor/api/updateinfo/${userId}`,
+        `${ip.address}/api/doctor/api/${userId}/updateDetails`,
         updatedData
       );
 
-      if (response.data.success) {
+      console.log('response:', response.data);
+
+      if (response.data) {
         Alert.alert("Profile Updated", response.data.message);
-        setProfileData(updatedData); // Pass updated data to the parent component
         toggleModal(); // Close the modal
-      } else {
+      } 
+      else {
         Alert.alert("Update Failed", response.data.message);
       }
     } catch (error) {
@@ -117,14 +116,12 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
 
   // Handle cancel changes
   const handleCancel = () => {
-    setFirstName(originalData.doctor_firstName);
-    setLastName(originalData.doctor_lastName);
-    setSpecialization(originalData.doctor_specialization);
-    setHospitalAffiliation(originalData.doctor_hospitalAffiliation);
-    setYearsOfExperience(originalData.doctor_yearsOfExperience);
-    setLicenseNumber(originalData.doctor_licenseNumber);
-    setEmail(originalData.doctor_email);
-    setContactNumber(originalData.doctor_contactNumber);
+    setFirstName(originalData.dr_firstName);
+    setLastName(originalData.dr_lastName);
+    setSpecialization(originalData.dr_specialty);
+    setLicenseNumber(originalData.dr_licenseNumber);
+    setEmail(originalData.dr_email);
+    setContactNumber(originalData.dr_contactNumber);
     toggleModal();
   };
 
@@ -158,8 +155,8 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
         <View style={styles.imageContainer}>
             <Image
                 source={
-                    profileImage && doctor && doctor.doctor_image 
-                    ? { uri: `${ip.address}/${doctor.doctor_image}` }
+                    profileImage && doctor && doctor.dr_image 
+                    ? { uri: `${ip.address}/${doctor.dr_image}` }
                     : { uri: 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }
                 }
                 style={styles.profileImage}
@@ -170,13 +167,11 @@ const EditDoctorProfile = ({ isVisible, toggleModal, setProfileData }) => {
           </TouchableOpacity>
         </View>
 
-        {renderInput("First Name", firstName, setFirstName)}
+        {renderInput("First Name", firstName , setFirstName)}
         {renderInput("Last Name", lastName, setLastName)}
-        {renderInput("Specialization", specialization, setSpecialization)}
-        {renderInput("Hospital Affiliation", hospitalAffiliation, setHospitalAffiliation)}
-        {renderInput("Years of Experience", yearsOfExperience, setYearsOfExperience)}
+        {renderInput("Specialization", specialization , setSpecialization)}
         {renderInput("License Number", licenseNumber, setLicenseNumber)}
-        {renderInput("Email", email, setEmail)}
+        {renderInput("Email",email , setEmail)}
         {renderInput("Contact Number", contactNumber, setContactNumber)}
 
         {/* Save and Cancel Buttons */}

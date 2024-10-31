@@ -3,9 +3,9 @@ import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions, Modal, Pre
 import NavigationBar from '../Navigation/NavigationBar';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { Entypo, FontAwesome5 } from '@expo/vector-icons';
 import { ip } from '../../../ContentExport';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getSpecialtyDisplayName } from '../../../utils/specialtyMap';
 import { Header1, Header2 } from '../../Headers/Headers';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
@@ -25,11 +25,13 @@ const Homepage = () => {
     const [patientData, setPatientData] = useState({});
     const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
     const [imageArray, setImageArray] = useState([
-        'https://images.unsplash.com/photo-1576669801615-4e2f69504d58?q=80&w=3494&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        'https://images.unsplash.com/photo-1596144241742-a54dffcc9b26?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGRvY3RvcnN8ZW58MHx8MHx8fDA%3D',
-        'https://images.unsplash.com/photo-1576669801615-4e2f69504d58?q=80&w=3494&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTspqeV2ho0cPe3MB8mKkXsVkoZwbki2T3hVQ&s',
+        // 'https://scontent.fmnl25-3.fna.fbcdn.net/v/t39.30808-6/461067605_959076416261350_1136815970805189389_n.jpg?stp=dst-jpg_s1080x2048&_nc_cat=101&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeFFP4Mv3qx2KjE0Zz-SEzCweN5DXJ7qCxB43kNcnuoLEP9KNK7OOemQH2wkgLVeptmhp9v0Wd5IErwto5gxQn0v&_nc_ohc=k1RvmY_tsCsQ7kNvgHYL0GM&_nc_ht=scontent.fmnl25-3.fna&_nc_gid=AK5kyBxSKlM7vq2WM7WrbTY&oh=00_AYCEcDViZ4Xkszg7mNbwzIcdbpMR5akHPOUGy5ADC5U8Xg&oe=671793B2',
+        // 'https://scontent.fmnl25-2.fna.fbcdn.net/v/t39.30808-6/459144521_950773843758274_1189041271773114161_n.jpg?stp=dst-jpg_s1080x2048&_nc_cat=111&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeFvrX6evRsQKvL2iCvlUjyLg9h2oA9BRpiD2HagD0FGmMff0uRrCm_qBY2a_ib7O9DGh3JCfczsOd7deaRD3ySA&_nc_ohc=8zwXmOdUYgMQ7kNvgH4MsCw&_nc_ht=scontent.fmnl25-2.fna&_nc_gid=AK5kyBxSKlM7vq2WM7WrbTY&oh=00_AYAz9WY7FFGe25GHF5EwDQdOSPJX0OXndZ8voKif-SfPNA&oe=67179071',
 
     ]);
+
+    const navigation = useNavigation();
 
 
     useEffect(() => {
@@ -55,7 +57,7 @@ const Homepage = () => {
         console.log(patientData);
     }, [patientData])
 
-    const AnimatedButton = ({ label }) => {
+    const AnimatedButton = ({ label, redir, icon }) => {
         const scaleValue = useRef(new Animated.Value(1)).current;
 
         const onPressIn = () => {
@@ -63,6 +65,8 @@ const Homepage = () => {
                 toValue: 0.95,
                 useNativeDriver: true,
             }).start();
+            label !== 'Consultation' ? navigation.navigate(redir, label) : null
+            
         };
 
         const onPressOut = () => {
@@ -75,15 +79,16 @@ const Homepage = () => {
         return (
             <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
                 <Pressable
-                    onPressIn={onPressIn}
+                    onPress={(onPressIn)}
                     onPressOut={onPressOut}
                     style={styles.optionBox}
                 >
-                    <Image 
+                    {/* <Image 
                         source={require('../../../assets/pictures/Stethoscope.png')}
                         style = {styles.optionImage}
-                        />
-                    <Text style={{ color: 'black' }}>{label}</Text> 
+                        /> */}
+                    <FontAwesome5 name = {icon} style = {styles.optionImage}/>
+                    <Text style={{ color: sd.colors.blue, fontFamily: sd.fonts.semiBold, textAlign: 'center' }}>{label}</Text> 
                 </Pressable>
             </Animated.View>
         );
@@ -139,16 +144,24 @@ const Homepage = () => {
                     />
                 </View>
 
+                <View>
+
+                </View>
+
                 <Text style = {styles.title}>How can we help you today?</Text>
                 
                 <View style = {styles.optionsContainer}>
                     <View style = {styles.optionsRow}>
-                        <AnimatedButton label="Check-up"/>
-                        <AnimatedButton label="X-ray" />
+                        <AnimatedButton label="Consultation" redir = 'doctorspecialty' icon = 'stethoscope'/>
+                        <AnimatedButton label="Vaccination" redir = 'bookappointment' icon = 'syringe'/>
                     </View>
                     <View style = {styles.optionsRow}>
-                        <AnimatedButton label = "EKG" />
-                        <AnimatedButton label = "Other Services" />
+                        <AnimatedButton label = "CBC" redir = 'bookappointment'  icon = 'tint'/>
+                        <AnimatedButton label = "Radiology" redir = 'bookappointment'  icon = 'radiation'/>
+                    </View>
+                    <View style = {styles.optionsRow}>
+                        <AnimatedButton label = "Pre- Employment" redir = 'bookappointment'  icon = 'user'/>
+                        <AnimatedButton label = "Ultrasound" redir = 'bookappointment'  icon = 'baby'/>
                     </View>
                     {/* <Button
                         mode="contained"

@@ -8,6 +8,8 @@ import sd from '../../../../utils/styleDictionary';
 import { ip } from '../../../../ContentExport';
 import { getData } from '../../../storageUtility';
 import EditDoctorProfile from '../Edit Doctor Profile/EditDoctorProfile';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView } from 'react-native';
 
 const ViewDoctorProfile = () => {
     const [doctorId, setDoctorId] = useState('');
@@ -70,7 +72,8 @@ const ViewDoctorProfile = () => {
     };
 
     return (
-        <View style={styles.modalContent}>
+        <SafeAreaView style={styles.modalContent}>
+        <ScrollView>
             <View style={styles.header}>
                 <Entypo name='chevron-small-left' size={30} color={sd.colors.blue} onPress={() => navigation.goBack()} style={{ flex: 1 }} />
                 <Text style={styles.headerText}>View Doctor Profile</Text>
@@ -127,7 +130,8 @@ const ViewDoctorProfile = () => {
             ) : (
                 <Text>Loading...</Text>
             )}
-        </View>
+        </ScrollView>
+        </SafeAreaView>
     );
 };
 

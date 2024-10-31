@@ -11,6 +11,7 @@ import { ip } from "../../../ContentExport";
 import sd from "../../../utils/styleDictionary";
 import { useNavigation } from "@react-navigation/native";
 import { Divider, Searchbar } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 //   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
 //   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
@@ -62,7 +63,7 @@ const SearchForAppointment = ({ route }) => {
   }, [allDoctorArray, specpec]);
 
   const bookAppointmentButton = (item) => {
-    navigation.navigate('aboutdoctor', { item });
+    navigation.navigate('bookappointment', { item });
     console.log(item)
   };
   
@@ -164,8 +165,10 @@ const SearchForAppointment = ({ route }) => {
 
   return (
     <>
-      <ScrollView
+      <SafeAreaView style={{flex:1, backgroundColor: sd.colors.white}}>
+      <View
         backgroundColor={sd.colors.white}
+        style={{ flex: 1, backgroundColor: sd.colors.white }}
       >
           <View style={styles.headerCont}>
               <Entypo name="chevron-thin-left" size={sd.fontSizes.large} color={sd.colors.blue} style={{flex:1}} onPress={()=>{navigation.goBack()}}/>
@@ -190,15 +193,16 @@ const SearchForAppointment = ({ route }) => {
               style={{ marginVertical: 10, marginTop: 20,  }}
               theme = {{colors: {outlineVariant: sd.colors.blue}}}
             />
-            <FlatList
+            {doctorFiltered ? <FlatList
               data={doctorFiltered}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
               showsVerticalScrollIndicator={false}
-            />
+            /> : <Text> Loading ...</Text>}
           </View>
         </ScrollView>
-      </ScrollView>
+      </View>
+      </SafeAreaView>
     </>
   );
 };

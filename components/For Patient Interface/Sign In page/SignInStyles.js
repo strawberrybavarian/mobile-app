@@ -1,83 +1,110 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
+import sd from "../../../utils/styleDictionary";
 
-export const styles = StyleSheet.create({
-  container: {
+export const SignInStyles = (theme) => StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 30,
     marginTop: 55,
   },
-  con1: {},
-  textcon: {
+  backButton: {
+    padding: 10,
+  },
+  headerTitleContainer: {},
+  headerTitle: {
+    fontSize: 15,
+    color: theme.colors.primary,
+    fontFamily: sd.fonts.light,
+  },
+  titleContainer: {
     paddingLeft: 30,
     marginTop: 50,
   },
-  con2: {
-    flexDirection: "column",
-    marginTop: 25,
-    paddingLeft: 30,
-    paddingRight: 30,
-  },
-  text1: {
+  title: {
     fontSize: 45,
     fontFamily: "Poppins-SemiBold",
     lineHeight: 55,
+    color: theme.colors.primary,
   },
-  title: {
-    fontSize: 15,
-    color: "#92A3FD",
-    fontFamily: "Poppins-SemiBold",
+  formContainer: {
+    flexDirection: "column",
+    marginVertical: 25,
+    paddingLeft: 30,
+    paddingRight: 30,
   },
-  pickerContainer: {
-    height: 50,
-    width: "100%",
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#d9d9d9",
-    marginVertical: 10,
-    fontSize: 13,
-    fontFamily: "Poppins",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pickerItem: {
-    fontFamily: "Poppins",
-    fontSize: 15,
-    paddingLeft: 10,
-  },
-  passwordContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
     borderRadius: 10,
-    backgroundColor: "#d9d9d9",
+    backgroundColor: theme.colors.surfaceVariant,
     marginVertical: 10,
+    ...sd.shadows.level1,
   },
-  passwordInput: {
+  inputField: {
     flex: 1,
     height: 50,
-    fontSize: 14,
-    fontFamily: "Poppins",
+    fontSize: sd.fontSizes.medium,
+    fontFamily: sd.fonts.light,
     paddingLeft: 10,
     top: 2,
+    color: theme.colors.onSurface,
   },
-  eyeIconContainer: {
+  iconContainer: {
     padding: 10,
   },
-  textButton: {
-    color: "white",
+  dropdownContainer: {
+    height: 50,
+    width: "100%",
+    borderRadius: 12,
+    backgroundColor: theme.colors.surfaceVariant,
+    marginVertical: 10,
+    fontSize: 13,
+    fontFamily: sd.fonts.light,
+    color: theme.colors.onSurfaceVariant,
+    ...sd.shadows.level1,
+  },
+  dropdown: {
+    fontFamily: sd.fonts.light,
+    color: theme.colors.onSurfaceVariant,
+    fontSize: 15,
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    paddingHorizontal: 10,
+    
+  },
+  signInButtonContainer: {
+    height: 45,
+    borderRadius: 40,
+    marginTop: 10,
+    marginHorizontal: 30,
+    backgroundColor: theme.colors.primary,
+  },
+  signInButton: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  signInText: {
+    color: theme.colors.onPrimary,
     fontSize: 15,
     textAlign: "center",
-    marginTop: 1,
     fontFamily: "Poppins",
   },
-  linkText: {
+  forgotPasswordText: {
     textAlign: "center",
     marginTop: 20,
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: "Poppins",
+    color: theme.colors.onSurface,
   },
   errorMessage: {
     color: "red",

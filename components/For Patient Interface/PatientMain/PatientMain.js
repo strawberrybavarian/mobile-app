@@ -11,6 +11,8 @@ import { getData } from '../../storageUtility';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from 'react-native-paper';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
@@ -88,8 +90,10 @@ const PatientMain = () => {
     }
   };
 
+  const theme = useTheme();
+
   return (
-    <>
+    <SafeAreaView  style = {{flex:1, backgroundColor: theme.colors.background}}>
       <Header3 name={uname} imageUri={uImage} />
       <TabView
         navigationState={{ index, routes }}
@@ -109,7 +113,7 @@ const PatientMain = () => {
           activeTab={routes[index].title}
         />
       </View>
-    </>
+    </SafeAreaView>
   );
 };
 

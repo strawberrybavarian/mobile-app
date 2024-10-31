@@ -9,12 +9,13 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
 import { useNavigation } from '@react-navigation/native';
-import { styles } from './DoctorHeaderStyles';
+import DrHeaderStyles from './DoctorHeaderStyles';
 import { getData } from '../../storageUtility';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
+import { useTheme } from 'react-native-paper';
 
-const DoctorHeader = () => {
+const DoctorHeader = ({ name , imageUri }) => {
     const [search, setSearch] = useState('');
     const [userId, setUserId] = useState('');
     const [doctorData, setDoctorData] = useState({});
@@ -42,14 +43,15 @@ const DoctorHeader = () => {
       });
     }, []);
     
- 
+    const theme = useTheme();
+    const styles = DrHeaderStyles(theme)
  
     return (
       <>
         <View style={styles.mainContainer}> 
           <View style={styles.wrapper}>
             <Image
-                source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s" }}
+                source={{ uri: `${ip.address}/${doctorData.dr_image}` }}
                 style={{ width: 50, height: 50, borderRadius: 50 }}
             />
             <View style={styles.textCont}>

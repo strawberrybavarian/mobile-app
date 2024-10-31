@@ -1,16 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Image, ScrollView } from 'react-native';
 import Modal from 'react-native-modal';
 import axios from 'axios';
 import { ip } from '../../../../../ContentExport';
 import { getData } from '../../../../storageUtility';
-import styles from './EditProfileStyles';
+import EditProfileStyles from './EditProfileStyles';
 import sd from '../../../../../utils/styleDictionary';
 import UploadImageModal from './UploadImageModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from 'react-native-paper';
 
 const EditProfile = ({ isVisible, toggleModal, setProfileData }) => {
+
+  const theme = useTheme();
+  const styles = EditProfileStyles(theme);
+
   const [userId, setUserId] = useState('');
   const [patient, setPatient] = useState(null);
   const [firstName, setFirstName] = useState('');
@@ -136,67 +142,72 @@ const EditProfile = ({ isVisible, toggleModal, setProfileData }) => {
       isVisible={isVisible}
       onBackdropPress={toggleModal}
       onSwipeComplete={toggleModal}
+      // onSwipeCancel={toggleModal}
+      swipeThreshold={50}
+      panResponderThreshold={4}
       swipeDirection="right"
       animationIn='slideInRight'
       animationOut="slideOutRight"
       coverScreen={true}
       style={styles.modal}
     >
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Edit Profile</Text>
+      <SafeAreaView  style = {{flex:1, backgroundColor: theme.colors.background}}>
+        <ScrollView style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Edit Profile</Text>
 
-        {/* Profile Image */}
-        <View style={styles.imageContainer}>
-            <Image
-                source={
-                    profileImage && patient && patient.patient_image 
-                    ? { uri: `${ip.address}/${patient.patient_image}` }
-                    : { uri: 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }
-                }
-                style={styles.profileImage}
-            />
+          <View style={styles.imageContainer}>
+              <Image
+                  source={
+                      profileImage && patient && patient.patient_image 
+                      ? { uri: `${ip.address}/${patient.patient_image}` }
+                      : { uri: 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png' }
+                  }
+                  style={styles.profileImage}
+              />
 
-          <TouchableOpacity style={styles.imageBadge} onPress={() => setIsImageModalVisible(true)}>
-            <Text style={styles.badgeText}>+</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity style={styles.imageBadge} onPress={() => setIsImageModalVisible(true)}>
+              <Text style={styles.badgeText}>+</Text>
+            </TouchableOpacity>
+          </View>
 
-        {renderInput("First Name", firstName, setFirstName)}
-        {renderInput("Middle Initial", middleInitial, setMiddleInitial)}
-        {renderInput("Last Name", lastName, setLastName)}
-        {renderInput("Contact Number", contactNumber, setContactNumber)}
-        {renderInput("Email", email, setEmail)}
-        {renderInput("Gender", gender, setGender)}
+          {renderInput("First Name", firstName, setFirstName)}
+          {renderInput("Middle Initial", middleInitial, setMiddleInitial)}
+          {renderInput("Last Name", lastName, setLastName)}
+          {renderInput("Contact Number", contactNumber, setContactNumber)}
+          {renderInput("Email", email, setEmail)}
+          {renderInput("Gender", gender, setGender)}
 
-        {/* Save and Cancel Buttons */}
-        <View style={styles.buttonContainer}>
-          
-          <Button
-            mode='outlined'
-            title="Cancel"
-            onPress={handleCancel}
-            theme={{colors : { outline: sd.colors.blue}}}
-          >
-            Cancel
-          </Button>
-          <Button
-            mode='contained'
-            onPress={handleSave}
-            disabled={isSubmitting}
-          >
-            Save Changes
-          </Button>
-        </View>
-      </View>
+          {/* Save and Cancel Buttons */}
+          <View style={styles.buttonContainer}>
+            
+            <Button
+              mode='outlined'
+              title="Cancel"
+              onPress={handleCancel}
+              theme={{colors : { outline: sd.colors.blue}}}
+            >
+              Cancel
+            </Button>
+            <Button
+              mode='contained'
+              onPress={handleSave}
+              disabled={isSubmitting}
+            >
+              Save Changes
+            </Button>
+          </View>
+        </ScrollView>
 
-      {/* Image Upload Modal */}
-      <UploadImageModal
-        isVisible={isImageModalVisible}
-        toggleModal={() => setIsImageModalVisible(false)}
-        userId={userId}
-        setProfileImage={setProfileImage} // Update image in profile
-      />
-    </Modal>
+        {/* Image Upload Modal */}
+        <UploadImageModal
+          isVisible={isImageModalVisible}
+          toggleModal={() => setIsImageModalVisible(false)}
+          userId={userId}
+          setProfileImage={setProfileImage} // Update image in profile
+        /> 
+      </SafeAreaView>
+      </Modal>
+   
   );
 };
 
