@@ -1,31 +1,34 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import sd from "../../../utils/styleDictionary";
 
 export const MyPatientStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: sd.colors.white,
+        backgroundColor: theme.colors.background,
+
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding : 10, 
     },
     scrollContainer: {
         flex: 1,
-        backgroundColor: sd.colors.white,
+        backgroundColor: theme.colors.background,
+        padding: 0,
     },
     bodyContainer: {
         padding: 20,
     },
     patientCard: {
+        flex: 1,
+    },
+    patientInfo: {
         padding: 20,
         //margin: 10,
         borderRadius: 10,
-        backgroundColor: sd.colors.white,
-        shadowColor: sd.colors.black,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        backgroundColor: theme.colors.surface,
+        // ...sd.shadows.level1,
     },
     patientName: {
         fontSize: sd.fontSizes.medium,
@@ -41,7 +44,40 @@ export const MyPatientStyles = (theme) => StyleSheet.create({
         fontFamily: sd.fonts.medium,
         margin: 10,
     },
-
+    subtitle: {
+        fontSize: sd.fontSizes.base,
+        fontFamily: sd.fonts.regular,
+        margin: 10,
+    },
+    medicalRecordContainer: {
+        padding: 20,
+        margin: 10,
+        borderRadius: 10,
+        backgroundColor: sd.colors.white,
+        shadowColor: sd.colors.black,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    dropdown: {
+        height: Dimensions.get('window').height*0.05, 
+        padding: 10, 
+        borderRadius: 10
+      },
+    dropdownText: {
+          fontSize: 16,
+      },
+    pickerContainer: {
+        ...sd.shadows.level2,
+        borderRadius: 10,
+        marginVertical: 15,
+        backgroundColor: sd.colors.white,
+        //padding: 10,
+        },
 
 
 
@@ -50,20 +86,7 @@ export const MyPatientStyles = (theme) => StyleSheet.create({
     //     flex: 1,
     //     backgroundColor: sd.colors.white,
     // },
-    // medicalRecordContainer: {
-    //     padding: 20,
-    //     margin: 10,
-    //     borderRadius: 10,
-    //     backgroundColor: sd.colors.white,
-    //     shadowColor: sd.colors.black,
-    //     shadowOffset: {
-    //         width: 0,
-    //         height: 2,
-    //     },
-    //     shadowOpacity: 0.25,
-    //     shadowRadius: 3.84,
-    //     elevation: 5,
-    // },
+    
     // medicalRecordTitle: {
     //     fontSize: 20,
     //     fontWeight: 'bold',

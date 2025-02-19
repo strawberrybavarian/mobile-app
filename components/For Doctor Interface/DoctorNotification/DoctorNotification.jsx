@@ -10,6 +10,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import { ip } from '@/ContentExport';
+import { getData } from '@/components/storageUtility';
 
 const patientData = [
     { id: 'P0256', name: 'La Grande Dame', specialization: 'Patient', status: 'Upcoming' },
@@ -32,6 +35,9 @@ const DoctorNotification = () => {
       patient.id.toLowerCase().includes(search.toLowerCase())
     );
   
+    console.log(
+      
+    )
  
  
     return (

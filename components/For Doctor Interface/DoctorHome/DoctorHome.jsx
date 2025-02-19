@@ -1,74 +1,134 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
-import DoctorHeader from '../DoctorHeader/DoctorHeader';
-import { styles } from './DoctorHomeStyles';
+import { DoctorHomeStyles } from './DoctorHomeStyles';
 import Carousel, {
   ICarouselInstance,
   Pagination,
 } from "react-native-reanimated-carousel";
 import sd from '../../../utils/styleDictionary';
+import { Card, useTheme, Divider, FAB } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
+import { ip } from '@/ContentExport';
+import { getData } from '@/components/storageUtility';
+import DoctorPosts from './DoctorHomeComponents/DoctorPosts';
+import { useNavigation } from '@react-navigation/native';
 
+const DoctorHome = ({ }) => {
+  const [doctorId, setDoctorId] = useState(null);
+  const [doctor, setDoctor] = useState({});
 
-const DoctorHome = ({ navigation }) => {
+  const navigation = useNavigation();
+
   const [announcement, setAnnouncement] = useState('');
   const [announcementsList, setAnnouncementsList] = useState([]);
 
-  const handlePostAnnouncement = () => {
-    if (announcement.trim() !== '') {
-      setAnnouncementsList((prevList) => [
-        {
-          id: Math.random().toString(),
-          text: announcement,
-          timestamp: new Date().toISOString(),
-        },
-        ...prevList,
-      ]);
-      setAnnouncement('');
+  const theme = useTheme();  
+  const styles = DoctorHomeStyles(theme);
+
+  // Fetch and set the doctor ID
+  useEffect(() => {
+    const fetchDoctorId = async () => {
+      try {
+        const id = await getData('userId'); // Ensure we fetch asynchronously
+        console.log('Doctor ID fetched:', id);
+        setDoctorId(id);
+      } catch (err) {
+        console.error('Error fetching doctor ID:', err);
+      }
+    };
+
+    fetchDoctorId();
+  }, []);
+
+  // Fetch announcements when doctorId is available
+  useEffect(() => {
+    if (doctorId) {
+      fetchAnnouncements(doctorId);
+      fetchDoctor(doctorId);
     }
+  }, [doctorId]);
+
+  const refreshPosts = () => {
+    fetchAnnouncements(doctorId);
   };
 
-  return (
+  const handlePostAnnouncement = () => {
+    // Handle posting announcements logic
+  };
+
+  const fetchDoctor = (id) => {
+    axios
+      .get(`${ip.address}/api/doctor/one/${id}`)
+      .then((res) => {
+        console.log('Doctor fetched:', res.data);
+        setDoctor(res.data?.doctor);
+      })
+      .catch((err) => console.error('Error fetching doctor:', err));
+  };
+
+  const fetchAnnouncements = (id) => {
+    axios
+      .get(`${ip.address}/api/doctor/api/post/getallpost/${id}`)
+      .then((res) => {
+        console.log('Announcements fetched:', res.data);
+        setAnnouncementsList(res.data?.posts.reverse());
+      })
+      .catch((err) => console.error('Error fetching announcements:', err));
+  };
+
+  return (  
     <>
-      <View style={styles.container}>
-        {/* Post Announcement Container */}
-        
-        <Text style={{ paddingLeft: 5, fontFamily: 'Poppins-SemiBold', fontSize: 20, paddingVertical: 20, marginLeft: 20 }}>Post Announcement</Text>
+      <SafeAreaView 
+        style={[styles.container, {padding: 0}]}
+        edges={['left', 'right', 'bottom']}
+        >
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+        >
+        {/* Status Card */}
+        <View style={{ flex: 1 }}>  
+          <Text style={styles.title}> Status</Text>
+          <Card style={{ backgroundColor: theme.colors.surface, marginVertical: 10, marginHorizontal: 5 }}>
+            <Card.Content style={styles.statusContainer}>
+              <Text style={styles.statusLabel}>Patients</Text>
+            </Card.Content> 
+          </Card>  
+        </View>  
 
-        <View style={styles.postContainer}>
-          <TextInput
-            style={styles.postInput}
-            placeholder="Post Announcement Here!"
-            value={announcement}
-            onChangeText={(text) => setAnnouncement(text)}
-          />
-          <View style={styles.buttonPostContainer}>
-            <TouchableOpacity style={styles.postButton} onPress={handlePostAnnouncement}>
-              <Text style={styles.postButtonText}>Post</Text>
-            </TouchableOpacity>
-          </View>
-          
+        {/* Posts */}
+        <View style={{ flex: 2, marginTop: 20 }}>
+          <Text style={styles.title}> Announcements</Text>
+          <Divider/>
+          <DoctorPosts posts={announcementsList} doctor = {doctor} refreshPosts={ refreshPosts}/>
         </View>
+
+       
+      </ScrollView>
+
+      <FAB
+        icon="plus"
+        size="medium"
+        style={{
+          position: 'absolute',
+          right: 0,
+          bottom: 80,
+          margin: 16,
+          backgroundColor: theme.colors.primary,
+        }}
+        onPress={() =>
+          navigation.navigate('drpost', { 
+            doctorId, 
+            fetchPosts: () => fetchAnnouncements(doctorId) ,
+            drimg: doctor?.dr_image,
+          })
+        }
+      />
       
-
-      {/* Display Announcements */}
-      {announcementsList.map((item) => (
-        <View key={item.id} style={styles.announcementContainer}>
-          <Text style={styles.announcementText}>{item.text}</Text>
-          <Text style={styles.announcementTimestamp}>{item.timestamp}</Text>
-        </View>
-      ))}
-      </View>
+      </SafeAreaView>
     </>
   );
 };
 
 export default DoctorHome;
-
-

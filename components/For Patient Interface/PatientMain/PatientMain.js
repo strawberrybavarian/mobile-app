@@ -12,12 +12,14 @@ import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from 'react-native-paper';
+import { FAB, useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
 const PatientMain = () => {
   const [index, setIndex] = useState(0);
+  const navigation = useNavigation();
 
   const [routes] = useState([
     { key: 'home', title: 'Home' },
@@ -113,6 +115,22 @@ const PatientMain = () => {
           activeTab={routes[index].title}
         />
       </View>
+
+      <FAB
+        icon="message"
+        size="medium"
+        style={{
+          position: 'absolute',
+          right: 0,
+          bottom: 80,
+          margin: 16,
+          backgroundColor: theme.colors.primary,
+        }}
+        onPress={() =>
+          navigation.navigate('ptnchat', {userId: userId})
+        }x
+      />
+
     </SafeAreaView>
   );
 };

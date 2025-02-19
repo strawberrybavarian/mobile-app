@@ -16,6 +16,7 @@ import MedicalHistory from './MedicalHistory';
 import Prescription from './Prescription';
 import Immunization from './Immunization';
 import LabResult from './LabResult';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MedicalRecords = () => {
     const [userId, setUserId] = useState('');
@@ -60,7 +61,7 @@ const MedicalRecords = () => {
 
     return (
         <>
-        <View style = {styles.mainContainer}>
+        <SafeAreaView style = {styles.mainContainer}>
             <ScrollView style = {styles.scrollContainer}>
                 <View style = {styles.headerContainer}>
                     <Entypo name = 'chevron-thin-left' size = {18} color = {sd.colors.black} style = {[styles.backIcon, {flex:1}]} onPress = {() => navigation.goBack()} />
@@ -128,7 +129,7 @@ const MedicalRecords = () => {
                     />
                 ) : (null)}
             </ScrollView>
-        </View>
+        </SafeAreaView>
         </>
     )
 }

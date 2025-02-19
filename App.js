@@ -1,8 +1,9 @@
 import { StyleSheet, StatusBar, Platform} from 'react-native';
+import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {useFonts} from 'expo-font';
-import { MaterialCommunityIcons } from 'react-native-vector-icons'; 
+import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { CardStyleInterpolators, TransitionSpecs } from '@react-navigation/stack';
 import { lightTheme as theme } from './utils/theme';
@@ -19,6 +20,7 @@ import HealthRiskAssessmentForm from './components/For Patient Interface/Health 
 import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
 import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
 import AppointmentDetails from './components/For Patient Interface/AppointmentDetails/AppointmentDetails';
+import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
 
 //Doctors
 
@@ -30,12 +32,16 @@ import DoctorNotification from './components/For Doctor Interface/DoctorNotifica
 import CreateAccountDoctor from './components/For Patient Interface/Create Account/CreateAccoutDoctor';
 import Homepage from './components/For Patient Interface/Homepage/Homepage';
 import PatientMain from './components/For Patient Interface/PatientMain/PatientMain';
-import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
 import MedicalRecords from './components/For Patient Interface/My Profile/ProfileModals/MedicalRecords/MedicalRecords';
 import ViewDoctorProfile from './components/For Doctor Interface/Doctor Profile/DoctorProfile Screens/ViewDoctorProfile';
+
+
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
+import DrPostScreen from './components/For Doctor Interface/DoctorHome/DoctorHomeComponents/DrPostScreen';
+import EditPostScreen from './components/For Doctor Interface/DoctorHome/DoctorHomeComponents/EditPostScreen';
+import PatientChat from './components/For Patient Interface/PatientChat/PatientChat';
 
 export default function App() {
   
@@ -75,7 +81,7 @@ export default function App() {
         <PaperProvider theme={theme}>
 
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="doctormain" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName="ptnmain" screenOptions={{ headerShown: false }}>
               <Stack.Screen name='landingpage' component={LandingPage} />
               <Stack.Screen name='SigninPage' component={SigninPage} />
               <Stack.Screen name='createaccount' component={CreateAccount}/>
@@ -147,12 +153,15 @@ export default function App() {
               <Stack.Screen name='apptdetails' component={AppointmentDetails} />
               <Stack.Screen name='ptnmain' component={PatientMain} />
               <Stack.Screen name='medicalrecords' component={MedicalRecords} />
+              <Stack.Screen name='ptnchat' component={PatientChat} />
 
 
               {/* Doctors */}
               
               
               <Stack.Screen name='doctormain' component={DoctorMain}/>
+              <Stack.Screen name="drpost" component={DrPostScreen} />
+              <Stack.Screen name='dreditpost' component={EditPostScreen}/>
               <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
               <Stack.Screen name='doctornotification' component={DoctorNotification}/>
               <Stack.Screen name= 'viewdrprofile' component={ViewDoctorProfile}/>

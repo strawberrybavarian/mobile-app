@@ -1,14 +1,17 @@
 // AppointmentModal.js
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import Modal from 'react-native-modal';
-import styles from './DoctorUpcomingStyles'; // Adjust path if necessary
+import DoctorUpcomingStyles from './DoctorUpcomingStyles'; // Adjust path if necessary
 import CancelModal from './ButtonModals/CancelModal';
 import RescheduleModal from './ButtonModals/RescheduleModal';
 import AcceptModal from './ButtonModals/AcceptModal';
 import sd from '../../../utils/styleDictionary';
+import { useTheme } from 'react-native-paper';
 
 const AppointmentDetail = ({ label, value }) => {
+    const styles = DoctorUpcomingStyles();
+
     if (!value || value.length == 0 ){
         value = "N/A"
     }
@@ -20,15 +23,8 @@ const AppointmentDetail = ({ label, value }) => {
 )};
 
 const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept, onReschedule, fetchAppointments }) => {
-    // const [isCancelModalVisible, setCancelModalVisible] = useState(false);
-    // const [isAcceptModalVisible, setAcceptModalVisible] = useState(false);
-    // const [isRescheduleModalVisible, setRescheduleModalVisible] = useState(false);
-
-    // const handleCancel = () => setCancelModalVisible(true);
-    // const handleAccept = () => setAcceptModalVisible(true);
-    // const handleReschedule = () => setRescheduleModalVisible(true);
-
-    
+  const styles = DoctorUpcomingStyles();
+  const theme = useTheme();
 
   return (
     <Modal
@@ -43,7 +39,7 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
       propagateSwipe={true}
     >
       {appointment && (
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, {height: Dimensions.get('window').height*0.65}]}>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Text style={styles.closeButtonText}>{`<   Close`}</Text>
           </TouchableOpacity>

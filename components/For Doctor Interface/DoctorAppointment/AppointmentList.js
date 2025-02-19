@@ -1,13 +1,17 @@
 // AppointmentList.js
 import React from 'react';
 import { Text, View, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
-import styles from './DoctorUpcomingStyles';
+import DoctorUpcomingStyles from './DoctorUpcomingStyles';
+import { useTheme } from 'react-native-paper';
 
 const filterAppointments = (appointments, status) => {
   return appointments.filter(appointment => appointment.status === status);
 };
 
 const AppointmentList = ({ appointments, status, setSelectedAppointment }) => {
+  const styles = DoctorUpcomingStyles();
+  const theme = useTheme();
+
   const filteredAppointments = filterAppointments(appointments, status);
 
   return (
@@ -19,7 +23,7 @@ const AppointmentList = ({ appointments, status, setSelectedAppointment }) => {
               style={styles.cardcont}
               key={appointment._id}
               onPress={() => setSelectedAppointment(appointment)} // Open modal with selected appointment
-            >
+            > 
               <View style={styles.container1}>
                 <View style={styles.datecontainer}>
                   <Text style={styles.monthText}>{new Date(appointment.date).toLocaleString('en-US', { month: 'short' })}</Text>
@@ -34,7 +38,7 @@ const AppointmentList = ({ appointments, status, setSelectedAppointment }) => {
                     {new Date(appointment.date).toLocaleDateString('en-US')} | {appointment.time}
                   </Text>
                 </View>
-              </View>
+              </View>  
             </TouchableOpacity>
           ))
         ) : (

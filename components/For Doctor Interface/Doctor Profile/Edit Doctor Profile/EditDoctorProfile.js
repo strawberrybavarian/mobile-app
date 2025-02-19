@@ -9,6 +9,7 @@ import sd from '../../../../utils/styleDictionary';
 import UploadImageModal from '../UploadImage/UploadImageModal';
 import { useFocusEffect } from '@react-navigation/native';
 import { Button } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const EditDoctorProfile = ({ isVisible, toggleModal }) => {
@@ -148,7 +149,7 @@ const EditDoctorProfile = ({ isVisible, toggleModal }) => {
       coverScreen={true}
       style={styles.modal}
     >
-      <View style={styles.modalContent}>
+      <SafeAreaView style={[styles.modalContent, {flex:1, marginTop: 20}]}>
         <Text style={styles.modalTitle}>Edit Doctor Profile</Text>
 
         {/* Profile Image */}
@@ -192,7 +193,7 @@ const EditDoctorProfile = ({ isVisible, toggleModal }) => {
             Save Changes
           </Button>
         </View>
-      </View>
+      </SafeAreaView>
 
       {/* Image Upload Modal */}
       <UploadImageModal

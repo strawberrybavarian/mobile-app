@@ -8,7 +8,7 @@ import DoctorProfile from '../Doctor Profile/DoctorProfile';
 import DoctorHeader from '../DoctorHeader/DoctorHeader';
 import DoctorNavigation from '../DoctorNavigation/DoctorNavigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from 'react-native-paper';
+import { Portal, useTheme } from 'react-native-paper';
 import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
@@ -19,6 +19,7 @@ const initialLayout = { width: Dimensions.get('window').width };
 const DoctorMain = () => {
   const [index, setIndex] = useState(0);
   const [drName, setDrName] = useState("");
+  const [doctorId, setDoctorId] = useState("");
   const [imageUri, setImageUri] = useState("");
   const [routes] = useState([
     { key: 'home', title: 'Home' },
@@ -46,8 +47,9 @@ const DoctorMain = () => {
             const doctor = res.data?.doctor;
             if (doctor) {
               console.log(doctor);
-              setDrName(`${doctor.dr_firstName} ${doctor.dr_lastName}`);
-              setImageUri(doctor.dr_image);
+              setDoctorId(doctor._id);
+              setDrName(`${doctor?.dr_firstName} ${doctor?.dr_lastName}`);
+              setImageUri(doctor?.dr_image);
             }
           })
           .catch(err => console.error(err));
@@ -89,6 +91,7 @@ const DoctorMain = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Portal.Host>
       <DoctorHeader name = {drName} imageUri={imageUri}/>
       <TabView
         navigationState={{ index, routes }}
@@ -104,8 +107,11 @@ const DoctorMain = () => {
             const newIndex = routes.findIndex(route => route.title === tabName);
             setIndex(newIndex);
           }}
-        />
+        /> 
       </View>
+
+      
+      </Portal.Host>
     </SafeAreaView>
   );
 };

@@ -2,7 +2,7 @@ import { StyleSheet, Dimensions } from 'react-native';
 import sd from '../../../utils/styleDictionary';
 const { height } = Dimensions.get('window');
 
-const styles = StyleSheet.create({
+export default DoctorUpcomingStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -20,10 +20,10 @@ const styles = StyleSheet.create({
   cardcont: {
     padding: 25,
     backgroundColor: 'white',
-    marginHorizontal: 10,
+    marginHorizontal: 20,
     marginBottom: 10,
     borderRadius: 10,
-    ...sd.shadows.large
+    ...sd.shadows.level2,
   },
   container1: {
     flexDirection: 'row',
@@ -153,6 +153,25 @@ const styles = StyleSheet.create({
         marginTop: 20,
       },
 
+      tabContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+      },
+      tabBar : {
+        backgroundColor: sd.colors.blue,
+        
+      },
+      tab: {
+        marginBottom: 10,
+        padding: 10,
+        marginHorizontal: 10,
+        
+      },
+      tabtext:{
+        fontSize: 14,
+        fontFamily:'Poppins',
+      },
+
 });
 
-export default styles;
+
