@@ -12,17 +12,20 @@ import { ip } from '../../../ContentExport';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
-import { Card, TextInput } from 'react-native-paper';
+import { Card, TextInput, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import io from 'socket.io-client';
 
 const PatientChat = () => {
+  const theme = useTheme();
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [socket, setSocket] = useState(null);
   const route = useRoute();
   const { userId } = route.params;
   const scrollViewRef = useRef(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!userId) {
@@ -79,7 +82,7 @@ const PatientChat = () => {
   };
 
   const sendMessage = () => {
-    if (message.trim() !== '') {
+    if (message.trim() !== '' && socket) {
       const messageData = {
         senderId: userId.toString(),
         senderModel: 'Patient',
@@ -87,24 +90,23 @@ const PatientChat = () => {
         receiverModel: 'Staff',
       };
 
-      // Send the message to the server
       socket.emit('chat message', messageData, (response) => {
         if (response.success) {
           console.log('Message sent successfully:', response);
-          // Update the state with the server's response
           setMessages((prevMessages) => [...prevMessages, response.data]);
         } else {
           console.error('Failed to send message:', response.message);
         }
       });
 
-      // Clear the input field
       setMessage('');
     }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const scrollToBottom = () => {
@@ -114,14 +116,18 @@ const PatientChat = () => {
   };
 
   return (
-    <SafeAreaView style={{flex:1, padding: '10px'}}>
+    <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <FontAwesome5 name="arrow-left" size={20} color="black" />
+      </TouchableOpacity>
+
       <ScrollView
         style={styles.chatContainer}
         ref={scrollViewRef}
         onContentSizeChange={scrollToBottom}
       >
         {messages.map((msg) => {
-          const isSentByCurrentUser = msg.sender === userId;
+          const isSentByCurrentUser = msg.sender === userId.toString();
           const displayName = isSentByCurrentUser ? 'You' : msg.senderName || 'Unknown';
 
           return (
@@ -148,7 +154,7 @@ const PatientChat = () => {
           onPress={sendMessage}
           disabled={!socket}
         >
-          <Text>Send</Text>
+          <Text style={{ color: '#fff' }}>Send</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -167,7 +173,7 @@ const styles = StyleSheet.create({
   },
   sentMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6',
+    backgroundColor: '#2F88D4',
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
@@ -188,10 +194,12 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    color: '#fff',
+    ...sd.fonts.medium,
   },
   timestamp: {
     fontSize: 10,
-    color: '#777',
+    color: '#ddd',
     marginTop: 5,
   },
   inputContainer: {
@@ -209,9 +217,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginRight: 10,
+    backgroundColor: '#fff',
   },
   sendButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#2F88D4',
+    padding: 10,
+    borderRadius: 20,
+  },
+  backButton: {
+    top: 10,
+    left: 10,
+    zIndex: 10,
     padding: 10,
     borderRadius: 20,
   },
