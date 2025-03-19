@@ -7,20 +7,34 @@ import DoctorSpecialty from '../Doctor Specialty/DoctorSpecialty';
 import MyProfile from '../My Profile/MyProfile';
 import NavigationBar from '../Navigation/NavigationBar';
 import Header3 from '../../Headers/Headers';
-import { getData } from '../../storageUtility';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FAB, useTheme } from 'react-native-paper';
+import { FAB, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { useUser } from '@/UserContext';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
 const PatientMain = () => {
   const [index, setIndex] = useState(0);
   const navigation = useNavigation();
+  const { user, role, isAuthenticated } = useUser();
+  const theme = useTheme();
 
+  // State variables for patient data
+  const [loading, setLoading] = useState(true);
+  const [uname, setUname] = useState("");
+  const [uImage, setUImage] = useState("");
+  const [userId, setUserId] = useState("");
+  const [patientData, setPatientData] = useState({});
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
+  const [doctorSpecialties, setDoctorSpecialties] = useState([]);
+  const [recommendedDoctors, setRecommendedDoctors] = useState([]);
+  
+  // Tab routes
   const [routes] = useState([
     { key: 'home', title: 'Home' },
     { key: 'upcoming', title: 'Upcoming' },
@@ -28,54 +42,160 @@ const PatientMain = () => {
     { key: 'myprofilepage', title: 'My Profile' },
   ]);
 
-  const renderScene = SceneMap({
-    home: Homepage,
-    upcoming: Upcoming,
-    doctorspecialty: DoctorSpecialty,
-    myprofilepage: MyProfile,
-  });
+  // At the top of the PatientMain component
+useEffect(() => {
+  if (!user && !loading) {
+    console.log("No authenticated user, redirecting to login");
+    navigation.replace('SigninPage'); // Redirect to login if no user
+  }
+}, [user, loading, navigation]);
 
-  const [uname, setUname] = useState("");
-  const [uImage, setUImage] = useState("");
-  const [userId, setUserId] = useState("");
-  const [patientData, setPatientData] = useState({});
+// Then in your existing useEffect for fetching data
+useEffect(() => {
+  // Set a default name while loading
+  setUname("Patient");
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchUserId = async () => {
-        try {
-          const id = await getData('userId');
-          if (id) {
-            setUserId(id);
+  const fetchAllPatientData = async () => {
+    if (!user || !user._id) {
+      console.log("No authenticated user for data fetch");
+      setLoading(false);
+      return;
+    }
+    
+    console.log("User authenticated, ID:", user._id);
+    
+    // Rest of your fetch logic stays the same...
+      try {
+        setLoading(true);
+        const patientId = user._id;
+        setUserId(patientId);
+        
+        console.log("Fetching data for patient:", patientId);
+        
+        // Create an array of promises for concurrent API calls
+        const apiCalls = [
+          // Basic patient profile data
+          axios.get(`${ip.address}/api/patient/api/onepatient/${patientId}`),
+          
+          // Upcoming appointments
+          axios.get(`${ip.address}/api/appointment/upcoming/${patientId}`),
+          
+          // Past appointments
+          axios.get(`${ip.address}/api/appointment/past/${patientId}`),
+          
+          // Available doctor specialties
+          axios.get(`${ip.address}/api/doctor/specialties`),
+          
+          // Recommended doctors (you might want to customize this endpoint)
+          axios.get(`${ip.address}/api/doctor/recommended`)
+        ];
 
-            axios.get(`${ip.address}/api/patient/api/onepatient/${id}`)
-              .then(res => {
-                const patient = res.data?.thePatient;
-                if (patient) {
-                  setUname(patient.patient_firstName + " " + patient.patient_lastName);
-                  setUImage(patient.patient_image);
-                }
-              })
-              .catch(err => console.log(err));
-          }
-        } catch (err) {
-          console.log(err);
+        
+        // Execute all API calls concurrently
+        const [
+          profileResponse, 
+          upcomingAppsResponse, 
+          pastAppsResponse, 
+          specialtiesResponse, 
+          recommendedResponse
+        ] = await Promise.all(apiCalls.map(p => p.catch(e => {
+          console.error("API call failed:", e.message);
+          return { data: null };
+        })));
+
+        // After API call
+console.log("Profile response data:", profileResponse.data);
+console.log("Patient data structure:", profileResponse.data?.thePatient);
+
+if (profileResponse.data?.thePatient) {
+  const patient = profileResponse.data.thePatient;
+  console.log("Patient name fields:", patient.patient_firstName, patient.patient_lastName);
+  setPatientData(patient);
+  setUname(patient.patient_firstName + " " + patient.patient_lastName);
+  console.log("Set uname to:", patient.patient_firstName + " " + patient.patient_lastName);
+  setUImage(patient.patient_image || "");
+}
+        
+        // Process patient profile data
+        if (profileResponse.data?.thePatient) {
+          const patient = profileResponse.data.thePatient;
+          setPatientData(patient);
+          setUname(patient.patient_firstName + " " + patient.patient_lastName);
+          setUImage(patient.patient_image || "");
         }
-      };
+        
+        // Process upcoming appointments
+        if (upcomingAppsResponse.data) {
+          setUpcomingAppointments(upcomingAppsResponse.data.appointments || []);
+        }
+        
+        // Process past appointments
+        if (pastAppsResponse.data) {
+          setPastAppointments(pastAppsResponse.data.appointments || []);
+        }
+        
+        // Process doctor specialties
+        if (specialtiesResponse.data) {
+          setDoctorSpecialties(specialtiesResponse.data.specialties || []);
+        }
+        
+        // Process recommended doctors
+        if (recommendedResponse.data) {
+          setRecommendedDoctors(recommendedResponse.data.doctors || []);
+        }
+        
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+        Alert.alert("Error", "Failed to load your profile data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAllPatientData();
+  }, [user]);
 
-      fetchUserId();
+  // Create a custom render scene map that passes down the fetched data
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'home':
+        return (
+          <Homepage 
+            patientName={uname}
+            upcomingAppointments={upcomingAppointments}
+            recommendedDoctors={recommendedDoctors}
+          />
+        );
+      case 'upcoming':
+        return (
+          <Upcoming 
+            upcomingAppointments={upcomingAppointments} 
+            pastAppointments={pastAppointments}
+            patientId={userId}
+          />
+        );
+      case 'doctorspecialty':
+        return (
+          <DoctorSpecialty 
+            specialties={doctorSpecialties}
+            recommendedDoctors={recommendedDoctors}
+          />
+        );
+      case 'myprofilepage':
+        return (
+          <MyProfile 
+            patientData={patientData}
+            userId={userId}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
-      const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
-
-      return () => {
-        backHandler.remove();
-      };
-    }, [])
-  );
-
+  // Handle back button
   const handleBackPress = () => {
     if (index === 0) {
-      // If the user is on the first tab (Home), show an alert or exit the app
       Alert.alert(
         'Exit App',
         'Are you sure you want to exit the app?',
@@ -85,24 +205,38 @@ const PatientMain = () => {
         ],
         { cancelable: false }
       );
-      return true; // Prevent the default back behavior
+      return true;
     } else {
-      setIndex(0); // Go back to the Home tab instead of exiting
+      setIndex(0);
       return true;
     }
   };
 
-  const theme = useTheme();
+  // Register back handler
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+      return () => subscription.remove();
+    }, [index])
+  );
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView  style = {{flex:1, backgroundColor: theme.colors.background}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Header3 name={uname} imageUri={uImage} />
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
         onIndexChange={(newIndex) => setIndex(newIndex)}
         initialLayout={initialLayout}
-        renderTabBar={() => null} // Hide default tab bar
+        renderTabBar={() => null}
       />
       <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
         <NavigationBar
@@ -126,11 +260,8 @@ const PatientMain = () => {
           margin: 16,
           backgroundColor: theme.colors.primary,
         }}
-        onPress={() =>
-          navigation.navigate('ptnchat', {userId: userId})
-        }x
+        onPress={() => navigation.navigate('ptnchat', {userId: userId})}
       />
-
     </SafeAreaView>
   );
 };

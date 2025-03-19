@@ -31,7 +31,7 @@ const DoctorSpecialty = () => {
 
   useEffect(() => {
     const fetchSpecialties = async () => {
-      axios.get(`${ip.address}/api/admin/specialties`)
+      axios.get(`${ip.address}/api/find/admin/specialties`)
         .then(res => {
           console.log('Specialties:', res.data);
           setSpecialties(res.data);
@@ -78,11 +78,11 @@ const DoctorSpecialty = () => {
           })
           .catch(err => {
             console.log(err);
-          });
+          }); 
       };
 
       const fetchSpecialties = async () => {
-        axios.get(`${ip.address}/api/admin/specialties`)
+        axios.get(`${ip.address}/api/find/admin/specialties`)
           .then(res => {
             console.log('Specialties:', res.data);
             setSpecialties(res.data);
@@ -117,7 +117,7 @@ const DoctorSpecialty = () => {
             {specialties.map((specialty) => (
               <TouchableOpacity
                 onPress={() => appointmentButton(specialty.name)}
-                key={specialty.id}
+                key={specialty._id}
                 style={styles.specialtyButton}
               >
                 <View style={styles.specialtyContent}>

@@ -18,7 +18,7 @@ const Header3 = ({name, imageUri}) => {
     const navigation = useNavigation();
 
     const handleNotification = () => {
-      navigation.navigate('doctornotification')
+      navigation.navigate('ptnnotification')
     };
 
     const theme = useTheme();
@@ -29,8 +29,13 @@ const Header3 = ({name, imageUri}) => {
         <View style={styles.mainContainer}> 
           <View style={styles.wrapper}>
             <Pressable onPress={() => navigation.navigate('My Profile')}>
+            {/* // In Header3 component, update the Image source */}
             <Image
-              source={imageUri ? { uri: `${ip.address}/${imageUri}` } : { uri: "images/014ef2f860e8e56b27d4a3267e0a193a.jpg" }}
+              source={
+                imageUri 
+                  ? { uri: `${ip.address}/${imageUri}` } 
+                  : null  // Use a local image instead
+              }
               style={{ width: 50, height: 50, borderRadius: 50 }}
             />
 

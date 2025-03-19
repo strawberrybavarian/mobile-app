@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Dimensions, BackHandler } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import DoctorHome from '../DoctorHome/DoctorHome';
@@ -77,6 +77,14 @@ const DoctorMain = () => {
       return true;
     }
   };
+
+  useEffect(() => {
+    axios.get(`${ip.address}/api/get/session`)
+      .then(res => {
+        console.log('session : ',res.data);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   useFocusEffect(
     useCallback(() => {

@@ -2,18 +2,28 @@ import * as SecureStore from 'expo-secure-store';
 import localForage from 'localforage';
 import { Platform } from 'react-native';
 
+// In storageUtility.js, improve error handling for SecureStore:
+
 const storeData = async (key, value) => {
   if (Platform.OS === 'web') {
     try {
       await localForage.setItem(key, value);
     } catch (error) {
-      console.error("Error storing data on web: ", error);
+      console.error("Error storing data to web:", error);
     }
   } else {
     try {
-      await SecureStore.setItemAsync(key, value);
+      // For null or undefined values, store empty string
+      const safeValue = value === null || value === undefined ? '' : String(value);
+      await SecureStore.setItemAsync(key, safeValue);
+      
+      // Verify storage worked
+      const verifyValue = await SecureStore.getItemAsync(key);
+      if (verifyValue !== safeValue) {
+        console.error("Storage verification failed for key:", key);
+      }
     } catch (error) {
-      console.error("Error storing data on mobile: ", error);
+      console.error("Error storing data in SecureStore:", error);
     }
   }
 };

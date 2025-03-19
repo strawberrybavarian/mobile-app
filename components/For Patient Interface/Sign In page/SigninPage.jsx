@@ -19,8 +19,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { SignInStyles } from "./SignInStyles";
 import { useTheme } from "react-native-paper";
 import sd from "../../../utils/styleDictionary";
-//import * as Validation from '../CreateAccount/Validations.js'
-
+import { useUser } from "@/UserContext";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -32,6 +31,10 @@ const SigninPage = ({ navigation }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);  // Add this line
+  const { login } = useUser();
+  
+  // ... rest of component remains the same
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -48,44 +51,183 @@ const SigninPage = ({ navigation }) => {
 
   const loginUser = async (e) => {
     e.preventDefault();
-
-    if (role === "Patient") {
-      try {
-        const response = await axios.post(`${ip.address}/api/patient/api/login`, {
-          email,
+    
+    // Validate inputs
+    if (!email || !password || !role) {
+      setIsErrorVisible(true);
+      return;
+    }
+    
+    // Show loading state
+    setIsSubmitting(true);
+    
+    // Convert email to lowercase
+    const normalizedEmail = email.toLowerCase();
+  
+    try {
+      console.log(`Attempting login for ${normalizedEmail} with role ${role}`);
+      
+      const response = await axios.post(
+        `${ip.address}/api/login`, 
+        {
+          email: normalizedEmail,
           password,
+          role,
+          rememberMe,
+        },
+        { withCredentials: true, timeout: 15000 } // Add timeout
+      );
+      
+      console.log("Server response:", response.status);
+      
+      // Handle email verification flow
+      if (response.data.emailVerificationRequired) {
+        console.log("Email verification required");
+        navigation.navigate("emailverification", { 
+          userId: response.data.userId, 
+          role: response.data.role,
+          email: normalizedEmail // Pass email for display purposes
         });
-
-        if (response.data.patientData) {
-          const patientData = response.data.patientData;
-          Alert.alert("Successfully logged in");
-
-          storeData('userId', patientData._id);
-          navigation.navigate('ptnmain');
-        } else {
-          Alert.alert("Invalid email or password. Please try again.");
-        }
-      } catch (err) {
-        Alert.alert("An error occurred while logging in.");
+        return;
       }
-    } else if (role === "Doctor") {
-      try {
-        const response = await axios.post(`${ip.address}/api/doctor/api/login`, {
-          email,
-          password,
+      
+      // Handle two-factor authentication flow
+      if (response.data.twoFactorRequired) {
+        console.log("Two-factor authentication required");
+        navigation.navigate("emailverification", { 
+          userId: response.data.userId, 
+          role: response.data.role,
+          isTwoFactor: true
         });
-
-        if (response.data.doctorData) {
-          const doctorData = response.data.doctorData;
-          Alert.alert("Successfully logged in");
-          storeData('userId', doctorData._id);
-          navigation.navigate('doctormain');
-        } else {
-          Alert.alert("Invalid email or password. Please try again.");
-        }
-      } catch (err) {
-        Alert.alert("Error logging in.");
+        return;
       }
+      
+      // Handle normal login with token
+      if (response.data.token) {
+        try {
+          const { user, role, token } = response.data;
+          console.log(`Login successful for ${role}: ${user._id}`);
+          
+          // Store authentication data
+          await Promise.all([
+            storeData("authToken", token),
+            storeData("userId", user._id),
+            storeData("userRole", role)
+          ]);
+
+          await storeData("userEmail", email);
+await storeData("userPassword", password);
+          
+          // Update authentication context
+          const loginSuccess = await login(user, role, token);
+          
+          if (!loginSuccess) {
+            throw new Error("Failed to update authentication context");
+          }
+          
+          console.log("Authentication context updated successfully");
+          
+          // Navigate based on role
+          switch(role) {
+            case 'Patient':
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'home' }]
+              });
+              break;
+            case 'Doctor':
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'doctormain' }]
+              });
+              break;
+            default:
+              console.warn(`Unhandled role: ${role}`);
+              Alert.alert("Warning", "Unsupported user role detected");
+          }
+        } catch (storageError) {
+          console.error("Failed to save authentication data:", storageError);
+          Alert.alert(
+            "Login Error", 
+            "Your login was successful, but we couldn't save your session. Please try again."
+          );
+        }
+      } else {
+        // Missing token in response
+        console.error("Invalid server response - missing token:", response.data);
+        Alert.alert(
+          "Authentication Error", 
+          "The server response was incomplete. Please try again or contact support."
+        );
+      }
+    } catch (err) {
+      // Network or server error handling
+      console.error("Login failed:", err.message);
+      
+      if (err.response) {
+        // Server returned an error response
+        const { status, data } = err.response;
+        console.error(`Server error ${status}:`, data);
+        
+        switch (status) {
+          case 400:
+            Alert.alert("Invalid Request", "Please verify your information and try again.");
+            break;
+          case 401:
+            Alert.alert("Authentication Failed", "The email or password is incorrect.");
+            break;
+          case 403:
+            if (data?.message?.includes("review")) {
+              Alert.alert(
+                "Account Under Review", 
+                "Your account is awaiting approval. Please check back later."
+              );
+            } else {
+              Alert.alert("Access Denied", "You don't have permission to access this account.");
+            }
+            break;
+          case 404:
+            Alert.alert(
+              "Account Not Found", 
+              `We couldn't find a ${role.toLowerCase()} account with that email.`
+            );
+            break;
+          case 429:
+            Alert.alert(
+              "Too Many Attempts", 
+              "Please wait a moment before trying again."
+            );
+            break;
+          case 500:
+            Alert.alert(
+              "Server Error", 
+              "We're experiencing technical difficulties. Please try again later."
+            );
+            break;
+          default:
+            Alert.alert(
+              "Login Failed", 
+              "An unexpected error occurred. Please try again."
+            );
+        }
+      } else if (err.request) {
+        // No response received from server
+        console.error("No response received:", err.request);
+        Alert.alert(
+          "Connection Error", 
+          "We couldn't reach our servers. Please check your internet connection and try again."
+        );
+      } else {
+        // Error setting up request
+        console.error("Request setup error:", err.message);
+        Alert.alert(
+          "Login Error", 
+          "An error occurred while attempting to log in. Please try again."
+        );
+      }
+    } finally {
+      // Always reset loading state
+      setIsSubmitting(false);
     }
   };
 
@@ -100,11 +242,14 @@ const SigninPage = ({ navigation }) => {
           <View style={styles.headerContainer}>
             <TouchableOpacity
               style={styles.backButton}
-              onPress={() => navigation.navigate('landingpage')}
+              onPress={() => navigation.navigate("landingpage")}
             >
               <FontAwesome5 name="chevron-left" size={15} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerTitleContainer} onPress={() => navigation.navigate('landingpage')}>
+            <TouchableOpacity
+              style={styles.headerTitleContainer}
+              onPress={() => navigation.navigate("landingpage")}
+            >
               <Text style={styles.headerTitle}>Sign up instead</Text>
             </TouchableOpacity>
           </View>
@@ -143,7 +288,7 @@ const SigninPage = ({ navigation }) => {
                   <FontAwesome5
                     name={passwordVisible ? "eye-slash" : "eye"}
                     size={15}
-                    color = {theme.colors.onSurfaceVariant}
+                    color={theme.colors.onSurfaceVariant}
                   />
                 </TouchableWithoutFeedback>
               </View>
@@ -162,8 +307,11 @@ const SigninPage = ({ navigation }) => {
                 labelField="label"
                 valueField="value"
                 placeholder="Select Role"
-                fontFamily= {sd.fonts.light}
-                placeholderStyle = {{color: theme.colors.onSurfaceVariant, fontSize: sd.fontSizes.medium}}
+                fontFamily={sd.fonts.light}
+                placeholderStyle={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontSize: sd.fontSizes.medium,
+                }}
                 value={role}
                 onChange={(item) => setRole(item.value)}
               />
@@ -171,24 +319,19 @@ const SigninPage = ({ navigation }) => {
             {roleError && isErrorVisible && (
               <Text style={styles.errorMessage}>{roleError}</Text>
             )}
-
-            
           </View>
 
-          <View
-              style={styles.signInButtonContainer}
+          <View style={styles.signInButtonContainer}>
+            <TouchableOpacity 
+              style={[styles.signInButton, isSubmitting && styles.disabledButton]} 
+              onPress={loginUser}
+              disabled={isSubmitting}
             >
-              <TouchableOpacity
-                style={styles.signInButton}
-                onPress={loginUser}
-              >
-                <Text style={styles.signInText}>SIGN IN</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableWithoutFeedback>
-              <Text style={styles.forgotPasswordText}>Forgot the Password?</Text>
-            </TouchableWithoutFeedback>
+              <Text style={styles.signInText}>
+                {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </>
     </KeyboardAvoidingView>
