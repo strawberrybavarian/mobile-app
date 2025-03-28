@@ -1,52 +1,52 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TouchableWithoutFeedback, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { getData } from '../../storageUtility';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
-import styles from './DoctorSpecialtyStyles'; // Import the new styles
+import styles from './DoctorSpecialtyStyles';
+import sd from '../../../utils/styleDictionary';
 
 const DoctorSpecialty = () => {
-  // const [search, setSearch] = useState('');
+  // Add route to get params
+  const route = useRoute();
+  const { serviceData, isServiceAppointment } = route.params || {};
+  
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [specialties, setSpecialties] = useState([]);
+  
+  // Add loading states
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigation = useNavigation();
 
-  const specialtiesData = 
-   [
-    { id: 1, name: 'Primary Care & General Medicine', image: require('../../../assets/pictures/Stethoscope.png'), spec: 'PrimaryCare' },
-    { id: 2, name: "OB-GYN's & Women's Health", image: require('../../../assets/pictures/FemaleReproductive.png'), spec: 'OBGYN' },
-    { id: 3, name: 'Pediatrics', image: require('../../../assets/pictures/Pedia.png'), spec: 'Pediatrics'  }, 
-    { id: 4, name: 'Heart & Cardiology', image: require('../../../assets/pictures/Heart.png'), spec: 'Cardiology'  },
-    { id: 5, name: 'Eye & Vision', image: require('../../../assets/pictures/Eye.png'), spec: 'Opthalmology'  },
-    { id: 6, name: 'Skin & Dermatology', image: require('../../../assets/pictures/Dermatology.png'), spec: 'Dermatology'  },
-    { id: 7, name: 'Brain & Nerves', image: require('../../../assets/pictures/Brain.png'), spec: 'Neurology'  },
-    { id: 8, name: 'Stomach, Digestion & Gastroenterology', image: require('../../../assets/pictures/Stomach.png'), spec: 'InternalMedicine'  },
-  ];
+  // Combined fetch function to avoid duplicate code
+  const fetchSpecialties = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await axios.get(`${ip.address}/api/find/admin/specialties`);
+      console.log('Specialties:', response.data);
+      setSpecialties(response.data);
+    } catch (err) {
+      console.log('Error fetching specialties:', err);
+      setError('Failed to load specialties. Please try again.');
+      // Set empty array to avoid map errors
+      setSpecialties([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchSpecialties = async () => {
-      axios.get(`${ip.address}/api/find/admin/specialties`)
-        .then(res => {
-          console.log('Specialties:', res.data);
-          setSpecialties(res.data);
-        })
-        .catch(err => {
-          console.log(err);
-        })
-    };
-
     fetchSpecialties();
   }, []);
-
-  // const handleSearch = (serts) => {
-  //   setSearch(serts);
-  // };
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -68,43 +68,36 @@ const DoctorSpecialty = () => {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchData = () => {
-        axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
-          .then(res => {
-            console.log(res.data.thePatient);
-            const patient = res.data.thePatient;
+      if (userId) {
+        const fetchData = async () => {
+          try {
+            const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`);
+            console.log(response.data.thePatient);
+            const patient = response.data.thePatient;
             setFirstName(patient.patient_firstName);
             setLastName(patient.patient_lastName);
-          })
-          .catch(err => {
-            console.log(err);
-          }); 
-      };
-
-      const fetchSpecialties = async () => {
-        axios.get(`${ip.address}/api/find/admin/specialties`)
-          .then(res => {
-            console.log('Specialties:', res.data);
-            setSpecialties(res.data);
-          })
-          .catch(err => {
-            console.log(err);
+          } catch (err) {
+            console.log('Error fetching patient data:', err);
           }
-        );
-      };
-    
-      fetchData();
-      fetchSpecialties();
-    }, [userId])
+        };
+        
+        fetchData();
+      }
+      
+      // Only refetch specialties if we don't already have them
+      if (specialties.length === 0 && !isLoading) {
+        fetchSpecialties();
+      }
+    }, [userId, specialties.length])
   );
 
-  // const filteredSpecialties = specialtiesData.filter(specialty =>
-  //   specialty.name.toLowerCase().includes(search.toLowerCase())
-  // );
-
-  const appointmentButton = (spec) => {
-    console.log(spec, typeof(spec));
-    navigation.navigate('searchappointment', { specpec: spec });
+  const appointmentButton = (specialty) => {
+    // Pass both specialty and service data if available
+    navigation.navigate('searchappointment', { 
+      specpec: specialty,
+      serviceData: serviceData,
+      isServiceAppointment: isServiceAppointment
+    });
   };
 
   return (
@@ -114,18 +107,24 @@ const DoctorSpecialty = () => {
         <View style={styles.specialtySection}>
           <Text style={styles.specialtyHeader}>Choose a Specialty</Text>
           <View style={styles.specialtyButtonContainer}>
-            {specialties.map((specialty) => (
-              <TouchableOpacity
-                onPress={() => appointmentButton(specialty.name)}
-                key={specialty._id}
-                style={styles.specialtyButton}
-              >
-                <View style={styles.specialtyContent}>
-                  <Image source={{uri : `${ip.address}/${specialty.imageUrl}`}} style={styles.specialtyImage} />
-                  <Text style={styles.buttonText}>{specialty.name}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {isLoading ? (
+              <ActivityIndicator size="large" color={sd.colors.primary} />
+            ) : error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : (
+              specialties.map((specialty) => (
+                <TouchableOpacity
+                  onPress={() => appointmentButton(specialty.name)}
+                  key={specialty._id}
+                  style={styles.specialtyButton}
+                >
+                  <View style={styles.specialtyContent}>
+                    <Image source={{uri : `${ip.address}/${specialty.imageUrl}`}} style={styles.specialtyImage} />
+                    <Text style={styles.buttonText}>{specialty.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </View>
       </ScrollView>

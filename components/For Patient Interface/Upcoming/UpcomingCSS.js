@@ -51,104 +51,69 @@ const styles = StyleSheet.create({
 
   // appointments
   cont: {
-    flexDirection:'column',
-    // backgroundColor: '#ffffff',
-    width: '100%',
-    // padding: 10,
-    marginTop: 10,
-    marginBottom: 12,
-    alignItems: 'center',
-    // 
+    padding: 16,
   },
-  container1: { 
-    flexDirection: 'row',
-    width: '100%',
-  },
-  cardcont: {
-    padding: 25,
-    backgroundColor: 'white',
-    marginHorizontal: 10,
-    marginBottom: 10,
+  cardContainer: {
+    backgroundColor: '#fff',
     borderRadius: 10,
-    ...sd.shadows.large
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  status: {
-    backgroundColor: 'rgba(240, 182, 75, 0.30)',
-    width: 90,
-    height: 25,
-    borderRadius: 4,
-    justifyContent:'center',
-    alignItems:'center',
-    marginLeft: 5,
-  },
-  statusContainer: {
-    flexDirection:'row'
-  },
-  text1: {
-    color: 'red',
-    fontFamily: 'Poppins-SemiBold'
-  },
-  infoCont: {
-    justifyContent: 'center',
-    marginLeft: 10,
-    flex: 4,
-  },
-  doctorName: {
-    fontSize: sd.fontSizes.large,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  specialization: {
-    fontSize: 14,
-    fontFamily:'Poppins',
-    marginBottom: 10,
-  },
-  dateTime: {
-    fontSize: 13,
-    color: '#888',
-  },
-  dateText: {
-    fontSize: sd.fontSizes.xl,
-    fontFamily: 'Poppins-Bold',
-    color: 'white',
-  },
-  datecontainer: {
+  cardContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
-    backgroundColor: sd.colors.blue,
-    flex: 1,
-    padding: 10,
-    borderRadius: 100,
+    padding: 16,
+  },
+  dateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
   },
   monthText: {
-    fontSize: sd.fontSizes.medium,
-    fontFamily: 'Poppins-SemiBold',
-    color: 'white',
+    fontSize: 16,
+    fontFamily: sd.fonts.medium,
+    color: '#555',
   },
-  filter1: {
-    height: 100,
-    width: 100,
-    borderRadius: 40,
+  dateText: {
+    fontSize: 24,
+    fontFamily: sd.fonts.bold,
+    color: '#333',
   },
-  gradientButton: {
-    width: 150,
-    padding: 10,
-    height: 45,
-    borderRadius: 40,
-    marginTop: 12,  
+  divider: {
+    width: 1,
+    height: '100%',
+    backgroundColor: '#ddd',
+    marginHorizontal: 16,
   },
-  gradientButtonContent: {
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center"
+  infoContainer: {
+    flex: 1,
   },
-  gradientButtonText: {
-    color: 'white', 
-    fontFamily: 'Poppins-SemiBold'
+  doctorName: {
+    fontSize: 16,
+    fontFamily: sd.fonts.semiBold,
+    color: '#007BFF',
+    marginBottom: 4,
+  },
+  dateTime: {
+    fontSize: 14,
+    fontFamily: sd.fonts.regular,
+    color: '#666',
+    marginBottom: 4,
+  },
+  statusText: {
+    fontSize: 14,
+    fontFamily: sd.fonts.medium,
+    color: '#007BFF',
   },
   noAppointments: {
+    fontSize: 16,
+    fontFamily: sd.fonts.regular,
+    color: '#666',
     textAlign: 'center',
-    color: '#555',
     marginTop: 20,
   },
 

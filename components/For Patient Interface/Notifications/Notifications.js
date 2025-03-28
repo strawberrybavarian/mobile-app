@@ -4,13 +4,11 @@ import {
   Text, 
   TouchableOpacity, 
   ScrollView, 
-  Image,
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
-  Platform 
+  StatusBar
 } from "react-native";
-import ActionSheet from "react-native-actions-sheet";
 import { getData } from "../../storageUtility";
 import axios from "axios";
 import { ip } from "../../../ContentExport";
@@ -20,6 +18,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useUser } from "../../../UserContext";
 import { format } from 'date-fns';
 import { SafeAreaView } from "react-native-safe-area-context";
+import sd from "../../../utils/styleDictionary";
 
 const Notifications = () => {
   const navigation = useNavigation();
@@ -47,24 +46,56 @@ const Notifications = () => {
         return;
       }
       
-      const response = await axios.get(`${ip.address}/api/notifications/patient/${user._id}`);
+      // Get token from storage for authorization
+      const token = await getData("authToken");
+      if (!token) {
+        console.error("No auth token available");
+        setLoading(false);
+        return;
+      }
       
-      if (response.data && response.data.notifications) {
-        // Sort notifications by date (newest first)
-        const sortedNotifications = response.data.notifications.sort(
+      // Set proper headers with authorization
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      };
+      
+      console.log(`Fetching notifications for patient: ${user._id}`);
+      
+      // Make the request with proper headers
+      const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${user._id}`);
+      
+      console.log("Response:", response.data.thePatient.notifications);
+      
+      // Check if response is HTML instead of JSON
+      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+        console.error("Received HTML response instead of JSON");
+        setNotifications([]);
+        return;
+      }
+      
+      if (response.data && response.data.thePatient.notifications) {
+        const sortedNotifications = response.data.thePatient.notifications.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         setNotifications(sortedNotifications);
+      } else {
+        console.log("No notifications data in response:", response.data);
+        setNotifications([]);
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      setNotifications([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const markAsRead = async (notification) => {
+  const handleNotification = async (notification) => {
     try {
       if (!notification._id) {
         console.error('Notification ID is undefined');
@@ -85,24 +116,24 @@ const Notifications = () => {
       setSelectedNotification(notification);
       setIsModalVisible(true);
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("Error handling notification:", error);
     }
   };
 
-  const handleNotificationAction = (notification) => {
+  const closeModal = () => {
     setIsModalVisible(false);
     
-    // Handle navigation based on notification link or type
-    if (notification.link) {
-      // Parse the link to determine which screen to navigate to
-      if (notification.link.includes('appointment')) {
-        navigation.navigate('upcoming');
-      } else if (notification.link.includes('doctor')) {
-        navigation.navigate('doctorspecialty');
-      } else {
-        navigation.navigate('home');
-      }
-    }
+    // // If the notification has a link, navigate to that screen
+    // if (selectedNotification && selectedNotification.link) {
+    //   // Parse the link to determine which screen to navigate to
+    //   if (selectedNotification.link.includes('appointment')) {
+    //     navigation.navigate('upcoming');
+    //   } else if (selectedNotification.link.includes('doctor')) {
+    //     navigation.navigate('doctorspecialty');
+    //   } else {
+    //     navigation.navigate('home');
+    //   }
+    // }
   };
 
   const onRefresh = useCallback(() => {
@@ -165,180 +196,191 @@ const Notifications = () => {
   const groupedNotifications = groupNotificationsByDate();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <FontAwesome5 name="arrow-left" size={20} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Notifications</Text>
-      </View>
-      
-      {loading && !refreshing ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2F88D4" />
-        </View>
-      ) : (
-        <ScrollView 
-          style={styles.scrollView}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#2F88D4"]}
-            />
-          }
-        >
-          {notifications.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <FontAwesome5 name="bell" size={60} color="#ccc" />
-              <Text style={styles.emptyText}>No notifications yet</Text>
-              <Text style={styles.emptySubtext}>
-                We'll notify you when something important happens
-              </Text>
+    <>
+      <StatusBar backgroundColor="white" barStyle="dark-content" />
+      <View style={styles.outerContainer}>
+        <SafeAreaView style={styles.container} edges={['right', 'left', 'top']}>
+          <View style={styles.header}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <FontAwesome5 name="arrow-left" size={20} color={sd.colors.blue} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Notifications</Text>
+            <View style={{width: 46}} />
+          </View>
+          
+          {loading && !refreshing ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={sd.colors.blue} />
+              <Text style={styles.loadingText}>Loading notifications...</Text>
             </View>
           ) : (
-            Object.keys(groupedNotifications).map(date => (
-              <View key={date}>
-                <Text style={styles.dateHeader}>
-                  {new Date(date).toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    month: 'short', 
-                    day: 'numeric'
-                  })}
+            <ScrollView 
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollViewContent}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[sd.colors.blue]}
+                  tintColor={sd.colors.blue}
+                />
+              }
+            >
+              {notifications.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <FontAwesome5 name="bell" size={60} color="#ccc" />
+                  <Text style={styles.emptyText}>No notifications yet</Text>
+                  <Text style={styles.emptySubtext}>
+                    We'll notify you when something important happens
+                  </Text>
+                </View>
+              ) : (
+                Object.keys(groupedNotifications).map(date => (
+                  <View key={date}>
+                    <Text style={styles.dateHeader}>
+                      {new Date(date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        month: 'short', 
+                        day: 'numeric'
+                      })}
+                    </Text>
+                    
+                    {groupedNotifications[date].map(notification => (
+                      <TouchableOpacity
+                        key={notification._id}
+                        style={[
+                          styles.notificationItem,
+                          !notification.isRead && styles.unreadNotification
+                        ]}
+                        onPress={() => handleNotification(notification)}
+                      >
+                        <View style={styles.notificationIconContainer}>
+                          <FontAwesome5 
+                            name={getNotificationIcon(notification.type)} 
+                            size={24} 
+                            color={sd.colors.blue}
+                            style={styles.notificationIcon}
+                          />
+                          {!notification.isRead && <View style={styles.unreadDot} />}
+                        </View>
+                        
+                        <View style={styles.notificationContent}>
+                          <Text style={[
+                            styles.notificationMessage,
+                            !notification.isRead && styles.unreadText
+                          ]}>
+                            {notification.message}
+                          </Text>
+                          <Text style={styles.notificationTime}>
+                            {getTimeAgo(notification.createdAt)}
+                          </Text>
+                        </View>
+                        
+                        <FontAwesome5 name="chevron-right" size={16} color="#888" />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          )}
+          
+          {/* Notification Detail Modal - Only render when we have a selectedNotification */}
+          {selectedNotification && (
+            <Modal
+              isVisible={isModalVisible}
+              onBackdropPress={() => setIsModalVisible(false)}
+              onBackButtonPress={() => setIsModalVisible(false)}
+              animationIn="slideInUp"
+              animationOut="slideOutDown"
+              backdropTransitionOutTiming={0}
+              style={styles.modal}
+            >
+              <View style={styles.modalContent}>
+                <View style={styles.modalIcon}>
+                  <FontAwesome5 
+                    name={getNotificationIcon(selectedNotification.type)} 
+                    size={36} 
+                    color={sd.colors.blue}
+                  />
+                </View>
+                
+                <Text style={styles.modalTitle}>
+                  {selectedNotification.title || "Notification"}
                 </Text>
                 
-                {groupedNotifications[date].map(notification => (
-                  <TouchableOpacity
-                    key={notification._id}
-                    style={[
-                      styles.notificationItem,
-                      !notification.isRead && styles.unreadNotification
-                    ]}
-                    onPress={() => markAsRead(notification)}
-                  >
-                    <View style={styles.notificationIconContainer}>
-                      <FontAwesome5 
-                        name={getNotificationIcon(notification.type)} 
-                        size={24} 
-                        color="#2F88D4"
-                        style={styles.notificationIcon}
-                      />
-                      {!notification.isRead && <View style={styles.unreadDot} />}
-                    </View>
-                    
-                    <View style={styles.notificationContent}>
-                      <Text style={[
-                        styles.notificationMessage,
-                        !notification.isRead && styles.unreadText
-                      ]}>
-                        {notification.message}
-                      </Text>
-                      <Text style={styles.notificationTime}>
-                        {getTimeAgo(notification.createdAt)}
-                      </Text>
-                    </View>
-                    
-                    <FontAwesome5 name="chevron-right" size={16} color="#888" />
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.modalMessage}>
+                  {selectedNotification.message}
+                </Text>
+                
+                <Text style={styles.modalTime}>
+                  {new Date(selectedNotification.createdAt).toLocaleString()}
+                </Text>
+                
+                <TouchableOpacity 
+                  style={styles.closeButton}
+                  onPress={closeModal}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
               </View>
-            ))
+            </Modal>
           )}
-        </ScrollView>
-      )}
-      
-      {/* Notification Detail Modal */}
-      <Modal
-        isVisible={isModalVisible}
-        onBackdropPress={() => setIsModalVisible(false)}
-        onBackButtonPress={() => setIsModalVisible(false)}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        backdropTransitionOutTiming={0}
-        style={styles.modal}
-      >
-        {selectedNotification && (
-          <View style={styles.modalContent}>
-            <View style={styles.modalIcon}>
-              <FontAwesome5 
-                name={getNotificationIcon(selectedNotification.type)} 
-                size={36} 
-                color="#2F88D4"
-              />
-            </View>
-            
-            <Text style={styles.modalTitle}>
-              {selectedNotification.title || "Notification"}
-            </Text>
-            
-            <Text style={styles.modalMessage}>
-              {selectedNotification.message}
-            </Text>
-            
-            <Text style={styles.modalTime}>
-              {new Date(selectedNotification.createdAt).toLocaleString()}
-            </Text>
-            
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={() => handleNotificationAction(selectedNotification)}
-            >
-              <Text style={styles.actionButtonText}>
-                {selectedNotification.actionText || "View Details"}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </Modal>
-    </SafeAreaView>
+        </SafeAreaView>
+      </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: 'white',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderBottomColor: '#f0f0f0',
+    ...sd.shadows.small,
   },
   backButton: {
     padding: 8,
-    marginRight: 16,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontFamily: sd.fonts.semiBold,
+    color: sd.colors.blue,
   },
   scrollView: {
     flex: 1,
+    backgroundColor: '#f8f8f8',
+  },
+  scrollViewContent: {
+    paddingBottom: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: sd.fonts.regular,
+    color: '#666',
   },
   emptyContainer: {
     flex: 1,
@@ -346,35 +388,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 32,
     marginTop: 80,
+    backgroundColor: '#f8f8f8',
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: sd.fonts.semiBold,
     color: '#555',
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: sd.fonts.regular,
     color: '#888',
     textAlign: 'center',
     marginTop: 8,
   },
   dateHeader: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: sd.fonts.semiBold,
     color: '#888',
     backgroundColor: '#f0f0f0',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    marginBottom: 8,
   },
   notificationItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     padding: 16,
     marginBottom: 1,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
     alignItems: 'center',
   },
   unreadNotification: {
@@ -385,7 +428,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   notificationIcon: {
-    backgroundColor: '#f0f7ff',
+    //backgroundColor: '#f0f7ff',
     padding: 10,
     borderRadius: 20,
   },
@@ -395,7 +438,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: 10,
     height: 10,
-    backgroundColor: '#f44336',
+    backgroundColor: sd.colors.red,
     borderRadius: 5,
   },
   notificationContent: {
@@ -404,27 +447,32 @@ const styles = StyleSheet.create({
   },
   notificationMessage: {
     fontSize: 15,
+    fontFamily: sd.fonts.regular,
     color: '#333',
     marginBottom: 4,
   },
   unreadText: {
-    fontWeight: '600',
+    fontFamily: sd.fonts.semiBold,
     color: '#000',
   },
   notificationTime: {
     fontSize: 12,
+    fontFamily: sd.fonts.regular,
     color: '#888',
   },
   modal: {
     justifyContent: 'flex-end',
     margin: 0,
+    
   },
   modalContent: {
     backgroundColor: 'white',
     padding: 24,
+    paddingBottom:60,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     alignItems: 'center',
+    ...sd.shadows.large,
   },
   modalIcon: {
     backgroundColor: '#f0f7ff',
@@ -434,9 +482,10 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: sd.fonts.semiBold,
     marginBottom: 12,
     textAlign: 'center',
+    color: sd.colors.blue,
   },
   modalMessage: {
     fontSize: 16,
@@ -444,35 +493,27 @@ const styles = StyleSheet.create({
     color: '#555',
     marginBottom: 16,
     lineHeight: 24,
+    fontFamily: sd.fonts.regular,
   },
   modalTime: {
     fontSize: 14,
+    fontFamily: sd.fonts.regular,
     color: '#888',
     marginBottom: 24,
   },
-  actionButton: {
-    backgroundColor: '#2F88D4',
+  closeButton: {
+    backgroundColor: sd.colors.blue,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 8,
     width: '100%',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  actionButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  closeButton: {
-    paddingVertical: 14,
-    width: '100%',
-    alignItems: 'center',
   },
   closeButtonText: {
-    color: '#888',
+    color: 'white',
     fontSize: 16,
-  },
+    fontFamily: sd.fonts.semiBold,
+  }
 });
 
 export default Notifications;

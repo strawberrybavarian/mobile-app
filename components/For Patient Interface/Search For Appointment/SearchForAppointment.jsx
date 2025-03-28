@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, FlatList, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from "react-native";
+import { View, TextInput, FlatList, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import doctorImage1 from '../../../assets/pictures/Doc.png';
 import magnify from '../../../assets/pictures/magni.png';
@@ -13,69 +13,81 @@ import { useNavigation } from "@react-navigation/native";
 import { Divider, Searchbar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-//   { id: "2", doctor: "Dr. Lalisa Manoban", specialty: "Dermatologist", rating: 4.8, image: doctorImage1 },
-//   { id: "3", doctor: "Dr. Sasha Banks", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-//   { id: "4", doctor: "Dr. Jennie Kim", specialty: "Neurologist", rating: 4.5, image: doctorImage1 },
-//   { id: "5", doctor: "Dr. Vice Ganda", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-//   { id: "6", doctor: "Dr. Fiona Dutirti", specialty: "Pediatrician", rating: 4.5, image: doctorImage1 },
-// ];
-
 const SearchForAppointment = ({ route }) => {
   const [searchText, setSearchText] = useState("");
-  // const [appointments, setAppointments] = useState(dummyAppointments);
   const [allDoctorArray, setAllDoctorArray] = useState([]);
   const [doctorFiltered, setDoctorFiltered] = useState([]);
-  // const [filteredAppointments, setFilteredAppointments] = useState([]);
-  // const [uniqueSpecialties, setUniqueSpecialties] = useState([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
-  const { specpec } = route.params || {};
-  console.log("specpec = " + specpec, typeof (specpec));
+  const { specpec, serviceData, isServiceAppointment } = route.params || {};
+  
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigation = useNavigation();
 
-  // Get all doctors
-  
+  // Get all doctors with loading state
   useEffect(() => {
+    setIsLoading(true);
     axios.get(`${ip.address}/api/doctor/api/alldoctor`)
       .then((res) => {
         if (Array.isArray(res.data.theDoctor)) {
           setAllDoctorArray(res.data.theDoctor); // Set the response if it's an array
-          console.log('Docs set:', res.data.theDoctor); // Log the array being set
+          console.log('Docs set:', res.data.theDoctor.length); // Log array length for debugging
         } else {
-          console.error('Expected an array but got:', typeof res.data.theDoctor, res.data.theDoctor);
+          console.error('Expected an array but got:', typeof res.data.theDoctor);
+          setError('Invalid response from server');
         }
       })
       .catch((err) => {
-        console.log('error here');
+        console.log('Error fetching doctors:', err);
+        setError('Failed to load doctors');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
-  // Filter based on params
+  // Filter based on params - keep as is
   useEffect(() => {
-    if( specpec == null ){
-      setDoctorFiltered(allDoctorArray);
-    }
-    else{
-    const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === specpec);
-    setDoctorFiltered(filteredDoctors);
-    console.log(filteredDoctors);
+    if(allDoctorArray.length > 0) {
+      if(specpec == null) {
+        setDoctorFiltered(allDoctorArray);
+      } else {
+        const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === specpec);
+        setDoctorFiltered(filteredDoctors);
+        console.log(filteredDoctors);
+      }
     }
   }, [allDoctorArray, specpec]);
 
   const bookAppointmentButton = (item) => {
-    navigation.navigate('bookappointment', { item });
-    console.log(item)
+    navigation.navigate('bookappointment', { 
+      item,
+      serviceData: serviceData || null,
+      isServiceAppointment: isServiceAppointment || false
+    });
+    console.log(item);
   };
   
-  // For search
+  // For search - keep as is
   useEffect(() => {
-    const filteredData = allDoctorArray.filter((item) =>
-      item.dr_firstName.toLowerCase().includes(searchText.toLowerCase()
-    || item.dr_lastName.toLowerCase().includes(searchText.toLowerCase())
-  )
-    );
-    setDoctorFiltered(filteredData);
-  }, [searchText]);
+    if (searchText && allDoctorArray.length > 0) {
+      const filteredData = allDoctorArray.filter((item) =>
+        item.dr_firstName.toLowerCase().includes(searchText.toLowerCase()) ||
+        item.dr_lastName.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setDoctorFiltered(filteredData);
+    } else if (allDoctorArray.length > 0) {
+      // Reset to initial filter state when search is cleared
+      if(specpec == null) {
+        setDoctorFiltered(allDoctorArray);
+      } else {
+        const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === specpec);
+        setDoctorFiltered(filteredDoctors);
+      }
+    }
+  }, [searchText, allDoctorArray]);
 
   const renderSpecialtyOval = (specialty) => (
     <TouchableOpacity
@@ -95,6 +107,7 @@ const SearchForAppointment = ({ route }) => {
   const handleSpecialtyClick = (specialty) => {
     console.log(`Clicked on: ${specialty}`);
     let mappedSpecialty;
+    
     switch (specialty) {
       case 'General':
         mappedSpecialty = 'PrimaryCare'
@@ -125,27 +138,25 @@ const SearchForAppointment = ({ route }) => {
     }
 
     setSelectedSpecialty(specialty);
-    if(mappedSpecialty == 'All'){
+    
+    if(mappedSpecialty === 'All'){
       setDoctorFiltered(allDoctorArray)
-    }
-    else{
+    } else {
       const filteredDoctors = allDoctorArray.filter(doctor => doctor.dr_specialty === mappedSpecialty);
       setDoctorFiltered(filteredDoctors);
     }
   };
 
-  // useEffect(() => {
-  //   console.log(doctorFiltered)
-  // }, [doctorFiltered])
-
   const renderItem = ({ item }) => {
-    console.log('Rendering item: ', item);
-  
     if (!item) return null;
   
     return (
       <TouchableOpacity style={styles.appointmentItem} onPress={() => bookAppointmentButton(item)}>
-        <Image source={{uri: `${ip.address}/${item.dr_image}`}} style={styles.doctorImage} />
+        <Image 
+          source={{uri: `${ip.address}/${item.dr_image}`}}
+          defaultSource={doctorImage1} 
+          style={styles.doctorImage} 
+        />
         <View style={styles.textContainer}>
           <Text style={styles.doctorName}>Dr. {item.dr_firstName} {item.dr_lastName}</Text>
           <Text style={styles.specialty}>{item.dr_specialty}</Text>
@@ -162,53 +173,135 @@ const SearchForAppointment = ({ route }) => {
     );
   };
   
+  // Create a header component for the FlatList
+  const ListHeaderComponent = () => (
+    <View style={styles.headerContent}>
+      <View style={styles.searchInputContainer}>
+        <Searchbar
+          placeholder="Search your Doctor"
+          onChangeText={(text) => setSearchText(text)}
+          value={searchText}
+          style={{ width: "100%", borderRadius: 20 }}
+        />
+      </View>
+      <Divider
+        bold
+        style={{ marginVertical: 10, marginTop: 20 }}
+        theme={{colors: {outlineVariant: sd.colors.blue}}}
+      />
+    </View>
+  );
+
+  // Loading component that matches your UI style
+  const renderLoading = () => (
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={sd.colors.blue} />
+      <Text style={styles.loadingText}>Loading doctors...</Text>
+    </View>
+  );
+
+  // Error component that matches your UI style
+  const renderError = () => (
+    <View style={styles.errorContainer}>
+      <FontAwesome name="exclamation-triangle" size={40} color="#ff6666" />
+      <Text style={styles.errorText}>{error || "Failed to load doctors"}</Text>
+      <TouchableOpacity 
+        style={styles.retryButton}
+        onPress={() => {
+          setIsLoading(true);
+          setError(null);
+          axios.get(`${ip.address}/api/doctor/api/alldoctor`)
+            .then((res) => {
+              if (Array.isArray(res.data.theDoctor)) {
+                setAllDoctorArray(res.data.theDoctor);
+              } else {
+                setError('Invalid response from server');
+              }
+            })
+            .catch((err) => {
+              setError('Failed to load doctors. Please try again.');
+            })
+            .finally(() => {
+              setIsLoading(false);
+            });
+        }}
+      >
+        <Text style={styles.retryText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Empty state component
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <FontAwesome name="user-md" size={40} color="#cccccc" />
+      <Text style={styles.emptyText}>
+        {searchText ? 
+          `No doctors found matching "${searchText}"` : 
+          `No doctors available for ${specpec || 'this specialty'}`}
+      </Text>
+    </View>
+  );
 
   return (
-    <>
-      <SafeAreaView style={{flex:1, backgroundColor: sd.colors.white}}>
+    <SafeAreaView style={{flex:1, backgroundColor: sd.colors.white}}>
       <View
         backgroundColor={sd.colors.white}
         style={{ flex: 1, backgroundColor: sd.colors.white }}
       >
-          <View style={styles.headerCont}>
-              <Entypo name="chevron-thin-left" size={sd.fontSizes.large} color={sd.colors.blue} style={{flex:1}} onPress={()=>{navigation.goBack()}}/>
-              <Text style= {styles.headerText}>
-                {specpec ? specpec + ' Department' : 'All Doctors'}
-              </Text>
-              <View style = {{flex:1}}></View>
-          </View>
+        <View style={styles.headerCont}>
+          <Entypo 
+            name="chevron-thin-left" 
+            size={sd.fontSizes.large} 
+            color={sd.colors.blue} 
+            style={{flex:1}} 
+            onPress={() => navigation.goBack()}
+          />
+          <Text style={styles.headerText}>
+            {specpec ? specpec + ' Department' : 'All Doctors'}
+          </Text>
+          <View style={{flex:1}}></View>
+        </View>
 
-        <ScrollView style={styles.container}>   
-          <View style={styles.appointmentBox}>
-            <View style={styles.searchInputContainer}>
-              <Searchbar
-                placeholder="Search your Doctor"
-                onChangeText={(text) => setSearchText(text)}
-                value={searchText}
-                style={{ width: "100%", borderRadius: 20 }}
-              />
-            </View>
-            <Divider
-              bold
-              style={{ marginVertical: 10, marginTop: 20,  }}
-              theme = {{colors: {outlineVariant: sd.colors.blue}}}
-            />
-            {doctorFiltered ? <FlatList
+        {/* Show service info if applicable */}
+        {isServiceAppointment && serviceData && (
+          <View style={styles.serviceInfoCard}>
+            <Text style={styles.serviceTitle}>Booking: {serviceData.name}</Text>
+            {serviceData.category && (
+              <Text style={styles.serviceCategory}>{serviceData.category}</Text>
+            )}
+          </View>
+        )}
+
+        <View style={styles.container}>
+          {isLoading ? (
+            renderLoading()
+          ) : error ? (
+            renderError()
+          ) : doctorFiltered && doctorFiltered.length > 0 ? (
+            <FlatList
               data={doctorFiltered}
               renderItem={renderItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item._id || item.id || Math.random().toString()}
               showsVerticalScrollIndicator={false}
-            /> : <Text> Loading ...</Text>}
-          </View>
-        </ScrollView>
+              ListHeaderComponent={ListHeaderComponent}
+              contentContainerStyle={styles.appointmentBox}
+            />
+          ) : (
+            <View style={styles.appointmentBox}>
+              <ListHeaderComponent />
+              {renderEmpty()}
+            </View>
+          )}
+        </View>
       </View>
-      </SafeAreaView>
-    </>
+    </SafeAreaView>
   );
 };
 
+// Keep all original styles and add new ones
 const styles = StyleSheet.create({
-
+  // All your existing styles
   navcontainer:{
     position: 'absolute',
     bottom: 0,
@@ -216,7 +309,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
- 
   },
   searchInput: {
     fontSize: 15,
@@ -234,14 +326,12 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     backgroundColor: sd.colors.white,
-    //marginTop: 20,
   },
   headerText:{
     fontSize: sd.fontSizes.large,
     fontFamily: sd.fonts.semiBold,
     color: sd.colors.blue,
   },
-
   arrowCont:{
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -250,16 +340,12 @@ const styles = StyleSheet.create({
   arrowText: {
     fontSize: 15,
     fontFamily: 'Poppins',
-  
     color: "#9dceff",
   },
-  
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    //height: 40,
     justifyContent: 'center',
-    //marginLeft: 12,
     width:"90%",
     backgroundColor: 'rgba(255, 255, 255, 1)',
     borderRadius: 50,
@@ -274,12 +360,11 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     marginBottom: 10,
-   
     justifyContent: "space-between",
   },
   specialtyOvalContainer: {
     flexDirection: "row",
-    paddingRight: 20, // Add paddingRight here
+    paddingRight: 20,
     overflow: 'visible',
   },
   specialtyOval: {
@@ -290,10 +375,7 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     paddingBottom: 3,
     paddingTop: 3,
-
     marginLeft: 10,
-    
-   
   },
   selectedSpecialty: {
     backgroundColor: "#92a3fd",
@@ -306,7 +388,6 @@ const styles = StyleSheet.create({
   },
   appointmentItem: {
     backgroundColor: '#ffffff',
-    //width: '100%',
     height: 110,
     borderRadius: 20,
     flexDirection: 'row',
@@ -315,12 +396,10 @@ const styles = StyleSheet.create({
     margin: 12,
     ...sd.shadows.large,
     alignSelf: 'center',
-    //marginHorizontal: 20,
   },
   appointmentBox:{
     width: '100%',
     paddingHorizontal: 20,
-
   },
   doctorImage: {
     width: 50,
@@ -337,7 +416,6 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 16,
     fontFamily: 'Poppins-SemiBold',
-
   },
   specialty: {
     fontSize: 12,
@@ -354,6 +432,79 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Poppins',
     color: "#666",
+  },
+  
+  // New styles for loading, error and empty states
+  headerContent: {
+    width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: 'Poppins',
+    color: "#666",
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  errorText: {
+    marginTop: 10,
+    marginBottom: 20,
+    fontSize: 16,
+    fontFamily: 'Poppins',
+    color: "#666",
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: sd.colors.blue,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 14,
+    fontFamily: 'Poppins',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: 'Poppins',
+    color: "#666",
+    textAlign: 'center',
+  },
+  serviceInfoCard: {
+    backgroundColor: '#f0f7ff',
+    margin: 10,
+    padding: 15,
+    borderRadius: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: sd.colors.blue,
+  },
+  serviceTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
+    color: sd.colors.blue,
+  },
+  serviceCategory: {
+    fontSize: 14,
+    fontFamily: 'Poppins',
+    color: '#666',
+    marginTop: 2,
   },
 });
 

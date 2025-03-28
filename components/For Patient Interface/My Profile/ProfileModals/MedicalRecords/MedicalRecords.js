@@ -92,7 +92,7 @@ const MedicalRecords = () => {
                         },
                         {
                             text: 'Lab',
-                            value: 'Lab',
+                            value: 'LabResult',
                             label: 'Lab',
                             //labelStyle: { color: sd.colors.black }
                         }

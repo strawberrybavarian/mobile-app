@@ -145,7 +145,7 @@ const PatientChat = () => {
   }, {});
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.container}>
       {/* Chat Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -188,7 +188,7 @@ const PatientChat = () => {
                 resizeMode="contain"
               /> */}
               <Text style={styles.emptyText}>
-                Send a message to connect with our Medical Secretary
+                Send a message to connect with our Medical Secretary.
               </Text>
             </View>
           ) : (
@@ -282,7 +282,7 @@ const PatientChat = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -310,12 +310,12 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: sd.fontSizes.medium,
     fontWeight: '600',
     ...sd.fonts.semiBold,
   },
   headerSubtitle: {
-    fontSize: 12,
+    fontSize: sd.fontSizes.small,
     color: '#888',
     ...sd.fonts.regular,
   },
@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
   chatContainer: {
     flex: 1,
     paddingHorizontal: 10,
+    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
@@ -433,8 +434,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 8,
+    paddingBottom: 20,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',

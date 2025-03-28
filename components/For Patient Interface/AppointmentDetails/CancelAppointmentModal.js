@@ -1,8 +1,11 @@
+import sd from '@/utils/styleDictionary';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
+import { Button, useTheme } from 'react-native-paper';
 
 const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
+  const theme = useTheme(); // Access the theme
   const [cancelReason, setCancelReason] = useState('');
 
   const handleCancelPress = () => {
@@ -11,35 +14,59 @@ const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
   };
 
   return (
-    <Modal 
-      //transparent={true} 
-      isVisible={isVisible} 
-      //animationType="fade"
-      animationIn={'fadeIn'}
-      animationOut={'fadeOut'}
+    <Modal
+      isVisible={isVisible}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
       onBackdropPress={closeModal}
       onSwipeComplete={closeModal}
       propagateSwipe={true}
-      style = {styles.modal}
-      coverScreen = {true}
+      style={styles.modal}
+      coverScreen={true}
       hideModalContentWhileAnimating={true}
       useNativeDriver={true}
-      >
+    >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.title}>Reason for Cancellation</Text>
+        <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.title, { color: theme.colors.onSurface }]}>
+            Reason for Cancellation
+          </Text>
           <TextInput
             placeholder="Enter reason"
+            placeholderTextColor={theme.colors.onSurfaceVariant}
             value={cancelReason}
             onChangeText={setCancelReason}
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                borderColor: theme.colors.outline,
+                color: theme.colors.onSurface,
+              },
+            ]}
           />
-          <TouchableOpacity style={styles.button} onPress={handleCancelPress}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={closeModal}>
-            <Text style={styles.buttonText}>Close</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonContainer}>
+            <Button
+              mode="contained"
+              onPress={handleCancelPress}
+              style={styles.submitButton}
+              buttonColor={theme.colors.error}
+              textColor={theme.colors.onError}
+            >
+               <Text style={{ fontSize: sd.fontSizes.lg, fontFamily: sd.fonts.semiBold }}>
+                Submit
+                </Text>
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={closeModal}
+              style={styles.closeButton}
+              textColor={theme.colors.primary}
+            >
+               <Text style={{ fontSize: sd.fontSizes.lg, fontFamily: sd.fonts.semiBold }}>
+                Close
+                </Text>
+            </Button>
+          </View>
         </View>
       </View>
     </Modal>
@@ -47,10 +74,9 @@ const CancelAppointmentModal = ({ isVisible, closeModal, onCancel }) => {
 };
 
 const styles = StyleSheet.create({
-  modal : {
-    margin: 0,  // Ensures the modal takes up the entire screen
+  modal: {
+    margin: 0, // Ensures the modal takes up the entire screen
     justifyContent: 'center',
-    height: '100%',
     flex: 1,
   },
   modalOverlay: {
@@ -60,35 +86,47 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: 300,
+    width: '90%',
     padding: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   title: {
     fontSize: 18,
-    marginBottom: 10,
+    fontFamily: 'Poppins-Bold',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   input: {
     width: '100%',
     height: 40,
-    borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 15,
-    paddingLeft: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
   },
-  button: {
-    backgroundColor: '#ff5c5c',
-    padding: 10,
+  buttonContainer: {
     width: '100%',
-    alignItems: 'center',
-    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  submitButton: {
+    flex: 1,
+    marginRight: 10,
     borderRadius: 5,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
+  closeButton: {
+    flex: 1,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
 });
 

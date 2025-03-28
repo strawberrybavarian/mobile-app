@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Dialog, Portal, Button } from 'react-native-paper';
+import { Dialog, Portal, Button, useTheme } from 'react-native-paper';
 import { ip } from '@/ContentExport';
 import { useUser } from '@/UserContext';
 import { storeData } from '@/components/storageUtility';
+import sd from "@/utils/styleDictionary";
 
 const EmailVerificationPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { userId, role } = route.params || {};
   const { login } = useUser();
+  const theme = useTheme();
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [attempts, setAttempts] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Create refs for each input
+  const inputRefs = useRef([]);
+  // Initialize with 6 refs
+  useEffect(() => {
+    inputRefs.current = Array(6).fill().map((_, i) => inputRefs.current[i] || React.createRef());
+  }, []);
 
   const [visible, setVisible] = useState(false);
   const [dialogTitle, setDialogTitle] = useState('');
@@ -37,6 +46,18 @@ const EmailVerificationPage = () => {
     const newCode = [...code];
     newCode[index] = value;
     setCode(newCode);
+
+    // Auto advance to next input if a digit was entered
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyPress = (e, index) => {
+    // Handle backspace to go to previous input
+    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
   };
 
   const handleSubmit = async () => {
@@ -80,19 +101,17 @@ const EmailVerificationPage = () => {
             console.log("Login successful after verification");
             
             // Use reset instead of navigate to clear the navigation stack
-            // Update the patient navigation target:
-
-          if (role === 'Patient') {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'ptnmain' }], // Change from 'ptnmain' to 'home'
-            });
-          } else if (role === 'Doctor') {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'doctormain' }],
-            });
-          }
+            if (role === 'Patient') {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'ptnmain' }],
+              });
+            } else if (role === 'Doctor') {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'doctormain' }],
+              });
+            }
           } else {
             console.error("Failed to login after verification");
             showDialog('Error', 'Failed to complete login after verification');
@@ -130,20 +149,47 @@ const EmailVerificationPage = () => {
       <View style={styles.content}>
         <Text style={styles.title}>Enter OTP Code</Text>
         <Text style={styles.subheading}>Please enter the 6-digit code sent to your email.</Text>
-        <View style={styles.inputContainer}>
+        
+        <View style={styles.codeContainer}>
           {code.map((digit, index) => (
-            <TextInput
-              key={index}
-              style={styles.codeInput}
-              maxLength={1}
-              value={digit}
-              onChangeText={(value) => handleChange(value, index)}
-              keyboardType="numeric"
-            />
+            <View 
+              key={index} 
+              style={[
+                styles.digitContainer,
+                { backgroundColor: theme.colors.surfaceVariant }
+              ]}
+            >
+              <TextInput
+                ref={el => inputRefs.current[index] = el}
+                style={[
+                  styles.codeInput,
+                  { color: theme.colors.onSurface, fontFamily: sd.fonts.light }
+                ]}
+                maxLength={1}
+                value={digit}
+                onChangeText={(value) => handleChange(value, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                keyboardType="numeric"
+                autoFocus={index === 0}
+              />
+            </View>
           ))}
         </View>
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={isSubmitting}>
-          <Text style={styles.submitButtonText}>{isSubmitting ? 'Verifying...' : 'Verify Code'}</Text>
+        
+        <TouchableOpacity 
+          style={[
+            styles.submitButton,
+            { backgroundColor: theme.colors.primary }
+          ]} 
+          onPress={handleSubmit} 
+          disabled={isSubmitting}
+        >
+          <Text style={[
+            styles.submitButtonText,
+            { color: theme.colors.onPrimary, fontFamily: sd.fonts.medium }
+          ]}>
+            {isSubmitting ? 'Verifying...' : 'Verify Code'}
+          </Text>
         </TouchableOpacity>
       </View>
       <Portal>
@@ -176,37 +222,53 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontFamily: 'Poppins-SemiBold',
     marginBottom: 10,
+    color: '#333',
   },
   subheading: {
     fontSize: 16,
     color: '#666',
-    marginBottom: 20,
+    marginBottom: 30,
+    fontFamily: 'Poppins-Light',
+    textAlign: 'center',
   },
-  inputContainer: {
+  codeContainer: {
     flexDirection: 'row',
-    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 30,
+  },
+  digitContainer: {
+    width: 45,
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   codeInput: {
-    width: 40,
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
+    width: '100%',
+    height: '100%',
+    fontSize: 20,
     textAlign: 'center',
-    marginHorizontal: 5,
   },
   submitButton: {
-    backgroundColor: '#007BFF',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 30,
     width: '100%',
     alignItems: 'center',
+    marginTop: 20,
+    height: 50,
   },
   submitButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },

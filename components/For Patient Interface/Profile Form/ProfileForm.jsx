@@ -1,37 +1,165 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import RNPickerSelect from 'react-native-picker-select';
-import Entypo from "@expo/vector-icons/Entypo";
+import { Entypo } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
-import { StyleSheet } from 'react-native';
-
-const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
-  <View style={styles.inputContainer}>
-    <Text style={styles.label}>{label}</Text>
-    <TextInput
-      style={styles.input}
-      value={value}
-      onChangeText={(text) => onChangeText(text)}
-      onTouchStart={onTouch}
-    />
-  </View>
-);
+import { useTheme, Button } from 'react-native-paper';
+import sd from '../../../utils/styleDictionary';
 
 const ProfileForm = ({ navigation }) => {
   const [userId, setUserId] = useState("");
-  // const [firstName, setFirstName] = useState('');
-  // const [lastName, setLastName] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  // const [email, setEmail] = useState('');
-  // const [phoneNumber, setPhoneNumber] = useState('');
-  // const [gender, setGender] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
-
   const [patientData, setPatientData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const theme = useTheme();
+  
+  // Fixed: Create styles inside the component using theme
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: '#fff',
+      padding: 16,
+    },
+    scrollContainer: {
+      flexGrow: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+      marginTop: 30,
+    },
+    title: {
+      fontSize: 20,
+      fontFamily: sd.fonts.bold,
+      color: theme.colors.primary,
+      textAlign: 'center',
+      flex: 2,
+    },
+    profilePicture: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      alignSelf: 'center',
+      marginBottom: 20,
+      marginTop: 10,
+    },
+    inputContainer: {
+      position: 'relative',
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 12,
+      position: 'absolute',
+      top: 8,
+      left: 14,
+      zIndex: 1,
+      color: theme.colors.onSurfaceVariant,
+      backgroundColor: 'transparent',
+      paddingHorizontal: 4,
+      fontFamily: sd.fonts.regular,
+    },
+    input: {
+      height: 60,
+      borderColor: theme.colors.outline,
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingLeft: 14,
+      paddingTop: 25,
+      paddingBottom: 8,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
+    calendarContainer: {
+      alignItems: 'center',
+      marginTop: 12,
+      marginBottom: 16,
+      backgroundColor: theme.colors.surfaceVariant,
+      borderRadius: 8,
+      padding: 10,
+    },
+    subtitle: {
+      fontSize: 16,
+      marginBottom: 12,
+      fontFamily: sd.fonts.medium,
+      color: theme.colors.primary,
+    },
+    pickerContainer: {
+      marginBottom: 16,
+      position: 'relative',
+    },
+    pickerLabel: {
+      fontSize: 12,
+      position: 'absolute',
+      top: 8,
+      left: 14,
+      zIndex: 1,
+      color: theme.colors.onSurfaceVariant,
+      backgroundColor: 'transparent',
+      paddingHorizontal: 4,
+      fontFamily: sd.fonts.regular,
+    },
+    picker: {
+      height: 60,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.outline,
+      backgroundColor: 'transparent',
+      paddingLeft: 14,
+      paddingTop: 25,
+      paddingBottom: 8,
+      color: theme.colors.onSurface,
+      fontFamily: sd.fonts.regular,
+    },
+    button: {
+      marginVertical: 20,
+      marginBottom: 40,
+    },
+    buttonText: {
+      color: theme.colors.onPrimary,
+      fontSize: 16,
+      fontFamily: sd.fonts.medium,
+    },
+    errorText: {
+      color: theme.colors.error,
+      marginBottom: 16,
+      fontFamily: sd.fonts.regular,
+    },
+    dateButton: {
+      borderColor: theme.colors.primary,
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 16,
+    },
+    dateButtonText: {
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
+  });
+
+  // Custom TextInput component with styled label
+  const OvalLabelTextInput = ({ label, value, onChangeText, onTouch }) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={(text) => onChangeText(text)}
+        onTouchStart={onTouch}
+      />
+    </View>
+  );
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -42,9 +170,11 @@ const ProfileForm = ({ navigation }) => {
           setUserId(id);
         } else {
           console.log('User not found');
+          setError('User not found');
         }
       } catch (err) {
         console.log(err);
+        setError('Error fetching user data');
       }
     };
 
@@ -52,144 +182,171 @@ const ProfileForm = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    const fetchData = () => {
+    if (!userId) return;
+    
+    setLoading(true);
+    
     axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
       .then(res => {
         console.log(res.data.thePatient);
         setPatientData(res.data.thePatient);
+        // If there's already a date of birth, set it
+        if (res.data.thePatient.patient_dob) {
+          setSelectedDate(new Date(res.data.thePatient.patient_dob));
+        }
       })
       .catch(err => {
         console.log(err);
+        setError('Error loading profile data');
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    };
-
-    fetchData();
   }, [userId]);
 
-  useEffect(() => {
-    console.log('Patient data:', patientData);
-  }, [patientData]);
-
-  const handleSaveProfile = () => {
-    axios.put(`${ip}/api/patient/api/${userId}/updateinfo`, {
-      patient_firstName: firstName,
-      patient_lastName: lastName,
-      patient_dob: selectedDate,
-      patient_email: email,
-      patient_contactNumber: phoneNumber,
-      patient_gender: gender,
-    })
+  const handleUpdate = () => {
+    if (!userId) {
+      setError('User ID is missing');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    // Include the selected date in the patientData
+    const updatedData = {
+      ...patientData,
+      patient_dob: selectedDate
+    };
+    
+    axios.put(`${ip.address}/api/patient/api/${userId}/updateinfo`, updatedData)
       .then((res) => {
         console.log('Profile updated successfully:', res.data);
         navigation.goBack();
       })
       .catch((err) => {
         console.log('Error updating profile:', err);
+        setError('Failed to update profile');
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
-
-  const handleUpdate = () => {
-    axios.put(`${ip.address}/api/patient/api/${userId}/updateinfo`, patientData)
-      .then((res) => {
-        console.log('Profile updated successfully:', res.data);
-
-      })
-      .catch((err) => {
-        console.log('Error updating profile:', err);
-      });
-  }
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setPatientData({
       ...patientData,
       patient_dob: date
-    })
+    });
     setShowDatePicker(false);
   };
   
+  const formatDate = (date) => {
+    if (!date) return '';
+    return date.toDateString();
+  };
+  
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
+        {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.arrowButton}
-            onPress={() => navigation.navigate('myprofilepage')}
-          >
-            <Entypo name="chevron-thin-left" size={14} />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
+            <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
           </TouchableOpacity>
-          <View style={{ justifyContent: 'center', width: "83%" }}>
-            <Text style={styles.title}>Edit Profile</Text>
-          </View>
+          <Text style={styles.title}>Edit Profile</Text>
+          <View style={{ flex: 1 }} />
         </View>
   
         <Image
           style={styles.profilePicture}
           source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQD29ZbwcUoURx5JZQ0kEwp6y4_NmjEJhh2Z6OdKRkbUw&s' }}
         />
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
   
-        <OvalLabelTextInput label="First Name" value={patientData.patient_firstName} onChangeText={(text) => {
-          setPatientData({
-            ...patientData,
-            patient_firstName: (text)
-        })}} />
-        <OvalLabelTextInput label="Last Name" value={patientData.patient_lastName} onChangeText={(text) => {
-          setPatientData({
-            ...patientData,
-            patient_lastName: (text)
-        })}} />
+        <OvalLabelTextInput 
+          label="First Name" 
+          value={patientData.patient_firstName} 
+          onChangeText={(text) => {
+            setPatientData({
+              ...patientData,
+              patient_firstName: text
+            });
+          }} 
+        />
+        
+        <OvalLabelTextInput 
+          label="Last Name" 
+          value={patientData.patient_lastName} 
+          onChangeText={(text) => {
+            setPatientData({
+              ...patientData,
+              patient_lastName: text
+            });
+          }} 
+        />
   
-        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <OvalLabelTextInput
-            label="Date of Birth"
-            value={selectedDate ? selectedDate.toDateString() : ''}
-            onTouch={() => setShowDatePicker(true)}
-          />
+        {/* Date selection */}
+        <Text style={styles.subtitle}>Date of Birth</Text>
+        <TouchableOpacity 
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.dateButtonText}>
+            {selectedDate ? formatDate(selectedDate) : 'Select date of birth'}
+          </Text>
+          <Entypo name="calendar" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
   
         {showDatePicker && (
           <View style={styles.calendarContainer}>
-            <Text style={styles.subtitle}>Select a Date</Text>
             <CalendarPicker
               onDateChange={handleDateChange}
-              selectedDayColor="#92a3fd"
-              selectedDayTextColor="white"
-              todayBackgroundColor="transparent"
-              todayTextStyle={{ color: '#000' }}
-              textStyle={{ color: '#000' }}
-              customDatesStyles={[
-                {
-                  date: selectedDate,
-                  style: { backgroundColor: '#92a3fd' },
-                  textStyle: { color: 'white' },
-                },
-              ]}
-              dayShape="square"
+              selectedStartDate={selectedDate}
+              selectedDayColor={theme.colors.primary}
+              selectedDayTextColor={theme.colors.onPrimary}
+              todayBackgroundColor={theme.colors.surfaceVariant}
+              todayTextStyle={{ color: theme.colors.onSurface }}
+              textStyle={{ color: theme.colors.onSurface }}
+              monthTitleStyle={{ fontFamily: sd.fonts.semiBold, color: theme.colors.primary }}
+              yearTitleStyle={{ fontFamily: sd.fonts.medium, color: theme.colors.primary }}
+              dayLabelsWrapper={{ borderTopWidth: 0, borderBottomWidth: 0 }}
               width={300}
-              height={300}
-              hideDayNames={true}
             />
           </View>
         )}
   
-        <OvalLabelTextInput label="Email" value={patientData.patient_email} onChangeText={(text) => {
-          setPatientData({
-            ...patientData,
-            patient_email: (text)
-        })}} />
+        <OvalLabelTextInput 
+          label="Email" 
+          value={patientData.patient_email} 
+          onChangeText={(text) => {
+            setPatientData({
+              ...patientData,
+              patient_email: text
+            });
+          }} 
+        />
 
-        <OvalLabelTextInput label="Phone Number" value={patientData.patient_contactNumber} onChangeText={(text) => {
-          setPatientData({
-            ...patientData,
-            patient_contactNumber: (text)
-        })}} />
+        <OvalLabelTextInput 
+          label="Phone Number" 
+          value={patientData.patient_contactNumber} 
+          onChangeText={(text) => {
+            setPatientData({
+              ...patientData,
+              patient_contactNumber: text
+            });
+          }} 
+        />
   
         <View style={styles.pickerContainer}>
+          <Text style={styles.pickerLabel}>Gender</Text>
           <RNPickerSelect
             placeholder={{ label: 'Select Gender', value: null }}
             onValueChange={(value) => setPatientData({
               ...patientData,
-              patient_gender: (value)
+              patient_gender: value
             })}
             items={[
               { label: 'Male', value: 'male' },
@@ -204,124 +361,20 @@ const ProfileForm = ({ navigation }) => {
           />
         </View>
   
-        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-          <LinearGradient
-            start={{ x: 1, y: 0 }}
-            end={{ x: 0, y: 2 }}
-            colors={["#92A3FD", "#9DCEFF"]}
-            style={{
-              width: "100%",
-              height: 40,
-              borderRadius: 40,
-              justifyContent: "center",
-              alignItems: "center"
-            }}>
-            <Text style={styles.buttonText}>Save Changes</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        {/* Submit button matching BookServices style */}
+        <Button
+          mode="contained"
+          buttonColor={theme.colors.primary}
+          textColor={theme.colors.onPrimary}
+          onPress={handleUpdate}
+          style={styles.button}
+          loading={loading}
+        >
+          Save Changes
+        </Button>
       </View>
     </ScrollView>
   );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 30,
-    padding: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-
-  },
-  arrowButton: {
-    padding: 10,
-  },
-  arrowText: {
-    fontSize: 20,
-    color: '#007BFF',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-   
-  },
-  profilePicture: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignSelf: 'center',
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  inputContainer: {
-    position: 'relative',
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 12,
-    position: 'absolute',
-    top: 8,
-    marginBottom: 5,
-    left: 14,
-    zIndex: 1,
-    color: 'gray',
-    backgroundColor: 'transparent',
-    paddingHorizontal: 4,
-  },
-  input: {
-    height: 65,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 15,
-    paddingLeft: 18,
-    paddingTop: 15,
-  },
-  calendarContainer: {
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  pickerContainer: {
-    marginBottom: 12,
-    position: 'relative',
-  },
-  picker: {
-    height: 65,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: 'gray',
-    backgroundColor: 'transparent',
-    zIndex: 1,
-    paddingLeft: 13,
-    paddingTop: 15,
-    paddingRight: 15,
-  },
-  pickerLabel: {
-    fontSize: 12,
-    position: 'absolute',
-    top: 8,
-    left: 14,
-    zIndex: 1,
-    color: 'gray',
-    backgroundColor: 'transparent',
-    paddingHorizontal: 4,
-  },
-  button: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "",
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
+};
 
 export default ProfileForm;

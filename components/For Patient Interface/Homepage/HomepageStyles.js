@@ -41,11 +41,19 @@ const styles = StyleSheet.create({
         margin: 30,
         borderRadius: sd.borders.radiusXL,
     },
+    // Add this to your existing styles
+serviceImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: 'center'
+},
     optionsContainer: {
         padding: 20,
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'space-evenly',
     },
     optionsRow: {
         flexDirection: "row",
@@ -55,7 +63,8 @@ const styles = StyleSheet.create({
     optionBox: {
         width: Dimensions.get('window').width / 3, 
         height: Dimensions.get('window').width / 3,
-        margin: 10,
+        marginLeft: 5,
+        marginRight: 5,
         padding: 10,
         backgroundColor: '#f8f8f8',
         borderRadius: sd.borders.radiusLarge,

@@ -12,7 +12,7 @@ export default headerStyles = (theme) => StyleSheet.create({
     width: '100%',
     height: 'auto',
     ...sd.shadows.level1,
-    shadowOffset: { width: 0, height: 5 },
+    shadowOffset: { width: 0, height: 2 },
     backgroundColor: theme.colors.background,
     zIndex: 100,
   },

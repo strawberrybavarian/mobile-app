@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Keyboard,  // Import Keyboard API
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -31,10 +32,8 @@ const SigninPage = ({ navigation }) => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);  // Add this line
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useUser();
-  
-  // ... rest of component remains the same
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -232,12 +231,12 @@ await storeData("userPassword", password);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
-    >
-      <>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
+      >
         <View style={styles.mainContainer}>
           <View style={styles.headerContainer}>
             <TouchableOpacity
@@ -267,6 +266,13 @@ await storeData("userPassword", password);
                 placeholderTextColor={theme.colors.onSurfaceVariant}
                 value={email}
                 onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoCompleteType="email"
+                textContentType="emailAddress"
+                blurOnSubmit={false}
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
             </View>
             {emailError && isErrorVisible && (
@@ -281,6 +287,12 @@ await storeData("userPassword", password);
                 secureTextEntry={passwordVisible}
                 value={password}
                 onChangeText={setPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoCompleteType="password"
+                textContentType="password"
+                blurOnSubmit={true}
+                onSubmitEditing={() => Keyboard.dismiss()}
               />
 
               <View style={styles.iconContainer}>
@@ -313,7 +325,10 @@ await storeData("userPassword", password);
                   fontSize: sd.fontSizes.medium,
                 }}
                 value={role}
-                onChange={(item) => setRole(item.value)}
+                onChange={(item) => {
+                  setRole(item.value);
+                  Keyboard.dismiss();
+                }}
               />
             </View>
             {roleError && isErrorVisible && (
@@ -324,7 +339,10 @@ await storeData("userPassword", password);
           <View style={styles.signInButtonContainer}>
             <TouchableOpacity 
               style={[styles.signInButton, isSubmitting && styles.disabledButton]} 
-              onPress={loginUser}
+              onPress={(e) => {
+                Keyboard.dismiss();
+                loginUser(e);
+              }}
               disabled={isSubmitting}
             >
               <Text style={styles.signInText}>
@@ -333,8 +351,8 @@ await storeData("userPassword", password);
             </TouchableOpacity>
           </View>
         </View>
-      </>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 

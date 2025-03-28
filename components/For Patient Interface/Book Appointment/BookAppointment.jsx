@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
 import { Avatar, Button, Card, DataTable, Dialog, Portal, Paragraph, TextInput } from 'react-native-paper';
@@ -21,6 +22,11 @@ import BookAppointmentStyles from './BookAppointmentStyles';
 import { Entypo } from '@expo/vector-icons';
 import { useUser } from '@/UserContext';
 import { storeData } from '../../storageUtility';
+import { useRoute } from '@react-navigation/native';
+import { Dropdown } from 'react-native-element-dropdown';
+import { FlatList } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { Modal } from 'react-native';
 
 const BookAppointment = ({ navigation, route }) => {
   const { user } = useUser(); // Use the hook to get authenticated user
@@ -37,19 +43,33 @@ const BookAppointment = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
-  const { item } = route.params;
+  const { item, serviceData, isServiceAppointment } = route.params;
   const theme = useTheme();
   const styles = BookAppointmentStyles(theme);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [visible, setVisible] = useState(false);
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
+  const [availableServices, setAvailableServices] = useState([]);
+  const [servicesLoading, setServicesLoading] = useState(false);
+  const [selectedService, setSelectedService] = useState(
+    serviceData || { name: "Consultation", category: "General" }
+  );
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
+
+  const appointmentTypeText = selectedService ? selectedService.name : "Consultation";
+  const appointmentCategoryText = selectedService ? selectedService.category : "General";
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
     setShowDatePicker(false);
+    
+    // Also fetch times for the modal
+    if (showDateModal) {
+      fetchAvailableTimesForModal(date);
+    }
   };
-
   useEffect(() => {
     console.log(item);
     
@@ -136,6 +156,7 @@ useEffect(() => {
   }
 }, [user?._id, navigation]); // Add navigation back to dependencies
 
+  
   useEffect(() => {
     if (selectedDate) {
       const fetchAppointments = async () => {
@@ -273,11 +294,13 @@ const confirmAppointment = async () => {
       time: selectedHour,
       reason: reason,
       appointment_type: {
-        appointment_type: "Consultation",
-        category: "General",
+        appointment_type: appointmentTypeText,
+        category: appointmentCategoryText,
       },
       // Include role explicitly for mobile apps
-      _role: userRole
+      _role: userRole,
+      // Add service reference if this is a service appointment
+      ...(isServiceAppointment && { serviceId: serviceData._id })
     };
     
     console.log("Appointment data:", JSON.stringify(formData, null, 2));
@@ -349,199 +372,304 @@ const confirmAppointment = async () => {
   }
 };
 
-  const renderAvailableHours = () => {
-    console.log('availableTimes:', availableTimes);
-    return availableTimes.map((slot, index) => (
-      <Button
-        key={index}
-        mode={selectedHour === slot.timeRange ? 'elevated' : 'outlined'}
-        buttonColor={selectedHour === slot.timeRange ? theme.colors.primary : theme.colors.surface}
-        textColor={selectedHour === slot.timeRange ? theme.colors.onPrimary : theme.colors.primary}
-        onPress={() =>
-          setSelectedHour(selectedHour === slot.timeRange ? null : slot.timeRange)
-        }      
-      >
-       {availableTimes.length > 0 ? slot.timeRange : 'No slots for this day.'}
-       {selectedHour === slot.timeRange ? <Entypo name="check" size={24} style={{margin: 10}}/> : null}
-      </Button>
-    ));
+  // Add these functions to your component (before the return statement)
+const openDateModal = () => {
+  setShowDateModal(true);
+  if (selectedDate) {
+    // Trigger time loading if date already selected
+    fetchAvailableTimesForModal(selectedDate);
+  }
+};
+
+const closeDateModal = () => {
+  setShowDateModal(false);
+};
+
+const handleTimeSelection = (time) => {
+  setSelectedHour(time.timeRange);
+};
+
+const fetchAvailableTimesForModal = async (date) => {
+  setLoadingTimes(true);
+  try {
+    const daysOfWeek = [
+      "sunday", "monday", "tuesday", "wednesday", 
+      "thursday", "friday", "saturday"
+    ];
+    const day = daysOfWeek[date.getDay()];
+
+    // Fetch booked patients for the selected date
+    const response = await axios.get(
+      `${ip.address}/api/appointments/doctor/${item._id}/count?date=${date}`
+    );
+    
+    const { morning, afternoon } = response.data;
+    
+    // Use your existing function to get available times
+    const times = getAvailableTimes(day, morning, afternoon);
+    setAvailableTimes(times);
+  } catch (error) {
+    console.error('Error fetching available times:', error);
+    Alert.alert("Error", "Failed to load available times for this date");
+  } finally {
+    setLoadingTimes(false);
+  }
+};
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      setServicesLoading(true);
+      try {
+        const response = await axios.get(`${ip.address}/api/services`);
+        
+        if (response.data && response.data.services) {
+          // Make sure consultation is always available
+          const hasConsultation = response.data.services.some(
+            service => service.name === "Consultation"
+          );
+          
+          const services = hasConsultation 
+            ? response.data.services 
+            : [{ _id: 'consultation', name: 'Consultation', category: 'General' }, ...response.data.services];
+            
+          setAvailableServices(services);
+        } else {
+          setAvailableServices([
+            { _id: 'consultation', name: 'Consultation', category: 'General' },
+            { _id: 'laboratory', name: 'Laboratory', category: 'Diagnostics' },
+            { _id: 'vaccination', name: 'Vaccination', category: 'Preventive' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        // Set default services
+        setAvailableServices([
+          { _id: 'consultation', name: 'Consultation', category: 'General' },
+          { _id: 'laboratory', name: 'Laboratory', category: 'Diagnostics' },
+          { _id: 'vaccination', name: 'Vaccination', category: 'Preventive' },
+        ]);
+      } finally {
+        setServicesLoading(false);
+      }
+    };
+    
+    
+    fetchServices();
+  }, []);
+
+  // Replace your ServiceSelectionSection with this dropdown version
+  const ServiceSelectionSection = () => {
+    const isFromDoctorSelection = !!item; // Check if we have doctor item to determine flow
+    
+    return (
+      <View style={{marginBottom: 30}}>
+        <Text style={styles.subtitle}>
+          {isFromDoctorSelection ? "Service" : "Select Service"}
+        </Text>
+        
+        
+      </View>
+    );
   };
+// Update your main return statement to be context-aware
+return (
+  <SafeAreaView style={styles.container}>
+    <KeyboardAwareScrollView style={styles.scrollContainer}>
+      {/* header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
+          <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Book Appointment</Text>
+        <View style={{ flex: 1 }} />
+      </View>
 
-  const renderMorningAvailability = (day) => {
-    const dayAvailability = availability[day] || {};
-    return dayAvailability.morning?.available
-      ? `${formatTime(dayAvailability.morning.startTime)} - ${formatTime(dayAvailability.morning.endTime)}`
-      : "Not available";
-  };
-  
-  const renderAfternoonAvailability = (day) => {
-    const dayAvailability = availability[day] || {};
-    return dayAvailability.afternoon?.available
-      ? `${formatTime(dayAvailability.afternoon.startTime)} - ${formatTime(dayAvailability.afternoon.endTime)}`
-      : "Not available";
-  };
+      {/* Only show doctor info if there is an item (doctor-first flow) */}
+      {item ? (
+        <>
+          {/* Doctor card */}
+          <View style={{marginBottom: 10}}>
+            <Card 
+              style={styles.card}
+              mode='elevated'
+            >
+              <Card.Content style={styles.doctorInfo}>
+                <Avatar.Image size={80} source={{ uri: imageUri }} />
+                <View style={styles.doctorDetails}>
+                  <Text style={styles.drName}>{`Dr. ${item.dr_firstName} ${item.dr_lastName}`}</Text>
+                  <Text style={styles.drSpecialty}>{item.dr_specialty}</Text>
+                </View>
+              </Card.Content>
+              <Card.Actions>
+                <Button
+                  mode='outlined'
+                  textColor={theme.colors.onSurface}
+                  labelStyle={{ fontFamily: sd.fonts.semiBold}}
+                  onPress={() => navigation.navigate('aboutdoctor', {item: item})}
+                >
+                  View Profile
+                </Button>
+              </Card.Actions>
+            </Card>
+          </View>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAwareScrollView style={styles.scrollContainer}>
-        {/* header */}
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
-        <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
-      </TouchableOpacity>
-      <Text style={styles.title}>Book Appointment</Text>
-      <View style={{ flex: 1 }} />
-    </View>
+          {/* Date selection button - opens modal */}
+          <Text style={styles.subtitle}>Select Date & Time</Text>
+          <Button
+            mode="outlined"
+            onPress={openDateModal}
+            style = {{borderColor: theme.colors.primary, borderWidth: 2}}
+            buttonColor={theme.colors.surface}
+            textColor={theme.colors.onSurface}
+            icon="calendar"
+          >
+            {selectedDate && selectedHour 
+              ? `${selectedDate.toLocaleDateString()} at ${selectedHour}`
+              : 'Choose Date & Time'}
+          </Button>
 
-    <View style = {{marginBottom: 10}}>
+          {/* Date/Time Selection Modal */}
+          <Modal
+            visible={showDateModal}
+         
+            transparent={true}
+            onRequestClose={closeDateModal}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Select Date & Time</Text>
+                  <TouchableOpacity onPress={closeDateModal}>
+                    <Entypo name="cross" size={24} color={theme.colors.primary} />
+                  </TouchableOpacity>
+                </View>
+                
+                <CalendarPicker
+                  onDateChange={handleDateChange}
+                  selectedStartDate={selectedDate}
+                  minDate={new Date()}
+                  textStyle={styles.calendarText}
+                  todayBackgroundColor={theme.colors.surfaceVariant}
+                  selectedDayColor={theme.colors.primary}
+                  selectedDayTextColor={theme.colors.onPrimary}
+                  monthTitleStyle={styles.calendarMonthTitle}
+                  yearTitleStyle={styles.calendarYearTitle}
+                  dayLabelsWrapper={styles.calendarDayLabels}
+                />
 
-    {/* doctor card */}
+                <Text style={styles.modalSubtitle}>Available Times</Text>
+                
+                {loadingTimes ? (
+                  <ActivityIndicator size="large" color={theme.colors.primary} style={{marginVertical: 20}} />
+                ) : (
+                  availableTimes.length > 0 ? (
+                    <View style={styles.timeButtonsContainer}>
+                      {availableTimes.map((slot, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={[
+                            styles.timeButton,
+                            selectedHour === slot.timeRange && styles.selectedTimeButton
+                          ]}
+                          onPress={() => handleTimeSelection(slot)}
+                        >
+                          <Text style={[
+                            styles.timeButtonText,
+                            selectedHour === slot.timeRange && styles.selectedTimeButtonText
+                          ]}>
+                            {slot.timeRange}
+                            {slot.availableSlots > 1 && (
+                              <Text style={styles.slotsText}> ({slot.availableSlots} slots)</Text>
+                            )}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.noTimesText}>No available slots for this date.</Text>
+                  )
+                )}
 
-    {item && (
-      <Card 
-        style={styles.card}
-        mode='elevated'
-      >
-        <Card.Content style={styles.doctorInfo}>
-          <Avatar.Image size={80} source={{ uri: imageUri }} />
-          <View style={styles.doctorDetails}>
-            <Text style={styles.drName}>{`Dr. ${item.dr_firstName} ${item.dr_lastName}`}</Text>
-            <Text style={styles.drSpecialty}>{item.dr_specialty}</Text>
+                <Button
+                  mode="contained"
+                  onPress={closeDateModal}
+                  style={styles.modalCloseButton}
+                  labelStyle={styles.modalCloseButtonText}
+                  disabled={!selectedDate || !selectedHour}
+                >
+                  Confirm Selection
+                </Button>
+              </View>
+            </View>
+          </Modal>
+
+          {/* reason card - only show if doctor selected */}
+          <View style={{marginBottom: 40}}>
+            <Text style={styles.subtitle}>Reason for Appointment</Text>
+            <TextInput
+              mode="outlined"
+              multiline
+              value={reason}
+              onChangeText={setReason}
+              style={styles.textArea}
+            />
+          </View>
+
+          {/* submit button - only show if doctor selected */}
+          <Button
+            mode='elevated'
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
+            onPress={createAppointment}
+            style={{marginVertical: 20, marginBottom: 100}}
+          >
+            Submit
+          </Button>
+        </>
+      ) : (
+        /* Service-first flow - show service info and button to select doctor */
+        <View style={styles.serviceFirstContainer}>
+          <View style={styles.serviceHighlight}>
+            <FontAwesome5 
+              // name={getServiceIcon(selectedService)} 
+              size={48} 
+              color={theme.colors.primary}
+            />
+            <Text style={styles.serviceHighlightTitle}>{selectedService?.name}</Text>
+            <Text style={styles.serviceHighlightCategory}>{selectedService?.category || 'General'}</Text>
+            <Text style={styles.serviceDescription}>
+              {selectedService?.description || 'Please select a doctor for this service to continue with your booking.'}
+            </Text>
           </View>
           
-        </Card.Content>
-        <Card.Actions>
           <Button
-            mode = 'outlined'
-            //buttonColor={theme.colors.secondary}
-            textColor={theme.colors.onSurface}
-            labelStyle = {{ fontFamily: sd.fonts.semiBold}}
-            onPress = {() => navigation.navigate('aboutdoctor', {item})}
+            mode="contained"
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
+            onPress={() => navigation.navigate('doctorspecialty', { 
+              serviceData: selectedService,
+              isServiceAppointment: true
+            })}
+            style={styles.findDoctorButton}
           >
-            View Profile
+            Find Available Doctors
           </Button>
-        </Card.Actions>
-      </Card>
-    )}
-    </View>
-
-    {/* availability card */}
-
-    <Text style={styles.subtitle}>Availability</Text>
-    <Card style={[styles.card, {padding: 0, marginBottom: 30}]}>
-      <Card.Content style={{paddingHorizontal:0, paddingVertical:0}}> 
-        <DataTable 
-          style={styles.dataTableView}
-          theme={{ colors: { text: theme.colors.onSurface } }}
-        >
-          <DataTable.Header
-            style={styles.dataTableHeaderView}
-            theme = {theme}
-          >
-            <DataTable.Title textStyle={[styles.dataTableHeaderText, {flex : 0.7}]}>Day</DataTable.Title>
-            <DataTable.Title textStyle={styles.dataTableHeaderText}>Morning</DataTable.Title>
-            <DataTable.Title textStyle={styles.dataTableHeaderText}>Afternoon</DataTable.Title>
-          </DataTable.Header> 
-          {days
-          .filter((day) => 
-            availability[day]?.morning?.available || availability[day]?.afternoon?.available
-          )
-          .map((day) => (
-            <DataTable.Row key={day} style={{height: 50}}>
-              <DataTable.Cell style = {[styles.dataTableCell, {flex: 0.7}]}>
-                <Text style = {styles.dataTableText}>
-                  {day.charAt(0).toUpperCase() + day.slice(1)}
-                </Text>
-              </DataTable.Cell>
-              <DataTable.Cell style = {styles.dataTableCell}>
-                <Text style = {styles.dataTableText}>
-                  {renderMorningAvailability(day)}
-                </Text>
-              </DataTable.Cell>
-              <DataTable.Cell style = {styles.dataTableCell}>
-                <Text style = {styles.dataTableText}>
-                  {renderAfternoonAvailability(day)}
-                </Text>
-              </DataTable.Cell>
-            </DataTable.Row>
-          ))}
-        </DataTable>
-      </Card.Content>
-    </Card>
-
-    {/* date card */}
-
-    <View style = {{marginBottom: 10}}>
-    <Text style={styles.subtitle}>Select a Date</Text>
-    <Button
-      mode='elevated'
-      onPress={() => setShowDatePicker(!showDatePicker)}
-      buttonColor= {theme.colors.primary}
-      textColor={theme.colors.onPrimary}
-      style = {{marginVertical: 10}}
-    >
-      {selectedDate ? new Date(selectedDate).toLocaleDateString() : 'Choose a Date'}
-    </Button>
-    
-    {showDatePicker ? (
-      <View style = {{padding : 20}}>
-        <CalendarPicker
-          initialDate={selectedDate ? selectedDate : new Date()}
-          onDateChange={handleDateChange}
-          selectedStartDate={selectedDate}
-          minDate={new Date()}
-          style = {{padding : 20, marginVertical: 10}}
-        />
-      </View>
-    ) : null}
-    </View>
-
-    {/* hour card */}
-
-    <View style = {{marginBottom: 40}}>
-      <Text style={styles.subtitle}>Select Hour</Text>
-      {loading ? (
-        <Text>Loading available times...</Text>
-      ) : (
-        <View>{ 
-          availableTimes.length === 0 ? 
-          <Text style = {{color : theme.colors.error, fontSize: sd.fonts.small, fontFamily: sd.fonts.italic}}>No available slots for this day.</Text> :
-          renderAvailableHours()
-          }
         </View>
       )}
-    </View>
-
-    {/* reason card */}
-
-    <View style = {{marginBottom: 40}}>
-    <Text style={styles.subtitle}>Reason for Appointment</Text>
-    <TextInput
-      mode="outlined"
-      multiline
-      value={reason}
-      onChangeText={setReason}
-      style={styles.textArea}
-    />
-    </View>
-
-    {/* submit button */}
-
-    <Button
-      mode='elevated'
-      buttonColor={theme.colors.primary}
-      textColor={theme.colors.onPrimary}
-      onPress={createAppointment}
-      style = {{marginVertical: 20, marginBottom: 100}}
-    >
-      Submit
-    </Button>
-
+    </KeyboardAwareScrollView>
+    
+    {/* Dialog remains the same */}
     <Portal>
       <Dialog visible={visible} onDismiss={hideDialog}>
         <Dialog.Title>Confirm Appointment</Dialog.Title>
         <Dialog.Content>
           <Paragraph>Doctor: {doctorName}</Paragraph>
+          <Paragraph>
+            Service: {selectedService?.name} 
+            <Text style={{fontStyle: 'italic', color: '#666'}}>
+              {" "}- {selectedService?.category || 'General'}
+            </Text>
+          </Paragraph>
           <Paragraph>Date: {selectedDate?.toLocaleDateString()}</Paragraph>
           <Paragraph>Time: {selectedHour}</Paragraph>
           <Paragraph>Reason: {reason}</Paragraph>
@@ -552,9 +680,8 @@ const confirmAppointment = async () => {
         </Dialog.Actions>
       </Dialog>
     </Portal>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
-  );
+  </SafeAreaView>
+);
 };
 
 // Replace the response interceptor with this more forgiving version:
@@ -593,5 +720,6 @@ const responseInterceptor = axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 
 export default BookAppointment;

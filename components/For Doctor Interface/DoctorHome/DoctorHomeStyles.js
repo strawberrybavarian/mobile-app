@@ -4,7 +4,7 @@ import sd from '../../../utils/styleDictionary';
 export const DoctorHomeStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 50,
     backgroundColor: theme.colors.background,
   },
@@ -27,7 +27,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
     marginVertical: 4,
-    padding: 15,
+    padding: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -209,5 +209,62 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
   badgeText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  statusCardsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  statusCardWrapper: {
+    width: '48%',
+  },
+  statusCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  statusCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+  statusIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#E3F2FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  statusTextContainer: {
+    flex: 1,
+  },
+  statusCount: {
+    fontSize: 22,
+    fontFamily: 'Poppins-Bold',
+    color: '#1976D2',
+    marginBottom: 4,
+  },
+  statusLabel: {
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    color: '#555',
+  },
+  loadingCard: {
+    padding: 20,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    fontFamily: 'Poppins-Regular',
+    color: '#666',
   },
 });

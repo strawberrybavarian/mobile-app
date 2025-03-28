@@ -1,87 +1,83 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import sd from '../../../../../utils/styleDictionary';
 
 export default EditProfileStyles = (theme) => StyleSheet.create({
-  modal:{
+  modal: {
     flex: 1,
-    margin: 0
+    margin: 0,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    paddingTop: Platform.OS === 'ios' ? 20 : 0, // Add padding for iOS to handle the notch
   },
   modalContent: {
-    backgroundColor: theme.colors.background,
-    padding: 20,
-    paddingTop: 40,
-    borderRadius: 10,
-    //alignItems: 'center',
-    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 20, // Add padding at the bottom for better spacing
   },
   modalTitle: {
-    fontSize: sd.fontSizes.medium,
+    fontSize: 20,
     fontFamily: sd.fonts.bold,
+    color: theme.colors.primary,
+    textAlign: 'center', // Center the title for consistency
     marginBottom: 20,
-    textAlign: 'center'
   },
   inputContainer: {
-    width: '100%',
-    marginBottom: 15,
+    marginBottom: 16,
   },
   label: {
-    fontSize: sd.fontSizes.small,
+    fontSize: 14,
     fontFamily: sd.fonts.medium,
-    marginBottom: 5,
-    color: sd.colors.darkGray,
-
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: 4,
   },
   input: {
-    backgroundColor: sd.colors.white,
-    padding: 10,
-    borderRadius: 5,
+    height: 50,
     borderWidth: 1,
-    borderColor: sd.colors.blue,
-    fontSize: sd.fontSizes.medium,
-    fontFamily: sd.fonts.semiBold,
-  },
-  editableInput: {
-    borderWidth: 1,
-    borderColor: sd.colors.blue,
+    borderColor: theme.colors.outline,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontFamily: sd.fonts.regular,
+    color: theme.colors.onSurface,
   },
   imageContainer: {
-    position: 'relative',
-    marginBottom: 20,
     alignItems: 'center',
+    marginBottom: 20,
   },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    elevation: 10,
-    ...sd.shadows.large,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
   },
   imageBadge: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: sd.colors.blue,
+    backgroundColor: theme.colors.primary,
     width: 30,
     height: 30,
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 15,
   },
   badgeText: {
-    color: 'white',
-    fontSize: 20,
+    color: theme.colors.onPrimary,
+    fontSize: 18,
+    fontFamily: sd.fonts.bold,
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginTop: 20,
-    width: '100%',
   },
   cancelButton: {
-    marginLeft: 10,
+    flex: 1,
+    marginRight: 8,
   },
-  editButton: {
-    marginLeft: 10,
+  saveButton: {
+    flex: 1,
+    marginLeft: 8,
   },
 });

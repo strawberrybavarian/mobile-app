@@ -1,7 +1,7 @@
 // MyProfileStyles.js
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+export const MyProfileStyles = (theme) => StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
   title: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: 30,
+    color: theme.colors.primary,
   },
   profileInfo: {
     marginTop: 10,

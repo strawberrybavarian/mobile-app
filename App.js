@@ -43,6 +43,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UserProvider, useUser } from './UserContext';
 import { navigationRef } from './RootNavigation';
 import React from 'react';
+import BookServices from './components/For Patient Interface/Book Appointment/BookServices';
+import EditProfileScreen from './components/For Patient Interface/My Profile/EditProfileScreen';
 
 // AppContent component that uses the UserContext hook, rendered inside UserProvider
 const AppContent = () => {
@@ -131,6 +133,7 @@ const AppContent = () => {
         />
         <Stack.Screen name='searchappointment' component={SearchForAppointment} />
         <Stack.Screen name='bookappointment' component={BookAppointment} />
+        <Stack.Screen name='bookservices' component={BookServices} />
         <Stack.Screen name='profileform' component={ProfileForm} />
         <Stack.Screen name='upcoming' component={Upcoming}/>
         <Stack.Screen name='aboutdoctor' component={AboutDoctor} />
@@ -139,6 +142,8 @@ const AppContent = () => {
         <Stack.Screen name='medicalrecords' component={MedicalRecords} />
         <Stack.Screen name='ptnchat' component={PatientChat} />
         <Stack.Screen name='ptnnotification' component={Notifications}/>
+        <Stack.Screen name='healthassessment' component={HealthRiskAssessmentForm} />
+        <Stack.Screen name='editprofile' component={EditProfileScreen} options={{ headerShown: false }}/>
 
         {/* Doctor */}
         <Stack.Screen name='doctormain' component={DoctorMain}/>

@@ -10,11 +10,8 @@ const styles = StyleSheet.create({
     },
     
     scrollContainer: {
-        flex: 5,
-        backgroundColor: sd.colors.white,
-        padding: 20,
-        //paddingBottom: 120,
-        marginVertical: 10,
+        flex: 1,
+        marginTop: 10,
     },
     infocont: {
         flexDirection: 'row',
@@ -26,35 +23,46 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     modalContainer: {
-        //flex: 1,
-        height:'80%',
-        backgroundColor: '#fff',
-        // padding: 20,
-        //width: '100%',
+        height: '80%',
+        backgroundColor: sd.colors.white,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
     },
     modalActions: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        alignContent: 'center',
-        marginVertical: 10,
-        //position: 'absolute',
-        bottom: 0,
-        paddingHorizontal: 20,
-        paddingBottom: 20,
+        justifyContent: 'space-between',
+        marginTop: 20,
     },
     modal: {
         justifyContent: 'flex-end',
         margin: 0,
-        //flex: 1,
-      },
+    },
 
-    
     //header
     header: {
-        flexDirection: 'row',
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
         alignItems: 'center',
-        padding: 15,
-        width: '100%',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontFamily: sd.fonts.bold,
+        color: '#fff',
+        marginBottom: 10,
+    },
+    headerBadge: {
+        backgroundColor: '#0056b3',
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+    },
+    headerBadgeText: {
+        fontSize: 14,
+        fontFamily: sd.fonts.medium,
+        color: '#fff',
     },
 
     //info
@@ -82,6 +90,52 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         flex: 2,
     },
+    infoCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f9f9f9',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 15,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    infoIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#EAF4FF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    infoContent: {
+        flex: 1,
+    },
+    infoTitle: {
+        fontSize: 14,
+        fontFamily: sd.fonts.medium,
+        color: '#555',
+        marginBottom: 4,
+    },
+    infoValue: {
+        fontSize: 16,
+        fontFamily: sd.fonts.bold,
+        color: '#333',
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    infoText: {
+        fontSize: sd.fontSizes.medium,
+        fontFamily: sd.fonts.regular,
+        color: sd.colors.textSecondary,
+    },
 
     //body
     title:{
@@ -90,12 +144,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     cancelButton: {
-        padding: 50,
-        borderRadius: 50,
+        backgroundColor: sd.colors.red,
+        flex: 1,
+        marginRight: 10,
+        borderRadius: 8,
     },
     modalButton: {
         padding: 10,
         borderRadius: 50,
+    },
+    rescheduleButton: {
+        backgroundColor: sd.colors.blue,
+        flex: 1,
+        borderRadius: 8,
     },
 
     //navbar
@@ -107,7 +168,6 @@ const styles = StyleSheet.create({
 
     //header
     headercont:{
-        // position:'absolute',
         top:0,
         width:'100%',
     },
