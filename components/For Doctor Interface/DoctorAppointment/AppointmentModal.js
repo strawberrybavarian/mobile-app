@@ -6,12 +6,91 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
 import sd from '../../../utils/styleDictionary';
 
+const ApptStyles = (theme) => StyleSheet.create({
+  modal: {
+    margin: 0,
+    justifyContent: 'flex-end',
+
+  },
+  modalContainer: {
+    height: '75%',
+    backgroundColor: sd.colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  headerTitle: {
+    fontSize: sd.fontSizes.large,
+    fontFamily: sd.fonts.bold,
+    color: '#fff',
+  },
+  headerBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  headerBadgeText: {
+    fontSize: 12,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+    
+  },
+  scrollContainer: {
+    marginTop: 10,
+  },
+  detailsGrid: {
+    // flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  infoCard: {
+    width: 'auto',
+    flexDirection: 'row',
+    marginBottom: 10,
+    padding: 10,
+    paddingLeft: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    elevation: 2,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+    marginRight: 15,
+  },
+  infoContent: {
+    alignItems: 'flex-start',
+  },
+  infoTitle: {
+    fontSize: sd.fontSizes.medium,
+    fontFamily: sd.fonts.semiBold,
+  },
+  infoValue: {
+    fontSize: sd.fontSizes.medium,
+    fontFamily: sd.fonts.regular,
+    color: '#555',
+  },
+});
+
+
 const InfoCard = ({ icon, title, value }) => {
   const theme = useTheme();
   
   if (!value || value.length === 0) {
     value = "N/A";
   }
+  const styles = ApptStyles(theme);
   
   return (
     <View style={styles.infoCard}>
@@ -30,6 +109,8 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
   const theme = useTheme();
   
   if (!appointment) return null;
+  const styles = ApptStyles(theme);
+
   
   return (
     <Modal
@@ -52,7 +133,7 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
             Appointment Details
           </Text>
           <View style={[styles.headerBadge, { backgroundColor: theme.colors.primaryContainer || '#0056b3' }]}>
-            <Text style={[styles.headerBadgeText, { color: theme.colors.onPrimary || '#fff' }]}>
+            <Text style={[styles.headerBadgeText, { color: theme.colors.primary || 'blue' }]}>
               ID: {appointment._id?.substring(0, 8)}...
             </Text>
           </View>
@@ -103,77 +184,6 @@ const AppointmentModal = ({ isVisible, appointment, onClose, onCancel, onAccept,
   );
 };
 
-const styles = StyleSheet.create({
-  modal: {
-    margin: 0,
-    justifyContent: 'flex-end',
 
-  },
-  modalContainer: {
-    height: '80%',
-    backgroundColor: sd.colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  headerTitle: {
-    fontSize: sd.fontSizes.large,
-    fontFamily: sd.fonts.bold,
-    color: '#fff',
-  },
-  headerBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  headerBadgeText: {
-    fontSize: 12,
-    color: 'blue',
-    fontWeight: 'bold',
-    
-  },
-  scrollContainer: {
-    marginTop: 10,
-  },
-  detailsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  infoCard: {
-    width: '48%',
-    marginBottom: 10,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    elevation: 2,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  infoContent: {
-    alignItems: 'flex-start',
-  },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  infoValue: {
-    fontSize: 12,
-    color: '#555',
-  },
-});
 
 export default AppointmentModal;

@@ -19,9 +19,11 @@ export const MyPatientStyles = (theme) => StyleSheet.create({
     },
     bodyContainer: {
         padding: 20,
+        
     },
     patientCard: {
         flex: 1,
+        marginVertical: 10,
     },
     patientInfo: {
         padding: 20,

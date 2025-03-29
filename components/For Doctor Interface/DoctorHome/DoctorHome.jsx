@@ -131,9 +131,8 @@ const DoctorHome = () => {
             ) : (
               <View style={styles.statusCardsContainer}>
                 {/* Today's Appointments Card */}
-                <TouchableOpacity 
+                <View 
                   style={styles.statusCardWrapper}
-                  onPress={() => handleViewAppointments('today')}
                 >
                   <Card style={[styles.statusCard, { borderColor: theme.colors.primary }]}>
                     <Card.Content style={styles.statusCardContent}>
@@ -151,12 +150,11 @@ const DoctorHome = () => {
                       </View>
                     </Card.Content>
                   </Card>
-                </TouchableOpacity>
+                </View>
                 
                 {/* Pending Appointments Card */}
-                <TouchableOpacity 
+                <View 
                   style={styles.statusCardWrapper}
-                  onPress={() => handleViewAppointments('pending')}
                 >
                   <Card style={[styles.statusCard, { borderColor: theme.colors.secondary }]}>
                     <Card.Content style={styles.statusCardContent}>
@@ -176,7 +174,7 @@ const DoctorHome = () => {
                       </View>
                     </Card.Content>
                   </Card>
-                </TouchableOpacity>
+                </View>
               </View>
             )}
           </View>  

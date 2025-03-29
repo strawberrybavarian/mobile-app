@@ -53,6 +53,7 @@ const PatientTab = ({ patients, viewDetails }) => {
                 style={{
                   backgroundColor: theme.colors.surface,
                   elevation: 1,
+                  marginVertical: 5,
                 }}
               >
                 <Card.Title
