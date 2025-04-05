@@ -17,7 +17,6 @@ import { Entypo } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
-
 // Utility function to extract image URLs from <img> tags and remove them from content
 const processContent = (content) => {
   const imageRegex = /<img[^>]+src="([^">]+)"/g;
@@ -36,9 +35,6 @@ const processContent = (content) => {
 };
 
 const stripHTMLTags = (text) => text?.replace(/<\/?[^>]+(>|$)/g, '') || '';
-
-
-
 
 const DoctorPosts = ({ posts, doctor, updatePostInState, refreshPosts }) => {
   const theme = useTheme();
@@ -207,16 +203,27 @@ const DoctorPosts = ({ posts, doctor, updatePostInState, refreshPosts }) => {
     setShowAll((prev) => !prev);
   };
 
+  const showMoreButtonVisible = posts.length >= 5;
+
   return (
     <>
-      <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
-        {posts.slice(0, showAll ? posts.length : 3).map((post, index) => (
-          <View key={post._id || index}>{renderPost({ item: post })}</View>
-        ))}
-      </ScrollView>
-      <Button mode="contained" onPress={toggleShowAll} style={styles.showMoreButton}>
-        {showAll ? 'Show Less' : 'Show More'}
-      </Button>
+      {posts.length === 0 ? (
+        <Text style={styles.announcementText}>
+          When you make any announcements, you'll be able to see them here.
+        </Text>
+      ) : (
+        <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+          {posts.slice(0, showAll ? posts.length : 3).map((post, index) => (
+            <View key={post._id || index}>{renderPost({ item: post })}</View>
+          ))}
+        </ScrollView>
+      )}
+
+      {showMoreButtonVisible && (
+        <Button mode="contained" onPress={toggleShowAll} style={styles.showMoreButton}>
+          {showAll ? 'Show Less' : 'Show More'}
+        </Button>
+      )}
 
       <Portal>
         <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalContainer}>
@@ -290,6 +297,12 @@ const createStyles = (theme) =>
       width: '100%',
       height: 300,
       borderRadius: 8,
+    },
+    announcementText: {
+      fontSize: 16,
+      textAlign: 'center',
+      marginTop: 20,
+      color: theme.colors.onSurfaceVariant,
     },
   });
 

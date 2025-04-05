@@ -5,7 +5,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     backgroundColor: '#ffffff',
     flex: 1,
-    //paddingBottom: 200,
+    paddingBottom: 200,
   },
   searchContainer: {
     flexDirection: "row",

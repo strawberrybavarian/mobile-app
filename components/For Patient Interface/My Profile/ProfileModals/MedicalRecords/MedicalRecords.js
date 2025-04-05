@@ -75,15 +75,10 @@ const MedicalRecords = () => {
                         {
                             text: 'Medical History',
                             value: 'Medical History',
-                            label: 'Medical History',
+                            label: 'History',
                             //labelStyle: { color: sd.colors.black }
                         },
-                        {
-                            text: 'Prescriptions',
-                            value: 'Prescriptions',
-                            label: 'Prescriptions',
-                            //labelStyle: { color: sd.colors.black }
-                        },
+                        
                         {
                             text: 'Immunizations',
                             value: 'Immunizations',

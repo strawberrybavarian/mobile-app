@@ -16,18 +16,18 @@ export const validateFirstName = (text) => {
 }
 
 export const validateMiddleInitial = (text) => {
-    text = text.trim();
-    if (!text){
-        return null;
+    text = text.trim(); // Removes any leading or trailing whitespace
+    if (!text) {
+        return null; // If the input is empty, validation passes (optional field)
     }
 
-    const regex = /^[a-zA-Z]$/;
-    if (!regex.test(text)){
-        return "Middle Initial must be 1 character long and contain only letters.";
+    const regex = /^[a-zA-Z]$/; // Regex ensures only one letter (uppercase or lowercase)
+    if (!regex.test(text)) {
+        return "Middle Initial must be 1 character long and contain only letters."; // Error message if validation fails
     }
 
-    return null; // Return null if validation passes
-}
+    return null; // Validation passes
+};
 
 export const validateLastName = (text) => {
     text = text.trim();
@@ -60,25 +60,25 @@ export const validateDob = (dob) => {
         return "Date of birth is required.";
     }
 
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const selectedYear = dob.getFullYear();
-    const selectedMonth = dob.getMonth() + 1; // Months are 0-indexed in JS
-    const selectedDay = dob.getDate();
+    // const currentDate = new Date();
+    // const currentYear = currentDate.getFullYear();
+    // const selectedYear = dob.getFullYear();
+    // const selectedMonth = dob.getMonth() + 1; // Months are 0-indexed in JS
+    // const selectedDay = dob.getDate();
 
-    // Check if the selected year is in the future or the current year
-    if (selectedYear > currentYear) {
-        return "Invalid date of birth.";
-    }
+    // // Check if the selected year is in the future or the current year
+    // if (selectedYear > currentYear) {
+    //     return "Invalid date of birth.";
+    // }
 
-    // Calculate the person's age
-    const age = currentYear - selectedYear;
+    // // Calculate the person's age
+    // const age = currentYear - selectedYear;
 
-    // Check if the person is under 18
-    if (age < 18 || (age === 18 && selectedMonth > currentDate.getMonth() + 1) || 
-        (age === 18 && selectedMonth === currentDate.getMonth() + 1 && selectedDay > currentDay)) {
-        return "You must be at least 18 years old.";
-    }
+    // // Check if the person is under 18
+    // if (age < 18 || (age === 18 && selectedMonth > currentDate.getMonth() + 1) || 
+    //     (age === 18 && selectedMonth === currentDate.getMonth() + 1 && selectedDay > currentDay)) {
+    //     return "You must be at least 18 years old.";
+    // }
 
     return null; // Return null if validation passes
 };
@@ -109,7 +109,7 @@ export const validateEmail = ( text) => {
     if (!regex.test(text)){
         return "Invalid email format.";
     }
-    return null; // Return null if validation passes
+    return null;
 }
 
 export const validatePassword = (text) => {

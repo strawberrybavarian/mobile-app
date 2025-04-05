@@ -51,7 +51,7 @@ const Header3 = ({name, imageUri}) => {
 
               <View style={styles.infoCont}>
                 <Text style={{ fontFamily: 'Poppins', fontSize: 12 }}> 
-                  <FontAwesome5 name="circle" size={12} style={{color:'green'}} />  Active Now
+                  Patient
                 </Text>
               </View>
             </View>

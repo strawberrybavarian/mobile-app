@@ -9,7 +9,7 @@ export const AboutDoctorStyle = (theme) => StyleSheet.create({
       paddingHorizontal: 30,
       paddingTop: 20,
       flexDirection: 'column',
-  
+      paddingBottom: 50,
     },
     containerCard: {
       backgroundColor: 'white',
@@ -37,9 +37,9 @@ export const AboutDoctorStyle = (theme) => StyleSheet.create({
     buttonContainer: {
       
   
-      position: 'absolute',
+      position: 'relative',
     
-      bottom: 105,
+      bottom: 100,
       left: 0,
       right:0,
       

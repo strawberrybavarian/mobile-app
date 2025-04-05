@@ -309,7 +309,7 @@ const ViewProfile = () => {
                       <MaterialIcons name="security" size={18} color={color} />
                     )}
                   >
-                    {patient.twoFactorEnabled ? "Security: Protected" : "Enable Account Security"}
+                    {patient.twoFactorEnabled ? "Security: Protected" : "Enable 2FA"}
                   </Button>
                 </View>
               </View>

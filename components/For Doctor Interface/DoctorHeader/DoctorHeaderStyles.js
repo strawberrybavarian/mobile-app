@@ -3,7 +3,7 @@ import sd from '../../../utils/styleDictionary';
 
 export default DrHeaderStyles =  (theme) => StyleSheet.create({
   mainContainer: {
-    //paddingTop: 15,
+    paddingTop: 15,
     paddingHorizontal: 15,
     width: '100%',
     height: 'auto',

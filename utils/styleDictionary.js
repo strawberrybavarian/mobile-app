@@ -110,16 +110,16 @@ const sd = {
       },
     },
     fontSizes: {
-      xs: 10,        // Extra Small: suitable for captions or subscript text
-      small: 12,     // Small: aligns with MD3's smallest label and assistive text
-      base: 14,      // Base: suitable for body text, aligning with MD3 body sizes
-      medium: 16,    // Medium: slightly larger body text, often for content emphasis
-      large: 20,     // Large: typically used for title text and primary headings
-      xl: 24,        // Extra Large: aligns with MD3's title or headline
-      xxl: 32,       // Extra Extra Large: aligns with MD3 display text for high emphasis
-      displaySmall: 36,  // Small display size in MD3 for prominent, large headlines
-      displayMedium: 45, // Medium display size in MD3 for section headers
-      displayLarge: 57   // Large display size in MD3, ideal for key content or titles
+      xs: 10,       
+      small: 12,     
+      base: 14,      
+      medium: 16,    
+      large: 20,     
+      xl: 24,        
+      xxl: 32,       
+      displaySmall: 36,
+      displayMedium: 45, 
+      displayLarge: 57   
   }
   };
   

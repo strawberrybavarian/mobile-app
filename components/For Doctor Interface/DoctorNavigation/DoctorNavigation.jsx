@@ -101,7 +101,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
             </Animated.View>
           </Pressable>
 
-          <Pressable
+          {/* <Pressable
             onPressIn={handlePressIn(scaleAnim3, 'My Patients')}
             onPressOut={handlePressOut(scaleAnim3)}
           >
@@ -126,7 +126,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                 </Text>
               </View>
             </Animated.View>
-          </Pressable>
+          </Pressable> */}
 
           <Pressable 
             onPressIn={handlePressIn(scaleAnim4, 'Profile')}

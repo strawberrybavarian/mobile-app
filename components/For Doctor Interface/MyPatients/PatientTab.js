@@ -1,20 +1,16 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { View, ScrollView, Text } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, ScrollView, Text, RefreshControl } from 'react-native';
 import { useTheme, Avatar, Card, Searchbar } from 'react-native-paper';
 import { Entypo } from '@expo/vector-icons';
 import { MyPatientStyles } from './MyPatientsStyles';
 import { ip } from '../../../ContentExport';
 
-const PatientTab = ({ patients, viewDetails }) => {
+const PatientTab = ({ patients, viewDetails, refreshing, onRefresh }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPatients, setFilteredPatients] = useState(patients);
 
   const theme = useTheme();
   const styles = MyPatientStyles(theme);
-
-  useEffect(() => {
-    console.log('Patients:', patients);
-  }, [patients]);
 
   useEffect(() => {
     setFilteredPatients(
@@ -38,11 +34,21 @@ const PatientTab = ({ patients, viewDetails }) => {
           placeholder="Search"
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{ paddingVertical: -2 }} 
-        /> 
+          style={{ paddingVertical: -2 }}
+        />
       </View>
 
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+          />
+        }
+      >
         <View style={styles.bodyContainer}>
           {filteredPatients.length > 0 ? (
             filteredPatients.map((patient) => (
@@ -77,7 +83,7 @@ const PatientTab = ({ patients, viewDetails }) => {
               </Card>
             ))
           ) : (
-            <Text style={styles.noPatientsText}>You have no patients yet</Text>
+            <Text style={styles.noPatientsText}>No patients found</Text>
           )}
         </View>
       </ScrollView>

@@ -5,7 +5,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 50,
+    paddingBottom: 80, // Increased from 50 to 80 for more bottom space
     backgroundColor: theme.colors.background,
   },
   addPostButton: {
@@ -26,7 +26,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     width: "100%",
     borderRadius: 12,
     backgroundColor: "#FFFFFF",
-    marginVertical: 4,
+    marginVertical: 6, // Slightly increased from 4
     padding: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -38,7 +38,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     fontSize: 16,
     color: '#333333',
     marginBottom: 10,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: sd.fonts.regular, // Updated to use style dictionary
   },
   postImage: {
     width: '100%',
@@ -51,14 +51,14 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     fontSize: 12,
     color: '#888888',
     marginTop: 8,
-    fontFamily: 'Poppins-Light',
+    fontFamily: sd.fonts.light, // Updated to use style dictionary
   },
   noPostsText: {
     fontSize: 16,
     color: '#888888',
     textAlign: 'center',
     marginVertical: 20,
-    fontFamily: 'Poppins-Italic',
+    fontFamily: sd.fonts.italic, // Updated to use style dictionary
   },
   input: {
     backgroundColor: '#F2F4F7',
@@ -67,7 +67,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     fontSize: 15,
     color: '#333333',
     marginVertical: 10,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: sd.fonts.regular, // Updated to use style dictionary
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -84,10 +84,14 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
   pickImageButtonText: {
     color: 'white',
     fontSize: 14,
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: sd.fonts.semiBold, // Updated to use style dictionary
   },
   title: {
     fontSize: sd.fontSizes.large,
+    fontFamily: sd.fonts.semiBold,
+    marginBottom: 16, // Added more margin below title
+    marginTop: 6, // Added more margin above title
+    color: theme.colors.primary,
   },
   postButton: {
     backgroundColor: '#2F88D4',
@@ -107,7 +111,6 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     height: 50,
     borderRadius: 10,
     marginTop: 10,
-    
   },
   postContent: {
     fontSize: sd.fontSizes.medium,
@@ -125,7 +128,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
   postButtonText: {
     color: 'white',
     fontSize: 16,
-    fontFamily: 'Poppins-SemiBold',
+    fontFamily: sd.fonts.semiBold, // Updated to use style dictionary
   },
   announcementContainer: {
     backgroundColor: sd.colors.white,
@@ -139,7 +142,7 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     padding: 10,
   },
   carouselContainer: {
-    height: Dimensions.get('window').height / 4, // Keep a fixed height for carousel
+    height: Dimensions.get('window').height / 4,
     backgroundColor: '#f8f8f8',
     margin: 30,
     borderRadius: sd.borders.radiusXL,
@@ -177,14 +180,14 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
   statusLabel: {
     fontSize: sd.fontSizes.base,
     color: theme.colors.onSurface,
-    fontFamily: sd.fonts.regular,
+    fontFamily: sd.fonts.regular, // Updated to use style dictionary
     textAlign: 'center',
     flex: 1,
   },
   statusContent: {
     fontSize: sd.fontSizes.large,
     color: theme.colors.onSurface,
-    fontFamily: sd.fonts.semiBold,
+    fontFamily: sd.fonts.semiBold, // Updated to use style dictionary
     flex: 1,
   },
   // New styles for selected images
@@ -210,61 +213,69 @@ export const DoctorHomeStyles = (theme) => StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
+  // Updated status card styles for a better vertical layout
   statusCardsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    marginVertical: 16,
+    marginBottom: 30, // More space at bottom
   },
   statusCardWrapper: {
-    width: '48%',
+    width: '48%', // Slightly wider for better proportions
   },
   statusCard: {
     backgroundColor: 'white',
     borderRadius: 12,
     borderLeftWidth: 4,
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    padding: 12, // Consistent padding all around
   },
   statusCardContent: {
-    flexDirection: 'row',
+    // Change to vertical stacking
+    flexDirection: 'column',
     alignItems: 'center',
-    padding: 8,
+    justifyContent: 'center',
   },
   statusIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 45, // Smaller icons
+    height: 45,
+    borderRadius: 22.5,
     backgroundColor: '#E3F2FD',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginBottom: 10, // Space between icon and text
   },
   statusTextContainer: {
-    flex: 1,
+    width: '100%', // Take full width
+    alignItems: 'center', // Center text
   },
   statusCount: {
-    fontSize: 22,
-    fontFamily: 'Poppins-Bold',
+    fontSize: 22, // Slightly smaller
+    fontFamily: sd.fonts.bold,
     color: '#1976D2',
     marginBottom: 4,
+    textAlign: 'center', // Center text
   },
   statusLabel: {
-    fontSize: 14,
-    fontFamily: 'Poppins-Regular',
+    fontSize: 13, // Smaller text
+    fontFamily: sd.fonts.regular,
     color: '#555',
+    textAlign: 'center', // Center text
   },
   loadingCard: {
     padding: 20,
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: 16, // Increased from 10
+    marginBottom: 24, // Extra margin at bottom
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 12, // Increased from 10
     fontSize: 14,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: sd.fonts.regular, // Updated to use style dictionary
     color: '#666',
   },
 });

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import axios from 'axios';
-import { Avatar, Button, Card, DataTable, Dialog, Portal, Paragraph, TextInput } from 'react-native-paper';
+import { Avatar, Button, Card, DataTable, Dialog, Portal, Paragraph, TextInput, Divider } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CalendarPicker from 'react-native-calendar-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -512,6 +512,65 @@ return (
               </Card.Actions>
             </Card>
           </View>
+
+<View style={{marginBottom: 16}}>
+  <Text style={styles.subtitle}>Doctor's Schedule</Text>
+  <Card style={[
+    styles.scheduleCard,
+    { backgroundColor: 'white' }  // Force white background
+  ]}>
+    <Card.Content>
+      <View style={styles.scheduleContainer}>
+        {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
+          const dayAvail = availability[day];
+          const hasMorning = dayAvail?.morning?.available;
+          const hasAfternoon = dayAvail?.afternoon?.available;
+          const isAvailable = hasMorning || hasAfternoon;
+          
+          return (
+            <View key={day} style={styles.daySchedule}>
+              <Text style={styles.dayName}>
+                {day.charAt(0).toUpperCase() + day.slice(1)}
+              </Text>
+              
+              {!isAvailable ? (
+                <View style={styles.unavailableContainer}>
+                  <Text style={styles.unavailableText}>Not Available</Text>
+                </View>
+              ) : (
+                <View style={styles.timePeriodsContainer}>
+                  {hasMorning && (
+                    <View style={styles.timePeriod}>
+                      <FontAwesome5 name="sun" size={12} color={theme.colors.primary} style={styles.timeIcon} />
+                      <Text style={styles.timeText}>
+                        {formatTime(dayAvail?.morning?.startTime)} - {formatTime(dayAvail?.morning?.endTime)}
+                      </Text>
+                    </View>
+                  )}
+                  
+                  {hasAfternoon && (
+                    <View style={styles.timePeriod}>
+                      <FontAwesome5 name="moon" size={12} color={theme.colors.primary} style={styles.timeIcon} />
+                      <Text style={styles.timeText}>
+                        {formatTime(dayAvail?.afternoon?.startTime)} - {formatTime(dayAvail?.afternoon?.endTime)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
+              
+              <Divider style={isAvailable === false ? styles.unavailableDivider : styles.availableDivider} />
+            </View>
+          );
+        })}
+      </View>
+      
+      <Text style={styles.scheduleTip}>
+        Tap "Choose Date & Time" below to select your preferred appointment slot
+      </Text>
+    </Card.Content>
+  </Card>
+</View>
 
           {/* Date selection button - opens modal */}
           <Text style={styles.subtitle}>Select Date & Time</Text>

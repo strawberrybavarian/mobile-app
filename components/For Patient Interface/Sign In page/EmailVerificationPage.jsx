@@ -44,6 +44,16 @@ const EmailVerificationPage = () => {
 
   const handleChange = (value, index) => {
     const newCode = [...code];
+    
+    // If value is empty and the previous value wasn't, it means backspace was pressed
+    if (!value && code[index] && index > 0) {
+      newCode[index] = '';
+      setCode(newCode);
+      // Focus on previous input
+      inputRefs.current[index - 1].focus();
+      return;
+    }
+    
     newCode[index] = value;
     setCode(newCode);
 
@@ -54,9 +64,21 @@ const EmailVerificationPage = () => {
   };
 
   const handleKeyPress = (e, index) => {
-    // Handle backspace to go to previous input
-    if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
+    // Check if the pressed key is Backspace
+    if (e.nativeEvent.key === 'Backspace') {
+      // If current input is empty and not the first input, move to previous input AND clear it
+      if (!code[index] && index > 0) {
+        // Create a new code array
+        const newCode = [...code];
+        // Clear the previous input
+        newCode[index - 1] = '';
+        // Update the state
+        setCode(newCode);
+        // Focus on previous input
+        inputRefs.current[index - 1].focus();
+      }
+      // If there's text in current field, let default behavior happen
+      // handleChange will catch the deletion in the next render
     }
   };
 
@@ -261,7 +283,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   submitButton: {
-    padding: 15,
+    padding: 10,
     borderRadius: 30,
     width: '100%',
     alignItems: 'center',
@@ -269,8 +291,8 @@ const styles = StyleSheet.create({
     height: 50,
   },
   submitButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontFamily: sd.fonts.bold,
   },
 });
 

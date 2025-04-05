@@ -7,7 +7,7 @@ import { useTheme } from 'react-native-paper';
 
 export default headerStyles = (theme) => StyleSheet.create({
   mainContainer: {
-    //paddingTop: 15,
+    paddingTop: 15,
     paddingHorizontal: 15,
     width: '100%',
     height: 'auto',

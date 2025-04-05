@@ -9,6 +9,7 @@ const BookAppointmentStyles = (theme) => StyleSheet.create({
   },
   scrollContainer: {
     padding: 16,
+
   },
   header: {
     flexDirection: 'row',
@@ -96,6 +97,7 @@ const BookAppointmentStyles = (theme) => StyleSheet.create({
   submitButton: {
     marginVertical: 20,
     marginBottom: 100,
+    
   },
   
   // Preserve existing modal and time selection styles
@@ -314,6 +316,72 @@ const BookAppointmentStyles = (theme) => StyleSheet.create({
     fontSize: sd.fontSizes.medium,
     flexWrap: 'wrap',
   },
+  // Add these styles to your existing BookAppointmentStyles object
+
+scheduleCard: {
+  borderRadius: 12,
+  marginTop: 8,
+  elevation: 2,
+  backgroundColor: 'white',
+},
+scheduleContainer: {
+  marginBottom: 10,
+  backgroundColor: 'white',
+},
+daySchedule: {
+  marginBottom: 12,
+},
+dayName: {
+  fontFamily: sd.fonts.semiBold,
+  fontSize: 15,
+  color: theme.colors.primary,
+  marginBottom: 4,
+},
+timePeriodsContainer: {
+  paddingLeft: 8,
+  marginTop: 2,
+  marginBottom: 6,
+},
+timePeriod: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 2,
+},
+timeIcon: {
+  marginRight: 6,
+},
+timeText: {
+  fontFamily: sd.fonts.regular,
+  fontSize: 14,
+  color: theme.colors.onSurface,
+},
+unavailableContainer: {
+  paddingLeft: 8,
+  marginTop: 2,
+  marginBottom: 6,
+},
+unavailableText: {
+  fontFamily: sd.fonts.italic,
+  fontSize: 14,
+  color: '#999',
+},
+availableDivider: {
+  backgroundColor: '#E3F2FD',
+  height: 1,
+  marginTop: 4,
+},
+unavailableDivider: {
+  backgroundColor: '#F5F5F5',
+  height: 1,
+  marginTop: 4,
+},
+scheduleTip: {
+  fontFamily: sd.fonts.italic,
+  fontSize: 12,
+  color: '#888',
+  textAlign: 'center',
+  marginTop: 8,
+},
 });
 
 export default BookAppointmentStyles;

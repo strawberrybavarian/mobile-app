@@ -6,7 +6,7 @@ import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
 import AppointmentList from './AppointmentList';
 import AppointmentModal from './AppointmentModal';
-import { Dropdown } from 'react-native-element-dropdown'; // Import Dropdown
+import { Dropdown } from 'react-native-element-dropdown';
 import sd from '../../../utils/styleDictionary';
 import DoctorUpcomingStyles from './DoctorUpcomingStyles';
 import { useTheme } from 'react-native-paper';
@@ -16,11 +16,10 @@ const DoctorUpcoming = () => {
   const [selectedStatus, setSelectedStatus] = useState('Scheduled');
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // Add refreshing state
   const theme = useTheme();
   const styles = DoctorUpcomingStyles(theme);
   
-  
-
   const fetchAppointments = useCallback(async () => {
     try {
       const id = await getData('userId');
@@ -31,6 +30,9 @@ const DoctorUpcoming = () => {
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      // Always set refreshing to false when done, whether successful or not
+      setRefreshing(false);
     }
   }, []);
 
@@ -39,6 +41,12 @@ const DoctorUpcoming = () => {
       fetchAppointments();
     }, [fetchAppointments])
   );
+
+  // Handle pull-to-refresh
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchAppointments();
+  }, [fetchAppointments]);
 
   const handleReschedule = async (newDate, newTime, appointment) => {
     if (!appointment || !appointment._id) {
@@ -99,9 +107,11 @@ const DoctorUpcoming = () => {
       {/* Dropdown for toggling appointment status */}
       <Dropdown
         data={[
-          { label: 'Scheduled', value: 'Scheduled' },
-          { label: 'Completed', value: 'Completed' },
-          { label: 'Cancelled', value: 'Cancelled' },
+          { label: 'Upcoming', value: 'Scheduled' },
+          { label: 'Today', value: 'Completed' },
+          { label: 'Ongoing', value: 'Cancelled' },
+          { label: 'Completed', value: 'Cancelled' },
+
         ]}
         labelField="label"
         valueField="value"
@@ -112,26 +122,33 @@ const DoctorUpcoming = () => {
         selectedTextStyle={{ color: theme.colors.primary, fontFamily: sd.fonts.semiBold, fontSize: sd.fontSizes.medium }}
       />
 
-      {/* Appointment List */}
+      {/* Appointment List with refresh control */}
       <AppointmentList
         appointments={filterAppointmentsByStatus(selectedStatus)}
         status={selectedStatus}
         setSelectedAppointment={(appointment) => {
+          console.log('setSelectedAppointment called with:', appointment);
           setSelectedAppointment(appointment);
           setModalVisible(true);
+          console.log('isModalVisible:', isModalVisible);
+          console.log('selectedAppointment:', selectedAppointment);
         }}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
 
-      {/* Modal Section */}
-      <AppointmentModal
-        isVisible={isModalVisible}
-        appointment={selectedAppointment}
-        onClose={() => setModalVisible(false)}
-        onAccept={handleAccept}
-        onCancel={handleCancel}
-        onReschedule={handleReschedule}
-        fetchAppointments={fetchAppointments}
-      />
+      {/* Modal for appointment details */}
+      {isModalVisible && selectedAppointment && (
+        <AppointmentModal
+          isVisible={isModalVisible}  // Changed from "visible" to "isVisible"
+          appointment={selectedAppointment}
+          onClose={() => setModalVisible(false)}
+          onReschedule={handleReschedule}
+          onCancel={handleCancel}
+          onAccept={handleAccept}
+          status={selectedStatus}
+        />
+      )}
     </View>
   );
 };

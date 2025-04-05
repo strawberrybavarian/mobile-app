@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   // Helper to clear all auth data
   const clearAuthData = async () => {
@@ -32,15 +33,38 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  // Enhanced logout function with server call
   const logout = async () => {
     try {
-      // Clear all auth data
+      console.log("Starting logout process...");
+      
+      // First try to tell the server to log out
+      try {
+        console.log("Calling server logout endpoint...");
+        await axios.post(`${ip.address}/api/logout`, {}, {
+          withCredentials: true
+        });
+        console.log("Server logout successful");
+      } catch (serverError) {
+        // Just log the error, but continue with client-side logout
+        console.warn("Server logout failed:", serverError.message);
+        console.log("Continuing with client-side logout");
+      }
+      
+      // Always clear client-side auth data, even if server call fails
       await clearAuthData();
       console.log("Logout complete - all auth data cleared");
       return true;
     } catch (error) {
       console.error("Logout error:", error);
+      
+      // Make a final attempt to clear data
+      try {
+        await clearAuthData();
+      } catch (e) {
+        console.error("Fatal error during logout cleanup:", e);
+      }
+      
       return false;
     }
   };
@@ -217,6 +241,11 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // Add this method to update the unread count
+  const updateUnreadNotificationsCount = (count) => {
+    setUnreadNotificationsCount(count);
+  };
+
   // Debug output
   console.log("UserContext state:", { 
     isAuthenticated: !!user, 
@@ -234,6 +263,12 @@ export const UserProvider = ({ children }) => {
       loading,
       login,
       logout,
+      unreadNotificationsCount,
+      updateUnreadNotificationsCount,
+      // Add an updateUser method
+      updateUser: (updatedUserData) => {
+        setUser(prev => ({...prev, ...updatedUserData}));
+      },
     }}>
       {children}
     </UserContext.Provider>

@@ -82,42 +82,52 @@ const CreateAccountStyles = (theme) => StyleSheet.create({
       flex: 1,
     },
     buttonContainer: {   
-      justifyContent: 'space-evenly',
-      flex: 0.1,
+      justifyContent: 'space-between', // Changed from 'space-evenly' to 'space-between'
       flexDirection: 'row',
-      margin: 10,
+      margin: 15, // Increased from 10
+      paddingHorizontal: 5, // Added horizontal padding
       backgroundColor: theme.colors.background,
+      gap: 10, // Add gap between buttons
     },
     backButton: {
       backgroundColor: sd.colors.white,
-      padding: 10,
-      borderRadius: 5,
+      paddingVertical: 10, // Increased from 10
+      paddingHorizontal: 16, // Added horizontal padding explicitly
+      borderRadius: 8, // Increased from 5
       flex: 1,
       marginVertical: 15,
-      //marginLeft: 10,
       borderColor: sd.colors.blue,
       borderWidth: 1,
       alignItems: 'center',
+      justifyContent: 'center', // Added to center text vertically
+      minHeight: 48, // Added minimum height for consistent button size
     },
     nextButton: {
       backgroundColor: sd.colors.blue,
-      padding: 10,
-      borderRadius: 5,
+      paddingVertical: 12, // Increased from 10
+      paddingHorizontal: 16, // Added horizontal padding
+      borderRadius: 8, // Increased from 5
+      flex: 1, 
+      marginVertical: 15,
+      alignItems: 'center',
+      justifyContent: 'center', // Added to center text vertically
+      minHeight: 48, // Added minimum height
+    },
+    submitButton: {
+      backgroundColor: sd.colors.blue,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 8,
       flex: 1,
       marginVertical: 15,
       alignItems: 'center',
-      marginLeft: 10,
-    },
-    submitButton: {
-      backgroundColor: '#34A853',
-      padding: 10,
-      borderRadius: 5,
-      width: '100%',
-      flex: 1
+      justifyContent: 'center',
+      minHeight: 48,
     },
     buttonText: {
-      color: '#fff',
-      fontWeight: 'bold',
+      color: 'white',
+      fontFamily: sd.fonts.medium,
+      fontSize: 16, // Increased from default
       textAlign: 'center',
     },
     stepText: {

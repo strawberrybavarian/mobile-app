@@ -12,8 +12,7 @@ import * as Progress from 'react-native-progress';
 import { Divider, Modal, Portal } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
-import { Calendar } from 'react-native-calendars'
-import CalendarPicker from 'react-native-calendar-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const CreateAccount = ({ navigation }) => {
 
@@ -55,6 +54,7 @@ const CreateAccount = ({ navigation }) => {
 
   const[image, setImage] = useState(null);
   const [dob, setDob] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false); // State to toggle DateTimePicker
   const [gender, setGender] = useState('');
   const genderOptions = [
     { label: 'Male', value: 'Male' },
@@ -78,12 +78,13 @@ const CreateAccount = ({ navigation }) => {
   const [addressEror, setAddressError] = useState('');
   
   const [showPassword, setShowPassword] = useState(true);
-  const [showCalendar, setShowCalendar] = useState(false);
 
-  const handleDateSelect = (day) => {
-    setDob(day);
-    setDobError(''); 
-    //setShowCalendar(!showCalendar);
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false); // Close the DateTimePicker
+    if (selectedDate) {
+      setDob(selectedDate); // Set the selected date
+      setDobError(''); // Clear any DOB error
+    }
   };
 
   const handleTogglePasswordVisibility = () => {
@@ -424,40 +425,25 @@ const CreateAccount = ({ navigation }) => {
               <Text style={styles.inputLabel}>Date of Birth</Text>
               <TouchableOpacity
                 style={styles.textInput}
-                onPress={() => setShowCalendar(!showCalendar)}
-                //disabled={showCalendar}
+                onPress={() => setShowDatePicker(true)} // Show DateTimePicker
               >
                 <Text>
                   {dob ? dob.toLocaleDateString() : 'Select Date of Birth'}
                 </Text>
               </TouchableOpacity>
-              <Portal>
-                <Modal
-                  visible={showCalendar}
-                  onDismiss={() => setShowCalendar(false)}
-                  contentContainerStyle={styles.calendarContainer}
-                  theme={{ 
-                    colors: { primary: theme.colors.primary },
-                  }}
-                >
-                  <CalendarPicker
-                    onDateChange={handleDateSelect}
-                    selectedStartDate={dob}
-                    selectedDayColor={theme.colors.primary}
-                    width = {(Dimensions.get('window').width)*0.8}
-                    initialDate={dob? dob : new Date()}
-                    textStyle = {styles.dateText}
-                    selectedDayTextColor = {theme.colors.onPrimary}
-                    monthTitleStyle = {[styles.dateText, {fontFamily: sd.fonts.semiBold}]} 
-                    yearTitleStyle = {[styles.dateText, {fontFamily: sd.fonts.semiBold}]}
-                    todayBackgroundColor={theme.colors.secondary}
-                    todayTextStyle={{color: theme.colors.onSecondary}}
-                    //scrollable
-                  />
-                </Modal>
-              </Portal>
               {dobError && isErrorVisible && <Text style={styles.errorText}>{dobError}</Text>}
             </View>
+
+            {/* Show DateTimePicker */}
+            {showDatePicker && (
+              <DateTimePicker
+                value={dob ? new Date(dob) : new Date()} // Default to current date if no DOB
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'} // Use spinner for iOS
+                maximumDate={new Date()} // Prevent selecting future dates
+                onChange={handleDateChange} // Handle date selection
+              />
+            )}
 
             {/* Gender */}
             <View style={styles.inputContainer}>
@@ -696,9 +682,9 @@ const CreateAccount = ({ navigation }) => {
             /* Back Button for other steps within the form */
             <TouchableOpacity style={styles.backButton} onPress={handlePrevStep}>
               <Text style={[styles.buttonText, {color: sd.colors.blue}]}>Back</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> 
           )}
-
+ 
           {/* Next/Submit Button */}
           {currentStep < 3 ? (
             <TouchableOpacity style={styles.nextButton} onPress={handleNextStep}>

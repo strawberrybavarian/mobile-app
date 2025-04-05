@@ -18,6 +18,7 @@ import sd from '../../../utils/styleDictionary';
 import { TextInput, Avatar, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import io from 'socket.io-client';
+import {ActivityIndicator} from 'react-native-paper';
 
 const PatientChat = () => {
   const theme = useTheme();
@@ -31,8 +32,9 @@ const PatientChat = () => {
   const navigation = useNavigation();
   
   const MEDICAL_SECRETARY_NAME = "Medical Secretary";
-  const MEDICAL_SECRETARY_AVATAR = "https://cdn-icons-png.flaticon.com/512/3209/3209202.png"; // Default medical icon
+  const MEDICAL_SECRETARY_AVATAR = "https://cdn-icons-png.flaticon.com/512/3209/3209202.png";
 
+  // Socket connection setup
   useEffect(() => {
     if (!userId) {
       console.error('User ID is not defined.');
@@ -43,7 +45,6 @@ const PatientChat = () => {
     setSocket(newSocket);
 
     newSocket.emit('identify', { userId: userId.toString(), userRole: 'Patient' });
-
     newSocket.on('chat message', handleChatMessage);
     
     return () => {
@@ -51,6 +52,7 @@ const PatientChat = () => {
     };
   }, [userId]);
 
+  // Handle incoming messages
   const handleChatMessage = (data) => {
     console.log('Received chat message:', data);
     setMessages((prevMessages) => {
@@ -61,10 +63,12 @@ const PatientChat = () => {
     });
   };
 
+  // Initial message fetch
   useEffect(() => {
     fetchMessages();
   }, []);
 
+  // Fetch message history
   const fetchMessages = async () => {
     try {
       setIsLoading(true);
@@ -79,7 +83,6 @@ const PatientChat = () => {
           receiver: msg.receiver.map((id) => id.toString()),
         }));
         setMessages(messagesData);
-        console.log('Fetched messages:', messagesData);
       } else {
         console.error('Failed to fetch messages:', response.data.message);
       }
@@ -90,6 +93,7 @@ const PatientChat = () => {
     }
   };
 
+  // Send message function
   const sendMessage = () => {
     if (message.trim() !== '' && socket) {
       const messageData = {
@@ -101,7 +105,6 @@ const PatientChat = () => {
 
       socket.emit('chat message', messageData, (response) => {
         if (response.success) {
-          console.log('Message sent successfully:', response);
           setMessages((prevMessages) => [...prevMessages, response.data]);
         } else {
           console.error('Failed to send message:', response.message);
@@ -112,6 +115,7 @@ const PatientChat = () => {
     }
   };
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom();
@@ -124,11 +128,13 @@ const PatientChat = () => {
     }
   };
 
+  // Format time to HH:MM
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Format date to MMM D format
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -146,7 +152,7 @@ const PatientChat = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Chat Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <FontAwesome5 name="arrow-left" size={20} color={theme.colors.primary} />
@@ -178,15 +184,18 @@ const PatientChat = () => {
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text style={styles.loadingText}>Loading messages...</Text>
             </View>
           ) : messages.length === 0 ? (
             <View style={styles.emptyContainer}>
-              {/* <Image 
-                source={require('../../../assets/images/chat-empty.png')} 
-                style={styles.emptyImage}
-                resizeMode="contain"
-              /> */}
+              <FontAwesome5 
+                name="comment-medical" 
+                size={70} 
+                color={`${theme.colors.primary}30`}
+                style={{marginBottom: 20}}
+              />
+              <Text style={styles.emptyTitle}>No messages yet</Text>
               <Text style={styles.emptyText}>
                 Send a message to connect with our Medical Secretary.
               </Text>
@@ -279,19 +288,26 @@ const PatientChat = () => {
   );
 };
 
+// Redesigned styles to match BookServices aesthetic
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
   },
+  // Header styling
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    backgroundColor: '#fff',
+    borderBottomColor: '#F0F0F0',
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   backButton: {
     padding: 8,
@@ -303,76 +319,84 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F5F7FA',
   },
   headerTextContainer: {
     flex: 1,
     marginLeft: 12,
   },
   headerTitle: {
-    fontSize: sd.fontSizes.medium,
-    fontWeight: '600',
-    ...sd.fonts.semiBold,
+    fontSize: 18,
+    fontFamily: sd.fonts.semiBold,
+    color: '#333333',
   },
   headerSubtitle: {
-    fontSize: sd.fontSizes.small,
-    color: '#888',
-    ...sd.fonts.regular,
+    fontSize: 13,
+    fontFamily: sd.fonts.regular,
+    color: '#777777',
   },
   keyboardAvoidView: {
     flex: 1,
   },
+  // Chat container
   chatContainer: {
     flex: 1,
-    paddingHorizontal: 10,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 16,
+    backgroundColor: '#F9FAFC',
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    marginTop: 40,
   },
   loadingText: {
-    color: '#888',
-    ...sd.fonts.regular,
+    marginTop: 16,
+    color: '#777777',
+    fontFamily: sd.fonts.medium,
   },
+  // Empty state styling
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    marginTop: 40,
+    marginTop: 80,
   },
-  emptyImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
-    opacity: 0.7,
+  emptyTitle: {
+    fontSize: 18,
+    fontFamily: sd.fonts.semiBold,
+    color: '#555555',
+    marginBottom: 10,
   },
   emptyText: {
     textAlign: 'center',
-    color: '#888',
-    ...sd.fonts.regular,
-    fontSize: 14,
+    color: '#777777',
+    fontFamily: sd.fonts.regular,
+    fontSize: 15,
+    maxWidth: '80%',
   },
+  // Date separator
   dateContainer: {
     alignItems: 'center',
     marginVertical: 16,
   },
   dateText: {
-    fontSize: 12,
-    color: '#888',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    ...sd.fonts.regular,
+    fontSize: 13,
+    color: '#777777',
+    backgroundColor: 'rgba(240, 242, 245, 0.8)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    fontFamily: sd.fonts.medium,
+    overflow: 'hidden',
   },
+  // Message containers
   messageContainer: {
     flexDirection: 'row',
-    marginBottom: 12,
-    maxWidth: '80%',
+    marginBottom: 16,
+    maxWidth: '85%',
   },
   sentMessageContainer: {
     alignSelf: 'flex-end',
@@ -382,83 +406,94 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   messageAvatar: {
-    marginRight: 8,
+    marginRight: 10,
     alignSelf: 'flex-end',
     marginBottom: 6,
     width: 30,
     height: 30,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#F5F7FA',
   },
+  // Message bubbles
   messageBubble: {
-    padding: 12,
-    borderRadius: 20,
+    padding: 14,
+    borderRadius: 18,
     maxWidth: '100%',
   },
   sentMessage: {
-    backgroundColor: '#2F88D4',
-    borderTopRightRadius: 4,
+    backgroundColor: '#1A8AE5', // Primary blue color
+    borderBottomRightRadius: 4,
   },
   receivedMessage: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 4,
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#EBEEF2',
   },
   senderName: {
     fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 4,
-    color: '#555',
-    ...sd.fonts.semiBold,
+    fontFamily: sd.fonts.semiBold,
+    marginBottom: 5,
+    color: '#555555',
   },
+  // Message text
   messageText: {
     fontSize: 15,
-    ...sd.fonts.regular,
+    fontFamily: sd.fonts.regular,
+    lineHeight: 20,
   },
   sentMessageText: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
   receivedMessageText: {
-    color: '#000',
+    color: '#333333',
   },
+  // Timestamp
   timestamp: {
-    fontSize: 10,
-    marginTop: 4,
+    fontSize: 11,
+    marginTop: 6,
     alignSelf: 'flex-end',
+    fontFamily: sd.fonts.regular,
   },
   sentTimestamp: {
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   receivedTimestamp: {
-    color: '#888',
+    color: '#9FA6B2',
   },
+  // Input area
   inputContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    paddingBottom: 20,
-    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#F0F0F0',
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    backgroundColor: '#fff',
-    marginRight: 10,
+    backgroundColor: '#FFFFFF',
+    marginRight: 12,
     maxHeight: 100,
+    borderRadius: 20,
   },
   sendButton: {
-    backgroundColor: '#2F88D4',
-    borderRadius: 25,
-    width: 50,
-    height: 50,
+    backgroundColor: '#1A8AE5', // Primary blue color
+    borderRadius: 24,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingLeft: 3, // Offset for send icon
+    paddingLeft: 2, // Offset for send icon
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   disabledSendButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#D1D5DB',
   },
 });
 

@@ -8,6 +8,7 @@ import { DoctorNotificationStyle } from '../../For Doctor Interface/DoctorStyleS
 import sd from '../../../utils/styleDictionary';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 const AboutDoctor = ({ navigation, route }) => {
   const theme = useTheme();
   const { item } = route.params || {};

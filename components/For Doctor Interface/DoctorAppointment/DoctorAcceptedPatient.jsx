@@ -56,7 +56,11 @@ const DoctorAcceptedPatient = ({ navigation }) => {
               <View key={patient.id} style={UpcomingStyles.cont}>
                 <View style={{ flexDirection: 'row' }}>
                   {/* Use appropriate image for the patient */}
-                  <Image style={UpcomingStyles.filter1} contentFit="cover" source={require("../../../assets/pictures/Doc.png")} />
+                  <Image 
+                    style={UpcomingStyles.filter1} 
+                    resizeMode="cover" 
+                    source={require("../../../assets/pictures/Doc.png")} 
+                  />
   
                   <View>
                     <Text style={UpcomingStyles.doctorName}>{patient.name}</Text>

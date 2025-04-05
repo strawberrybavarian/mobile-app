@@ -1,72 +1,186 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';
-import styles from '../DoctorUpcomingStyles'; // Adjust path if necessary
-import CalendarPicker from 'react-native-calendar-picker';
-import { Picker } from '@react-native-picker/picker';
+import { useTheme } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
+import sd from '../../../../utils/styleDictionary';
 
 const RescheduleModal = ({ isVisible, onClose, onReschedule, appointment }) => {
-
-    const [newDate, setNewDate] = useState(null);
-    const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
-
-    const availableTimeSlots = [
-        { label: "8:00 AM to 11:00 AM", value: "8:00 AM to 11:00 AM" },
-        { label: "3:00 PM to 4:00 PM", value: "3:00 PM to 4:00 PM" }
-    ];
-
-
-    return (
-        <Modal
-        isVisible={isVisible}
-        onBackdropPress={onClose}
-        style={styles.modal}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        swipeDirection={['down']}
-        onSwipeComplete={onClose}
-        coverScreen={true}
-        >
-        <View style={styles.modalContent}>
-            <Text style={styles.title}>Reschedule Appointment</Text>
-            <Text style={styles.subtitle}>Select a Date</Text>
-          <CalendarPicker
-            onDateChange={(date) => setNewDate(date)}
-            selectedDayColor="#92a3fd"
-            selectedDayTextColor="white"
-            todayBackgroundColor="transparent"
-            todayTextStyle={{ color: '#000' }}
-            textStyle={{ color: '#000', fontFamily: 'Poppins' }}
-            dayShape="circle"
-            width={250} // Reduce width to make the calendar smaller
-            height={250} // Optional: adjust height
-          />
-
-          <Text style={styles.subtitle}>Select a Time Slot</Text>
-          <View style={styles.dropdownContainer}>
-            <Picker
-              selectedValue={selectedTimeSlot}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSelectedTimeSlot(itemValue)}
-            >
-              <Picker.Item label="Select a timeslot..." value={null} />
-              {availableTimeSlots.map((slot, index) => (
-                <Picker.Item key={index} label={slot.label} value={slot.value} />
-              ))}
-            </Picker>
-          </View>
-            <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={onClose} style={styles.button}>
-                <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onReschedule(newDate, selectedTimeSlot, appointment._id)} style={styles.button}>
-                <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
-            
-            </View>
+  const [reason, setReason] = useState('');
+  const theme = useTheme();
+  
+  const handleSubmit = () => {
+    onReschedule(reason, appointment?._id);
+    setReason('');
+  };
+  
+  return (
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      style={styles.modal}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      swipeDirection={['down']}
+      onSwipeComplete={onClose}
+      backdropOpacity={0.7}
+    >
+      <View style={styles.modalContainer}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
+          <Text style={styles.headerTitle}>Reschedule Appointment</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <MaterialIcons name="close" size={18} color="#fff" />
+          </TouchableOpacity>
         </View>
-        </Modal>
-    );
+        
+        {/* Content */}
+        <View style={styles.content}>
+          <Text style={styles.label}>Reason for rescheduling:</Text>
+          <TextInput
+            style={styles.input}
+            multiline
+            numberOfLines={3}
+            value={reason}
+            onChangeText={setReason}
+            placeholder="Enter reason here..."
+            textAlignVertical="top"
+          />
+          
+          {/* Patient name and date display */}
+          <View style={styles.detailsContainer}>
+            <View style={styles.detailRow}>
+              <MaterialIcons name="person" size={14} color={theme.colors.primary} style={styles.icon} />
+              <Text style={styles.detailText}>
+                {appointment?.patient?.patient_firstName} {appointment?.patient?.patient_lastName}
+              </Text>
+            </View>
+            
+            <View style={styles.detailRow}>
+              <MaterialIcons name="event" size={14} color={theme.colors.primary} style={styles.icon} />
+              <Text style={styles.detailText}>
+                {appointment ? new Date(appointment.date).toLocaleDateString() : ''} | {appointment?.time || ''}
+              </Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Buttons */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity 
+            style={[styles.button, styles.cancelButton]} 
+            onPress={onClose}
+          >
+            <Text style={styles.cancelButtonText}>Close</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.button, styles.confirmButton, { backgroundColor: theme.colors.primary }]} 
+            onPress={handleSubmit}
+            disabled={!reason.trim()}
+          >
+            <Text style={styles.confirmButtonText}>Reschedule</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 };
+
+const styles = StyleSheet.create({
+  modal: {
+    margin: 0,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContainer: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    overflow: 'hidden'
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: sd.fonts.medium
+  },
+  closeButton: {
+    padding: 3
+  },
+  content: {
+    padding: 12
+  },
+  label: {
+    fontSize: 14,
+    fontFamily: sd.fonts.medium,
+    marginBottom: 8,
+    color: '#444'
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    padding: 8,
+    fontSize: 14,
+    backgroundColor: '#f9f9f9',
+    minHeight: 70,
+    fontFamily: sd.fonts.regular
+  },
+  detailsContainer: {
+    marginTop: 12,
+    backgroundColor: '#f5f5f5',
+    padding: 8,
+    borderRadius: 6
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4
+  },
+  icon: {
+    marginRight: 6
+  },
+  detailText: {
+    fontSize: 13,
+    fontFamily: sd.fonts.regular,
+    color: '#555'
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    justifyContent: 'space-between'
+  },
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    minWidth: 80,
+    alignItems: 'center'
+  },
+  cancelButton: {
+    backgroundColor: '#f2f2f2'
+  },
+  confirmButton: {
+    backgroundColor: '#1976D2'
+  },
+  cancelButtonText: {
+    color: '#555',
+    fontFamily: sd.fonts.medium,
+    fontSize: 13
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontFamily: sd.fonts.medium,
+    fontSize: 13
+  }
+});
 
 export default RescheduleModal;

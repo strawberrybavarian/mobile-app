@@ -6,8 +6,10 @@ import {
   ScrollView, 
   ActivityIndicator,
   RefreshControl,
-  StyleSheet,
-  StatusBar
+  StatusBar,
+  Image,
+  FlatList,
+  Dimensions
 } from "react-native";
 import { getData } from "../../storageUtility";
 import axios from "axios";
@@ -19,15 +21,41 @@ import { useUser } from "../../../UserContext";
 import { format } from 'date-fns';
 import { SafeAreaView } from "react-native-safe-area-context";
 import sd from "../../../utils/styleDictionary";
+// Import styles from external file
+import styles from './NotificationsCSS';
+
+// Function to strip HTML tags and decode entities
+const stripHtmlTags = (html) => {
+  if (!html) return '';
+  
+  // First replace common line break tags with newlines
+  const withLineBreaks = html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n');
+  
+  // Then strip all remaining HTML tags
+  const withoutTags = withLineBreaks.replace(/<[^>]*>/g, '');
+  
+  // Decode HTML entities
+  return withoutTags
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+};
 
 const Notifications = () => {
   const navigation = useNavigation();
-  const { user } = useUser();
+  const { user, updateUnreadNotificationsCount } = useUser();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   
   // Fetch notifications when screen is focused
   useFocusEffect(
@@ -66,7 +94,7 @@ const Notifications = () => {
       console.log(`Fetching notifications for patient: ${user._id}`);
       
       // Make the request with proper headers
-      const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${user._id}`);
+      const response = await axios.get(`${ip.address}/api/patient/api/onepatient/${user._id}`, config);
       
       console.log("Response:", response.data.thePatient.notifications);
       
@@ -81,14 +109,50 @@ const Notifications = () => {
         const sortedNotifications = response.data.thePatient.notifications.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-        setNotifications(sortedNotifications);
+        
+        // For notifications with content references (like news or announcements)
+        // we need to fetch the additional details
+        const enhancedNotifications = await Promise.all(
+          sortedNotifications.map(async (notification) => {
+            if (notification.type === 'News' && notification.link) {
+              try {
+                // Extract news ID from link if available
+                const newsIdMatch = notification.link.match(/\/news\/(\d+)/);
+                const newsId = newsIdMatch ? newsIdMatch[1] : null;
+                
+                if (newsId) {
+                  const newsResponse = await axios.get(`${ip.address}/api/news/api/getnews/${newsId}`, config);
+                  if (newsResponse.data && newsResponse.data.news) {
+                    return {
+                      ...notification,
+                      headline: newsResponse.data.news.headline,
+                      images: newsResponse.data.news.images || [],
+                      content: newsResponse.data.news.content
+                    };
+                  }
+                }
+              } catch (error) {
+                console.error(`Error fetching news details for notification ${notification._id}:`, error);
+              }
+            }
+            return notification;
+          })
+        );
+
+        setNotifications(enhancedNotifications);
+        
+        // Count unread notifications and update context
+        const unreadCount = enhancedNotifications.filter(n => !n.isRead).length;
+        updateUnreadNotificationsCount(unreadCount);
       } else {
         console.log("No notifications data in response:", response.data);
         setNotifications([]);
+        updateUnreadNotificationsCount(0);
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setNotifications([]);
+      updateUnreadNotificationsCount(0);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -109,8 +173,16 @@ const Notifications = () => {
         )
       );
 
+      // If the notification wasn't already read, update the unread count
+      if (!notification.isRead) {
+        updateUnreadNotificationsCount(prev => Math.max(0, prev - 1));
+      }
+
       // API call to mark notification as read
       await axios.put(`${ip.address}/api/notifications/${notification._id}/read`);
+      
+      // Reset active image index when opening a new notification
+      setActiveImageIndex(0);
       
       // Set selected notification and show modal
       setSelectedNotification(notification);
@@ -122,18 +194,7 @@ const Notifications = () => {
 
   const closeModal = () => {
     setIsModalVisible(false);
-    
-    // // If the notification has a link, navigate to that screen
-    // if (selectedNotification && selectedNotification.link) {
-    //   // Parse the link to determine which screen to navigate to
-    //   if (selectedNotification.link.includes('appointment')) {
-    //     navigation.navigate('upcoming');
-    //   } else if (selectedNotification.link.includes('doctor')) {
-    //     navigation.navigate('doctorspecialty');
-    //   } else {
-    //     navigation.navigate('home');
-    //   }
-    // }
+    setActiveImageIndex(0);
   };
 
   const onRefresh = useCallback(() => {
@@ -151,6 +212,8 @@ const Notifications = () => {
         return "bell";
       case 'news':
         return "newspaper";
+      case 'announcement':
+        return "bullhorn";
       default:
         return "info-circle";
     }
@@ -191,6 +254,23 @@ const Notifications = () => {
     });
     
     return grouped;
+  };
+
+  // Function to render an image with proper error handling
+  const renderImage = (imageUrl, style, index = 0) => {
+    const fullUrl = imageUrl.startsWith('http') 
+      ? imageUrl 
+      : `${ip.address}/${imageUrl}`;
+      
+    return (
+      <Image
+        source={{ uri: fullUrl }}
+        style={style}
+        resizeMode="cover"
+        defaultSource={null}
+        onError={(e) => console.log('Image load error:', e.nativeEvent.error)}
+      />
+    );
   };
 
   const groupedNotifications = groupNotificationsByDate();
@@ -268,12 +348,30 @@ const Notifications = () => {
                         </View>
                         
                         <View style={styles.notificationContent}>
+                          {notification.headline && (
+                            <Text style={styles.notificationHeadline}>
+                              {notification.headline}
+                            </Text>
+                          )}
+                          
                           <Text style={[
                             styles.notificationMessage,
                             !notification.isRead && styles.unreadText
                           ]}>
                             {notification.message}
                           </Text>
+                          
+                          {notification.images && notification.images.length > 0 && (
+                            <View style={styles.thumbnailContainer}>
+                              {renderImage(notification.images[0], styles.notificationThumbnail)}
+                              {notification.images.length > 1 && (
+                                <View style={styles.moreImagesIndicator}>
+                                  <Text style={styles.moreImagesText}>+{notification.images.length - 1}</Text>
+                                </View>
+                              )}
+                            </View>
+                          )}
+                          
                           <Text style={styles.notificationTime}>
                             {getTimeAgo(notification.createdAt)}
                           </Text>
@@ -288,37 +386,84 @@ const Notifications = () => {
             </ScrollView>
           )}
           
-          {/* Notification Detail Modal - Only render when we have a selectedNotification */}
+          {/* Enhanced Notification Detail Modal with Images Support */}
           {selectedNotification && (
             <Modal
               isVisible={isModalVisible}
-              onBackdropPress={() => setIsModalVisible(false)}
-              onBackButtonPress={() => setIsModalVisible(false)}
+              onBackdropPress={closeModal}
+              onBackButtonPress={closeModal}
               animationIn="slideInUp"
               animationOut="slideOutDown"
               backdropTransitionOutTiming={0}
               style={styles.modal}
             >
               <View style={styles.modalContent}>
-                <View style={styles.modalIcon}>
-                  <FontAwesome5 
-                    name={getNotificationIcon(selectedNotification.type)} 
-                    size={36} 
-                    color={sd.colors.blue}
-                  />
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalIcon}>
+                    <FontAwesome5 
+                      name={getNotificationIcon(selectedNotification.type)} 
+                      size={28} 
+                      color={sd.colors.blue}
+                    />
+                  </View>
+                  
+                  <Text style={styles.modalTitle}>
+                    {selectedNotification.headline || selectedNotification.title || "Notification"}
+                  </Text>
+                  
+                  <TouchableOpacity onPress={closeModal} style={styles.modalCloseButton}>
+                    <FontAwesome5 name="times" size={20} color="#757575" />
+                  </TouchableOpacity>
                 </View>
                 
-                <Text style={styles.modalTitle}>
-                  {selectedNotification.title || "Notification"}
-                </Text>
+                {/* Images carousel if notification has images */}
+                {selectedNotification.images && selectedNotification.images.length > 0 && (
+                  <View style={styles.imagesContainer}>
+                    <FlatList
+                      data={selectedNotification.images}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      keyExtractor={(item, index) => index.toString()}
+                      onMomentumScrollEnd={(e) => {
+                        const contentOffset = e.nativeEvent.contentOffset;
+                        const viewSize = e.nativeEvent.layoutMeasurement;
+                        const pageNum = Math.floor(contentOffset.x / viewSize.width);
+                        setActiveImageIndex(pageNum);
+                      }}
+                      renderItem={({item, index}) => (
+                        <View style={styles.imageSlide}>
+                          {renderImage(item, styles.modalImage, index)}
+                        </View>
+                      )}
+                    />
+                    
+                    {/* Image pagination dots */}
+                    {selectedNotification.images.length > 1 && (
+                      <View style={styles.paginationContainer}>
+                        {selectedNotification.images.map((_, index) => (
+                          <View 
+                            key={index}
+                            style={[
+                              styles.paginationDot,
+                              index === activeImageIndex && styles.activePaginationDot
+                            ]} 
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                )}
                 
-                <Text style={styles.modalMessage}>
-                  {selectedNotification.message}
-                </Text>
-                
-                <Text style={styles.modalTime}>
-                  {new Date(selectedNotification.createdAt).toLocaleString()}
-                </Text>
+                <ScrollView style={styles.modalScrollContent}>
+                  <Text style={styles.modalMessage}>
+                    {stripHtmlTags(selectedNotification.content) || selectedNotification.message}
+                  </Text>
+                  
+                  <Text style={styles.modalTime}>
+                    {new Date(selectedNotification.createdAt).toLocaleString()}
+                  </Text>
+                </ScrollView>
                 
                 <TouchableOpacity 
                   style={styles.closeButton}
@@ -334,186 +479,5 @@ const Notifications = () => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  outerContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    ...sd.shadows.small,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontFamily: sd.fonts.semiBold,
-    color: sd.colors.blue,
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
-  },
-  scrollViewContent: {
-    paddingBottom: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontFamily: sd.fonts.regular,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-    marginTop: 80,
-    backgroundColor: '#f8f8f8',
-  },
-  emptyText: {
-    fontSize: 18,
-    fontFamily: sd.fonts.semiBold,
-    color: '#555',
-    marginTop: 16,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    fontFamily: sd.fonts.regular,
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  dateHeader: {
-    fontSize: 14,
-    fontFamily: sd.fonts.semiBold,
-    color: '#888',
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    padding: 16,
-    marginBottom: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-    alignItems: 'center',
-  },
-  unreadNotification: {
-    backgroundColor: '#f0f7ff',
-  },
-  notificationIconContainer: {
-    position: 'relative',
-    marginRight: 16,
-  },
-  notificationIcon: {
-    //backgroundColor: '#f0f7ff',
-    padding: 10,
-    borderRadius: 20,
-  },
-  unreadDot: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: 10,
-    height: 10,
-    backgroundColor: sd.colors.red,
-    borderRadius: 5,
-  },
-  notificationContent: {
-    flex: 1,
-    marginRight: 8,
-  },
-  notificationMessage: {
-    fontSize: 15,
-    fontFamily: sd.fonts.regular,
-    color: '#333',
-    marginBottom: 4,
-  },
-  unreadText: {
-    fontFamily: sd.fonts.semiBold,
-    color: '#000',
-  },
-  notificationTime: {
-    fontSize: 12,
-    fontFamily: sd.fonts.regular,
-    color: '#888',
-  },
-  modal: {
-    justifyContent: 'flex-end',
-    margin: 0,
-    
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 24,
-    paddingBottom:60,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    alignItems: 'center',
-    ...sd.shadows.large,
-  },
-  modalIcon: {
-    backgroundColor: '#f0f7ff',
-    padding: 16,
-    borderRadius: 40,
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontFamily: sd.fonts.semiBold,
-    marginBottom: 12,
-    textAlign: 'center',
-    color: sd.colors.blue,
-  },
-  modalMessage: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#555',
-    marginBottom: 16,
-    lineHeight: 24,
-    fontFamily: sd.fonts.regular,
-  },
-  modalTime: {
-    fontSize: 14,
-    fontFamily: sd.fonts.regular,
-    color: '#888',
-    marginBottom: 24,
-  },
-  closeButton: {
-    backgroundColor: sd.colors.blue,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontFamily: sd.fonts.semiBold,
-  }
-});
 
 export default Notifications;

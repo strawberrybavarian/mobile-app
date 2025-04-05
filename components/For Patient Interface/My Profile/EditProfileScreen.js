@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Button, useTheme, ActivityIndicator, Badge } from 'react-native-paper';
@@ -9,6 +9,9 @@ import { ip } from '../../../ContentExport';
 import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
 import { Entypo, FontAwesome5 } from '@expo/vector-icons';
+import { Dropdown } from 'react-native-element-dropdown';
+import Modal from "react-native-modal";
+import ChangePasswordModal from './ChangePasswordModal';
 
 const EditProfileScreen = ({ navigation }) => {
   const theme = useTheme();
@@ -31,6 +34,14 @@ const EditProfileScreen = ({ navigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+
+  const genderOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Other', value: 'Other' },
+  ];
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -59,7 +70,6 @@ const EditProfileScreen = ({ navigation }) => {
           const patientData = response.data.thePatient;
           setPatient(patientData);
           
-          // Set the profile image if available
           if (patientData.patient_image) {
             setProfileImage(`${ip.address}/${patientData.patient_image}`);
           }
@@ -71,7 +81,6 @@ const EditProfileScreen = ({ navigation }) => {
           setEmail(patientData.patient_email || '');
           setGender(patientData.patient_gender || '');
           
-          // Set address data if available
           if (patientData.patient_address) {
             setAddress({
               street: patientData.patient_address.street || '',
@@ -102,13 +111,12 @@ const EditProfileScreen = ({ navigation }) => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.2, // Very low quality to reduce file size
+        quality: 0.2,
       });
-
-      console.log('Image result:', result);
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setSelectedImage(result.assets[0].uri);
+        setIsImageModalVisible(true);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -124,27 +132,22 @@ const EditProfileScreen = ({ navigation }) => {
     
     setUploadingImage(true);
     try {
-      // Create form data for image upload
       const formData = new FormData();
-      
-      // Add the image file to form data
       formData.append('image', {
         uri: selectedImage,
         type: 'image/jpeg',
         name: 'profile.jpg',
       });
 
-      // Upload the image
       const response = await axios.post(
         `${ip.address}/api/patient/api/${userId}/updateimage`,
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
 
-      // Update local profile image if successful
       if (response.data && response.data.updatedPatient) {
         setProfileImage(`${ip.address}/${response.data.updatedPatient.patient_image}`);
-        setSelectedImage(null); // Clear the selected image
+        setSelectedImage(null);
         Alert.alert('Success', 'Profile picture updated successfully.');
         return true;
       } else {
@@ -168,7 +171,6 @@ const EditProfileScreen = ({ navigation }) => {
     setIsSubmitting(true);
     
     try {
-      // Update profile data - this was missing the address fields
       const updatedData = {
         patient_firstName: firstName,
         patient_lastName: lastName,
@@ -176,10 +178,8 @@ const EditProfileScreen = ({ navigation }) => {
         patient_contactNumber: contactNumber,
         patient_email: email,
         patient_gender: gender,
-        patient_address: address  // Include the address object
+        patient_address: address
       };
-
-      console.log('Sending update data:', JSON.stringify(updatedData));
 
       const response = await axios.put(
         `${ip.address}/api/patient/api/updateinfo/${userId}`,
@@ -198,7 +198,6 @@ const EditProfileScreen = ({ navigation }) => {
       let errorMessage = 'An error occurred while updating the profile information.';
       
       if (error.response) {
-        console.error('Error response:', error.response.status, error.response.data);
         if (error.response.data && error.response.data.message) {
           errorMessage = error.response.data.message;
         }
@@ -219,6 +218,29 @@ const EditProfileScreen = ({ navigation }) => {
         onChangeText={onChangeText}
         placeholder={`Enter ${label}`}
         placeholderTextColor={theme.colors.onSurfaceVariant}
+      />
+    </View>
+  );
+
+  const renderDropdown = (label, value, setValue, data) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>{label}</Text>
+      <Dropdown
+        style={styles.dropdown}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={data}
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={value || `Select ${label}`}
+        searchPlaceholder="Search..."
+        value={value}
+        onChange={item => {
+          setValue(item.value);
+        }}
       />
     </View>
   );
@@ -266,6 +288,7 @@ const EditProfileScreen = ({ navigation }) => {
       borderRadius: 60,
       overflow: 'hidden',
     },
+
     loadingOverlay: {
       position: 'absolute',
       top: 0,
@@ -360,10 +383,6 @@ const EditProfileScreen = ({ navigation }) => {
       justifyContent: 'center',
       alignItems: 'center',
     },
-        // Add to your existing styles object
-
-        // Add to your existing styles object
-
     editBadge: {
       position: 'absolute',
       bottom: 5,
@@ -372,11 +391,91 @@ const EditProfileScreen = ({ navigation }) => {
       borderWidth: 2,
       borderColor: 'white',
       zIndex: 10,
-      // No need for border radius, width or height as Badge handles this
       alignItems: 'center',
       justifyContent: 'center',
     },
-      });
+    changeButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      marginTop: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    dropdown: {
+      height: 50,
+      borderColor: theme.colors.outline,
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    icon: {
+      marginRight: 5,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurfaceVariant,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalView: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 20,
+      width: '90%',
+      alignSelf: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontFamily: sd.fonts.bold,
+      color: theme.colors.primary,
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    previewImage: {
+      width: '100%',
+      height: 200,
+      borderRadius: 8,
+      marginBottom: 16,
+    },
+    buttonText: {
+      fontSize: 12,
+      fontFamily: sd.fonts.medium,
+      color: theme.colors.onPrimary,
+    },
+    changePasswordButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 10,
+      marginTop: 10,
+      fontSize: 10,
+    },
+  });
 
   if (loading) {
     return (
@@ -392,7 +491,6 @@ const EditProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
             <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
@@ -401,9 +499,7 @@ const EditProfileScreen = ({ navigation }) => {
           <View style={{ flex: 1 }} />
         </View>
 
-        {/* Profile Image Section - Redesigned */}
         <View style={styles.profileSection}>
-          {/* Image with click functionality */}
           <View style={styles.imageContainer}>
             <TouchableOpacity 
               style={styles.profileImageTouchable} 
@@ -421,9 +517,6 @@ const EditProfileScreen = ({ navigation }) => {
                 style={styles.profileImage}
               />
               
-              {/* React Native Paper Badge */}
-              
-              
               {(uploadingImage) && (
                 <View style={styles.loadingOverlay}>
                   <ActivityIndicator color="white" size="small" />
@@ -438,44 +531,27 @@ const EditProfileScreen = ({ navigation }) => {
               </Badge>
           </View>
           
-          {/* Upload Button and Badge */}
           <View style={styles.profileActions}>
-            <View style={styles.actionButtonContainer}>
-              <Button
-                mode="contained"
-                onPress={uploadImage}
-                loading={uploadingImage}
-                disabled={uploadingImage || !selectedImage}
-                style={styles.uploadButton}
-                contentStyle={styles.uploadButtonContent}
-                labelStyle={styles.uploadButtonLabel}
-                icon={({color}) => (
-                  <View style={styles.badgeIcon}>
-                    <FontAwesome5 name="camera" size={12} color={theme.colors.primary} />
-                  </View>
-                )}
-              >
-                Upload New Photo
-              </Button>
-            </View>
-            <Text style={styles.uploadHint}>
-              {selectedImage ? 'Click upload to save your new profile picture' : 'Tap on your profile picture to change it'}
-            </Text>
+          <Button
+          mode="contained"
+          onPress={() => setIsModalVisible(true)}
+          style={styles.changePasswordButton}
+        >
+          <Text style={{fontFamily: sd.fonts.regular}}>Change Password</Text>
+        </Button>
           </View>
         </View>
 
-        {/* Inputs - Personal Information */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Personal Information</Text>
           {renderInput('First Name', firstName, setFirstName)}
           {renderInput('Middle Initial', middleInitial, setMiddleInitial)}
           {renderInput('Last Name', lastName, setLastName)}
-          {renderInput('Gender', gender, setGender)}
+          {renderDropdown('Gender', gender, setGender, genderOptions)}
           {renderInput('Email', email, setEmail)}
           {renderInput('Contact Number', contactNumber, setContactNumber)}
         </View>
 
-        {/* Inputs - Address Information */}
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Address</Text>
           {renderInput('Street', address.street, (text) => setAddress({...address, street: text}))}
@@ -483,16 +559,8 @@ const EditProfileScreen = ({ navigation }) => {
           {renderInput('City', address.city, (text) => setAddress({...address, city: text}))}
         </View>
 
-        {/* Buttons */}
+        
         <View style={styles.buttonContainer}>
-          <Button
-            mode="outlined"
-            onPress={() => navigation.goBack()}
-            style={styles.cancelButton}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
           <Button
             mode="contained"
             onPress={handleSave}
@@ -503,6 +571,56 @@ const EditProfileScreen = ({ navigation }) => {
             Save Changes
           </Button>
         </View>
+
+        <Modal
+          isVisible={isImageModalVisible}
+          animationIn="slideInUp"
+          animationOut="slideOutDown"
+          onBackdropPress={() => setIsImageModalVisible(false)}
+        >
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Preview Profile Photo</Text>
+            
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.previewImage}
+            />
+            
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setIsImageModalVisible(false);
+                  setSelectedImage(null);
+                }}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.changeButton]}
+                onPress={() => {
+                  uploadImage();
+                  setIsImageModalVisible(false);
+                }}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? (
+                  <ActivityIndicator color={theme.colors.onPrimary} size="small" />
+                ) : (
+                  <Text style={styles.buttonText}>Upload Photo</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <ChangePasswordModal 
+          isVisible={isModalVisible} 
+          onClose={() => setIsModalVisible(false)} 
+          email={email}
+          userId={userId}
+          theme={theme}
+        />
       </KeyboardAwareScrollView>
     </SafeAreaView>
   );

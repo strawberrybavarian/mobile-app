@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "hp-management-patient",
+    "name": "Molino Care App",
     "slug": "molino-polyclinic",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/pictures/molinologo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/pictures/molinologo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -20,7 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/pictures/molinologo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.hpmanagementpatient"

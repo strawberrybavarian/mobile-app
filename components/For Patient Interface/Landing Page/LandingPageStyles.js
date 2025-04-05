@@ -9,7 +9,7 @@ const LandingPageStyles = (theme) => StyleSheet.create({
       alignItems: 'center',
     },
     logoContainer: {
-      paddingTop: 110,
+      paddingTop: 90,
       width: '100%',
       flexDirection: 'row',
       justifyContent: 'center',
@@ -36,14 +36,15 @@ const LandingPageStyles = (theme) => StyleSheet.create({
     },
     bottomContainer: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: 'flex',
       alignContent: 'center',
     },
     termsText: {
       color: theme.colors.onPrimary,
       textAlign: 'center',
-      fontSize: 12,
+      fontSize: 14,
       fontFamily: 'Poppins',
+      marginBottom: 30,
     },
     linkText: {
       textDecorationLine: 'underline',

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Dimensions, BackHandler } from 'react-native';
+import { View, Dimensions, BackHandler, Alert } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import DoctorHome from '../DoctorHome/DoctorHome';
 import MyPatients from '../MyPatients/MyPatients';
@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { getData } from '../../storageUtility';
+import { useUser } from '@/UserContext';
 
 const initialLayout = { width: Dimensions.get('window').width };
 
@@ -24,39 +25,38 @@ const DoctorMain = () => {
   const [routes] = useState([
     { key: 'home', title: 'Home' },
     { key: 'appointment', title: 'Appointment' },
-    { key: 'patients', title: 'My Patients' },
+    // { key: 'patients', title: 'My Patients' },
     { key: 'profile', title: 'Profile' },
   ]);
+
+  const { user } = useUser();
 
   const theme = useTheme();
 
   const renderScene = SceneMap({
     home: DoctorHome,
-    patients: MyPatients,
+    // patients: MyPatients,
     appointment: DoctorAppointment,
     profile: DoctorProfile,
   });
 
   const fetchUserId = async () => {
-    try {
-      const id = await getData('userId');
-      if (id) {
-        axios.get(`${ip.address}/api/doctor/one/${id}`)
-          .then(res => {
-            console.log(res.data)
-            const doctor = res.data?.doctor;
-            if (doctor) {
-              console.log(doctor);
-              setDoctorId(doctor._id);
-              setDrName(`${doctor?.dr_firstName} ${doctor?.dr_lastName}`);
-              setImageUri(doctor?.dr_image);
-            }
-          })
-          .catch(err => console.error(err));
-      }
-    } catch (err) {
-      console.error(err);
-    }
+
+      
+    axios.get(`${ip.address}/api/doctor/one/${user._id}`)
+      .then(res => {
+        console.log(res.data)
+        const doctor = res.data?.doctor;
+        if (doctor) {
+          console.log(doctor);
+          setDoctorId(doctor._id);
+          setDrName(`${doctor?.dr_firstName} ${doctor?.dr_lastName}`);
+          setImageUri(doctor?.dr_image);
+        }
+      })
+      .catch(err => console.error(err));
+
+    
   };
 
   const handleBackPress = () => {

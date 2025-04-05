@@ -33,7 +33,6 @@ const SigninPage = ({ navigation }) => {
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useUser();
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);

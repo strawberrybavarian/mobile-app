@@ -19,6 +19,7 @@ import Upcoming from './components/For Patient Interface/Upcoming/Upcoming';
 import AboutDoctor from './components/For Patient Interface/AboutDoctorProfile/AboutDoctor';
 import AppointmentDetails from './components/For Patient Interface/AppointmentDetails/AppointmentDetails';
 import ViewProfile from './components/For Patient Interface/My Profile/ProfileModals/ViewProfile';
+import NewsDetail from './components/For Patient Interface/Homepage/NewsDetail';
 
 // Doctor components
 import DoctorAppointment from './components/For Doctor Interface/DoctorAppointment/DoctorAppointment';
@@ -36,6 +37,8 @@ import EditPostScreen from './components/For Doctor Interface/DoctorHome/DoctorH
 import PatientChat from './components/For Patient Interface/PatientChat/PatientChat';
 import EmailVerificationPage from './components/For Patient Interface/Sign In page/EmailVerificationPage';
 import Notifications from './components/For Patient Interface/Notifications/Notifications';
+import EditDoctorProfile from './components/For Doctor Interface/Doctor Profile/Edit Doctor Profile/EditDoctorProfile';
+import AuditPatient from './components/For Patient Interface/My Profile/AuditPatient';
 
 // Providers and utilities
 import { PaperProvider } from 'react-native-paper';
@@ -45,6 +48,8 @@ import { navigationRef } from './RootNavigation';
 import React from 'react';
 import BookServices from './components/For Patient Interface/Book Appointment/BookServices';
 import EditProfileScreen from './components/For Patient Interface/My Profile/EditProfileScreen';
+import DoctorAvailability from './components/For Doctor Interface/Doctor Profile/DoctorAvailability';
+import AuditDoctor from './components/For Doctor Interface/Doctor Profile/AuditDoctor';
 
 // AppContent component that uses the UserContext hook, rendered inside UserProvider
 const AppContent = () => {
@@ -104,6 +109,7 @@ const AppContent = () => {
             },
           }}
         />
+        <Stack.Screen name="NewsDetail" component={NewsDetail} />
         <Stack.Screen 
           name='viewprofile' 
           component={ViewProfile}
@@ -144,6 +150,7 @@ const AppContent = () => {
         <Stack.Screen name='ptnnotification' component={Notifications}/>
         <Stack.Screen name='healthassessment' component={HealthRiskAssessmentForm} />
         <Stack.Screen name='editprofile' component={EditProfileScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name='auditpatient' component={AuditPatient} />
 
         {/* Doctor */}
         <Stack.Screen name='doctormain' component={DoctorMain}/>
@@ -152,6 +159,9 @@ const AppContent = () => {
         <Stack.Screen name='doctorprofile' component={DoctorProfile}/>
         <Stack.Screen name='doctornotification' component={DoctorNotification}/>
         <Stack.Screen name='viewdrprofile' component={ViewDoctorProfile}/>
+        <Stack.Screen name='editdrprofile' component={EditDoctorProfile} options={{ headerShown: false }}/>
+        <Stack.Screen name='dravailability' component={DoctorAvailability} />
+        <Stack.Screen name='draudit' component={AuditDoctor} />
       </Stack.Navigator>   
     </NavigationContainer>
   );

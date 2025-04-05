@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { View, Dimensions, BackHandler } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
 import axios from 'axios';
@@ -15,7 +15,9 @@ const MyPatients = () => {
   const [patients, setPatients] = useState([]);
   const [patient, setPatient] = useState(null);
   const [index, setIndex] = useState(0);
-  
+  const [refreshing, setRefreshing] = useState(false);
+  const fetchInProgressRef = useRef(false);
+
   const routes = useMemo(() => [
     { key: 'first', title: 'Patients' },
     { key: 'second', title: 'Medical Record' },
@@ -24,46 +26,44 @@ const MyPatients = () => {
   const theme = useTheme();
   const styles = MyPatientStyles(theme);
 
+  const fetchPatients = useCallback(async () => {
+    if (fetchInProgressRef.current) return;
+
+    fetchInProgressRef.current = true;
+    try {
+      const userId = await getData('userId');
+      if (userId) {
+        const response = await axios.get(`${ip.address}/api/doctor/one/${userId}`);
+        const appts = response.data.doctor.dr_appointments || [];
+        const newPidArr = appts.map(appt => appt.patient);
+        setPidArr(newPidArr);
+
+        const uniquePatients = [...new Set(newPidArr)];
+        const patientPromises = uniquePatients.map(patientId =>
+          axios.get(`${ip.address}/api/patient/api/onepatient/${patientId}`)
+            .then(res => res.data.thePatient)
+            .catch(err => {
+              console.error(`Error fetching patient ${patientId}:`, err);
+              return null;
+            })
+        );
+
+        const fetchedPatients = await Promise.all(patientPromises);
+        const validPatients = fetchedPatients.filter(patient => patient !== null);
+        setPatients(validPatients);
+      }
+    } catch (err) {
+      console.error("Error fetching patients:", err);
+    } finally {
+      fetchInProgressRef.current = false;
+      setRefreshing(false);
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      let isActive = true;
-
-      const fetchPatients = async () => {
-        try {
-          const userId = await getData('userId');
-          if (userId) {
-            const response = await axios.get(`${ip.address}/api/doctor/one/${userId}`);
-            const appts = response.data.doctor.dr_appointments || [];
-            const newPidArr = appts.map(appt => appt.patient);
-            setPidArr(newPidArr);
-
-            const uniquePatients = [...new Set(newPidArr)];
-            const patientPromises = uniquePatients.map(patientId =>
-              axios.get(`${ip.address}/api/patient/api/onepatient/${patientId}`)
-                .then(res => res.data.thePatient)
-                .catch(err => {
-                  console.error(`Error fetching patient ${patientId}:`, err);
-                  return null;
-                })
-            );
-
-            const fetchedPatients = await Promise.all(patientPromises);
-            if (isActive) {
-              const validPatients = fetchedPatients.filter(patient => patient !== null);
-              setPatients(validPatients);
-            }
-          }
-        } catch (err) {
-          console.error("Error fetching patients:", err);
-        }
-      };
-
       fetchPatients();
-
-      return () => {
-        isActive = false;
-      };
-    }, [])
+    }, [fetchPatients])
   );
 
   const handleSelectPatient = useCallback((selectedPatient) => {
@@ -80,12 +80,21 @@ const MyPatients = () => {
     setPatient(null);
   }, []);
 
+  const onRefresh = useCallback(() => {
+    if (refreshing || fetchInProgressRef.current) return;
+
+    setRefreshing(true);
+    fetchPatients();
+  }, [fetchPatients, refreshing]);
+
   const FirstRoute = useCallback(() => (
     <PatientTab
       patients={patients}
       viewDetails={handleSelectPatient}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
     />
-  ), [patients, handleSelectPatient]);
+  ), [patients, handleSelectPatient, refreshing, onRefresh]);
 
   const SecondRoute = useCallback(() => (
     <MedicalRecord

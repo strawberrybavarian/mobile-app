@@ -153,8 +153,7 @@ const SearchForAppointment = ({ route }) => {
     return (
       <TouchableOpacity style={styles.appointmentItem} onPress={() => bookAppointmentButton(item)}>
         <Image 
-          source={{uri: `${ip.address}/${item.dr_image}`}}
-          defaultSource={doctorImage1} 
+          source={item.dr_image ? {uri: `${ip.address}/${item.dr_image}`} : null}
           style={styles.doctorImage} 
         />
         <View style={styles.textContainer}>

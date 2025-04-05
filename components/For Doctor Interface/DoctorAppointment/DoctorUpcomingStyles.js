@@ -171,6 +171,26 @@ export default DoctorUpcomingStyles = (theme) => StyleSheet.create({
         fontSize: 14,
         fontFamily:'Poppins',
       },
+      emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 20,
+      },
+      noAppointments: {
+        fontSize: 18,
+        fontFamily: 'Poppins-Medium',
+        color: '#666',
+        marginTop: 16,
+        textAlign: 'center',
+      },
+      emptySubText: {
+        fontSize: 14,
+        fontFamily: 'Poppins',
+        color: '#999',
+        marginTop: 8,
+        textAlign: 'center',
+      }
 
 });
 

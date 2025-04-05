@@ -39,18 +39,21 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
     }
   };
 
-//   const handleReschedule = async (newDate, newTime) => {
-//     try {
-//       const userId = await getData('userId');
-//       if (userId) {
-//         const rescheduleData = { newDate, newTime };
-//         await axios.put(`${ip.address}/api/doctor/${appointmentData._id}/rescheduleappointment`, rescheduleData);
-//         closeModal();
-//       }
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
+  // Add this function after handleCancel function
+  const handleReschedule = async (date, timeSlot) => {
+    try {
+      const userId = await getData('userId');
+      if (userId) {
+        await axios.put(`${ip.address}/api/appointments/${appointmentData._id}/assign`, {
+          date: date,
+          time: timeSlot
+        });
+        closeModal();
+      }
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+    }
+  };
 
   // Function to get status color
   const getStatusColor = (status) => {
@@ -71,11 +74,11 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
   const InfoCard = ({ icon, title, value }) => (
     <View style={styles.infoCard}>
       <View style={[styles.iconContainer, { backgroundColor: theme.colors.surfaceVariant || '#EAF4FF' }]}>
-        <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
+        <MaterialIcons name={icon} size={20} color={theme.colors.primary} /> 
       </View>
       <View style={styles.infoContent}>
         <Text style={[styles.infoTitle, { color: theme.colors.onSurfaceVariant || '#555' }]}>{title}</Text>
-        <Text style={[styles.infoValue, { color: theme.colors.onSurface || '#333' }]}>{value || 'N/A'}</Text>
+        <Text style={[styles.infoValue, { color: theme.colors.onSurface || '#333' }]} numberOfLines={2} ellipsizeMode="tail">{value || 'N/A'}</Text>
       </View>
     </View>
   );
@@ -95,7 +98,6 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
       useNativeDriver={true}
     >
       <View style={[styles.modalContainer, { backgroundColor: theme.colors.surface }]}>
-        {/* Header Section */}
         <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
           <Text style={[styles.headerTitle, { color: theme.colors.onPrimary || '#fff' }]}>
              Appointment Details
@@ -107,7 +109,6 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
           </View>
         </View>
 
-        {/* Appointment Details */}
         <ScrollView style={styles.scrollContainer}>
           <View style={styles.detailsGrid}>
             <InfoCard
@@ -152,11 +153,11 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
               buttonColor={theme.colors.error}
               textColor={theme.colors.onError || '#fff'}
             >
-                <Text style={{ fontSize: sd.fontSizes.lg, fontFamily: sd.fonts.semiBold }}>
-                Cancel Appointment
-                </Text>
-              
+              <Text style={{ fontSize: sd.fontSizes.medium, fontFamily: sd.fonts.semiBold }}>
+                Cancel
+              </Text>
             </Button>
+            
             {/* <Button
               mode="contained"
               onPress={() => setRescheduleModalVisible(true)}
@@ -164,64 +165,67 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
               buttonColor={theme.colors.primary}
               textColor={theme.colors.onPrimary || '#fff'}
             >
-              Reschedule
+              <Text style={{ fontSize: sd.fontSizes.medium, fontFamily: sd.fonts.semiBold }}>
+                Reschedule
+              </Text>
             </Button> */}
           </View>
         )}
 
-        {/* Cancel Appointment Modal */}
         <CancelAppointmentModal
           closeModal={() => setCancelModalVisible(false)}
           onCancel={handleCancel}
           isVisible={isCancelModalVisible}
         />
-        {/* <RescheduleModal
+
+        <RescheduleModal
+          isVisible={isRescheduleModalVisible}
           closeModal={() => setRescheduleModalVisible(false)}
           onReschedule={handleReschedule}
-          isVisible={isRescheduleModalVisible}
-        /> */}
+        />
       </View>
     </Modal>
   );
 };
 
+// Update the DetailStyles function
 const DetailStyles = (theme) => StyleSheet.create({
   modalContainer: {
     height: '80%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: theme?.colors.surfaceVariant,
-    paddingBottom: 50,
+    paddingBottom: 40, // Reduced padding
   },
   scrollContainer: {
     flex: 1,
-    marginTop: 10,
+    marginTop: 5, // Reduced margin
   },
   modal: {
     justifyContent: 'flex-end',
     margin: 0,
   },
 
-  // Header Section
+  // Header Section - Reduced sizes
   header: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
+    padding: 15, // Reduced padding
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5, // Reduced margin
   },
   headerTitle: {
-    fontSize: sd.fontSizes.xl,
+    fontSize: sd.fontSizes.large, // Reduced from xl to large
     fontFamily: sd.fonts.bold,
-    marginBottom: 10,
+    marginBottom: 5, // Reduced from 10
   },
   headerBadge: {
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderRadius: 15, // Smaller radius
+    paddingHorizontal: 8, // Reduced from 12
+    paddingVertical: 2, // Reduced from 4
   },
   headerBadgeText: {
-    fontSize: 14,
+    fontSize: 12, // Reduced from 14
     fontFamily: sd.fonts.medium,
     color: theme.colors.onBackground || '#fff',
   },
@@ -231,46 +235,46 @@ const DetailStyles = (theme) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: 8, // Reduced from 10
   },
 
-  // Info Card
+  // Info Card - Made smaller
   infoCard: {
     width: '48%',
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 8, // Reduced from 10
+    padding: 10, // Reduced from 15
+    marginBottom: 10, // Reduced from 15
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: theme.colors.outline || '#ddd', // Changed to outline color
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 32, // Reduced from 40
+    height: 32, // Reduced from 40
+    borderRadius: 16, // Reduced from 20
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: 6, // Reduced from 8
   },
   infoContent: {
     flex: 1,
   },
   infoTitle: {
-    fontSize: 14,
+    fontSize: 12, // Reduced from 14
     fontFamily: sd.fonts.medium,
-    marginBottom: 4,
+    marginBottom: 2, // Reduced from 4
   },
   infoValue: {
-    fontSize: 16,
-    fontFamily: sd.fonts.bold,
+    fontSize: 14, // Reduced from 16
+    fontFamily: sd.fonts.semiBold, // Changed from bold
   },
 
   // Action Buttons
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    marginTop: 10, // Reduced from 20
     paddingHorizontal: 10,
     paddingBottom: 10,
   },

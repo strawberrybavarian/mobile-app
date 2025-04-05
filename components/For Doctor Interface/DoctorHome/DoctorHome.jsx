@@ -130,7 +130,7 @@ const DoctorHome = () => {
               </Card>
             ) : (
               <View style={styles.statusCardsContainer}>
-                {/* Today's Appointments Card */}
+                {/* Today's Appointments Card */} 
                 <View 
                   style={styles.statusCardWrapper}
                 >

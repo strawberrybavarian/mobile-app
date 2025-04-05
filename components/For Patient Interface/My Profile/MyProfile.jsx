@@ -10,19 +10,20 @@ import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { getData } from '../../storageUtility';
+import { deleteData, getData, removeData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
 import ViewProfile from './ProfileModals/ViewProfile';
 import { Card } from 'react-native-paper';
 import { useUser } from '../../../UserContext'; // Add this import
 
+ 
 const MyProfile = () => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [isAccountModalVisible, setAccountModalVisible] = useState(false);
   const navigation = useNavigation();
-  const { logout } = useUser(); // Get the logout function from UserContext
+  const { logout } = useUser(); // Use the logout function from UserContext
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -53,43 +54,41 @@ const MyProfile = () => {
     }, [userId])
   );
 
-  // Updated logout function that actually logs out
-  const logoutButton = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          onPress: async () => {
-            try {
-              console.log("Logging out...");
-              
-              // Call the logout function from UserContext
-              const success = await logout();
-              
-              if (success) {
-                console.log("Logout successful");
-                
-                // Use reset to clear navigation history
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'landingpage' }],
-                });
-              } else {
-                Alert.alert('Error', 'Failed to log out. Please try again.');
-              }
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'An error occurred during logout.');
+
+  // In your component:
+const handleLogout = () => {
+  Alert.alert(
+    'Logout',
+    'Are you sure you want to log out?',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Logout', 
+        onPress: async () => {
+          try {
+            deleteData('userId');
+            deleteData('userRole');
+            const success = await logout();
+            
+            if (success) {
+              // Reset navigation stack to prevent going back
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'landingpage' }],
+              });
+            } else {
+              Alert.alert('Error', 'Failed to log out. Please try again.');
             }
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Error', 'An unexpected error occurred. Please try again.');
           }
         }
-      ],
-      { cancelable: true }
-    );
-  };
+      }
+    ],
+    { cancelable: true }
+  );
+};
 
   const renderSettingOption = (icon, label, onPress = () => {}) => (
 
@@ -122,8 +121,8 @@ const MyProfile = () => {
           <Text style={styles.settingsTitle}> Settings </Text>
           {renderSettingOption("user", "Account", () => {navigation.navigate("viewprofile")})}
           {renderSettingOption("book", "Medical Records", ()=> {navigation.navigate('medicalrecords')})}
-          {renderSettingOption("info", "About Us")}
-          {renderSettingOption("sign-out", "Logout", logoutButton)}
+          {renderSettingOption("history", "Activity Logs", () => {navigation.navigate("auditpatient")})} 
+          {renderSettingOption("sign-out", "Logout", handleLogout)}
         </View>
       </ScrollView>
 

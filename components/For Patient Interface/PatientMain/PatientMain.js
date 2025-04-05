@@ -12,15 +12,17 @@ import { ip } from '../../../ContentExport';
 import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FAB, useTheme, ActivityIndicator } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useUser } from '@/UserContext';
+import NotificationBadge from '../Homepage/NotificationBadge'; 
 
 const initialLayout = { width: Dimensions.get('window').width };
 
 const PatientMain = () => {
   const [index, setIndex] = useState(0);
   const navigation = useNavigation();
-  const { user, role, isAuthenticated } = useUser();
+  const route = useRoute(); // Add this line to get route object
+  const { user, role, isAuthenticated, unreadNotificationsCount } = useUser(); // Get unreadNotificationsCount from context
   const theme = useTheme();
 
   // State variables for patient data
@@ -40,31 +42,32 @@ const PatientMain = () => {
     { key: 'upcoming', title: 'Upcoming' },
     { key: 'doctorspecialty', title: 'Doctor Specialty' },
     { key: 'myprofilepage', title: 'My Profile' },
+    { key: 'notifications', title: 'Notifications' }, // Add notifications tab
   ]);
 
   // At the top of the PatientMain component
-useEffect(() => {
-  if (!user && !loading) {
-    console.log("No authenticated user, redirecting to login");
-    navigation.replace('SigninPage'); // Redirect to login if no user
-  }
-}, [user, loading, navigation]);
-
-// Then in your existing useEffect for fetching data
-useEffect(() => {
-  // Set a default name while loading
-  setUname("Patient");
-
-  const fetchAllPatientData = async () => {
-    if (!user || !user._id) {
-      console.log("No authenticated user for data fetch");
-      setLoading(false);
-      return;
+  useEffect(() => {
+    if (!user && !loading) {
+      console.log("No authenticated user, redirecting to login");
+      navigation.replace('SigninPage'); // Redirect to login if no user
     }
-    
-    console.log("User authenticated, ID:", user._id);
-    
-    // Rest of your fetch logic stays the same...
+  }, [user, loading, navigation]);
+
+  // Then in your existing useEffect for fetching data
+  useEffect(() => {
+    // Set a default name while loading
+    setUname("Patient");
+
+    const fetchAllPatientData = async () => {
+      if (!user || !user._id) {
+        console.log("No authenticated user for data fetch");
+        setLoading(false);
+        return;
+      }
+      
+      console.log("User authenticated, ID:", user._id);
+      
+      // Rest of your fetch logic stays the same...
       try {
         setLoading(true);
         const patientId = user._id;
@@ -104,17 +107,17 @@ useEffect(() => {
         })));
 
         // After API call
-console.log("Profile response data:", profileResponse.data);
-console.log("Patient data structure:", profileResponse.data?.thePatient);
+        console.log("Profile response data:", profileResponse.data);
+        console.log("Patient data structure:", profileResponse.data?.thePatient);
 
-if (profileResponse.data?.thePatient) {
-  const patient = profileResponse.data.thePatient;
-  console.log("Patient name fields:", patient.patient_firstName, patient.patient_lastName);
-  setPatientData(patient);
-  setUname(patient.patient_firstName + " " + patient.patient_lastName);
-  console.log("Set uname to:", patient.patient_firstName + " " + patient.patient_lastName);
-  setUImage(patient.patient_image || "");
-}
+        if (profileResponse.data?.thePatient) {
+          const patient = profileResponse.data.thePatient;
+          console.log("Patient name fields:", patient.patient_firstName, patient.patient_lastName);
+          setPatientData(patient);
+          setUname(patient.patient_firstName + " " + patient.patient_lastName);
+          console.log("Set uname to:", patient.patient_firstName + " " + patient.patient_lastName);
+          setUImage(patient.patient_image || "");
+        }
         
         // Process patient profile data
         if (profileResponse.data?.thePatient) {
@@ -155,6 +158,21 @@ if (profileResponse.data?.thePatient) {
     fetchAllPatientData();
   }, [user]);
 
+  // Handle specialty parameter from navigation
+  useEffect(() => {
+    // Check if there's a specialty parameter
+    if (route.params?.specialty) {
+      console.log("Specialty selected:", route.params.specialty);
+      
+      // Find the index of doctorspecialty tab
+      const doctorSpecialtyIndex = routes.findIndex(route => route.key === 'doctorspecialty');
+      if (doctorSpecialtyIndex !== -1) {
+        // Switch to doctorspecialty tab
+        setIndex(doctorSpecialtyIndex);
+      }
+    }
+  }, [route.params?.specialty]); // Only re-run when specialty parameter changes
+
   // Create a custom render scene map that passes down the fetched data
   const renderScene = ({ route }) => {
     switch (route.key) {
@@ -179,6 +197,7 @@ if (profileResponse.data?.thePatient) {
           <DoctorSpecialty 
             specialties={doctorSpecialties}
             recommendedDoctors={recommendedDoctors}
+            preSelectedSpecialty={route.params?.specialty} // Pass the specialty parameter
           />
         );
       case 'myprofilepage':
@@ -187,6 +206,12 @@ if (profileResponse.data?.thePatient) {
             patientData={patientData}
             userId={userId}
           />
+        );
+      case 'notifications':
+        return (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <NotificationBadge count={unreadNotificationsCount} />
+          </View>
         );
       default:
         return null;
