@@ -2,6 +2,9 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { ip } from './ContentExport';
 import { storeData, getData, deleteData } from './components/storageUtility';
+import { updatePassword } from 'firebase/auth';
+import * as Notifications from 'expo-notifications';
+import { storeUserData, clearUserData } from './utils/userDataStorage';
 
 const UserContext = createContext();
 
@@ -53,6 +56,13 @@ export const UserProvider = ({ children }) => {
       
       // Always clear client-side auth data, even if server call fails
       await clearAuthData();
+      
+      // Reset notification counts
+      updateUnreadNotificationsCount(0);
+      
+      // Clear notification badge on app icon
+      await Notifications.setBadgeCountAsync(0);
+      
       console.log("Logout complete - all auth data cleared");
       return true;
     } catch (error) {
@@ -141,60 +151,73 @@ export const UserProvider = ({ children }) => {
         // Get ALL required auth data
         const storedToken = await getData("authToken");
         const userId = await getData("userId");
-        const storedRole = await getData("userRole");
+        const userRole = await getData("userRole");
         
-        console.log("Auth data check:", {
-          hasToken: !!storedToken,
-          hasUserId: !!userId, 
-          hasRole: !!storedRole
-        });
-        
-        if (!storedToken || !userId || !storedRole) {
-          console.log("Incomplete auth data in storage");
-          setLoading(false);
-          return;
+        if (storedToken && userId && userRole) {
+          try {
+            // Try to validate token and fetch user from backend
+            const response = await axios.post(`${ip.address}/api/verify-token`, {
+              token: storedToken,
+              userId,
+              userRole
+            });
+            if (response.data.valid) {
+              console.log("Token is valid, session restored");
+              
+              // Set axios default headers
+              axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+              
+              // Update app state
+              setToken(storedToken);
+              setRole(userRole);
+              
+              // Fetch user data
+              let userData;
+              if (userRole === 'Doctor') {
+                const doctorResponse = await axios.get(`${ip.address}/api/doctor/one/${userId}`);
+                userData = doctorResponse.data.doctor;
+              } else {
+                const patientResponse = await axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`);
+                userData = patientResponse.data.thePatient;
+              }
+              
+              setUser(userData);
+              
+              // Fetch unread notification count
+              try {
+                const notificationsResponse = await axios.get(
+                  `${ip.address}/api/${userRole.toLowerCase()}/notifications/unread-count/${userId}`
+                );
+                
+                if (notificationsResponse.data && typeof notificationsResponse.data.count === 'number') {
+                  updateUnreadNotificationsCount(notificationsResponse.data.count);
+                }
+              } catch (notificationError) {
+                console.error("Error fetching notification count:", notificationError);
+              }
+              
+              return;
+            }
+          } catch (err) {
+            // If backend fails, try to restore user from storage
+            const storedUser = await getData("user");
+            if (storedUser) {
+              setUser(JSON.parse(storedUser));
+              setToken(storedToken);
+              setRole(userRole);
+              setLoading(false);
+              console.log("Restored user from local storage (offline mode)");
+              return;
+            }
+          }
         }
         
-        // Set token in axios headers
-        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-        
-        try {
-          // Verify token with backend
-          console.log("Verifying token with server...");
-          const response = await axios.get(`${ip.address}/api/verify-token`);
-          
-          if (response.data && (response.data.user || response.data.valid)) {
-            console.log("Token verified successfully");
-            
-            // Get user data from response or create minimal user object
-            const userData = response.data.user || { _id: userId };
-            
-            // Update app state
-            setUser(userData);
-            setRole(storedRole);
-            setToken(storedToken);
-            
-            console.log(`Successfully restored session as ${storedRole}`);
-          } else {
-            console.log("Server rejected token");
-            await clearAuthData();
-          }
-        } catch (verifyError) {
-          console.error("Token verification failed:", verifyError.message);
-          
-          // For network errors, keep stored credentials
-          if (!verifyError.response) {
-            console.log("Network error, keeping stored credentials");
-            setUser({ _id: userId });
-            setRole(storedRole);
-            setToken(storedToken);
-          } else if (verifyError.response.status === 401) {
-            console.log("Token expired or invalid, clearing auth data");
-            await clearAuthData();
-          }
-        }
+        // If we reach here, no valid session exists
+        console.log("No valid session found");
+        await clearAuthData();
       } catch (error) {
-        console.error("Session restoration error:", error);
+        console.error("Error restoring session:", error);
+        await clearAuthData();
       } finally {
         setLoading(false);
       }
@@ -208,12 +231,18 @@ export const UserProvider = ({ children }) => {
     try {
       console.log("Storing auth credentials...");
       
+      // Store user data for background tasks
+      await storeUserData(userData);
+
       // Store token in secure storage
       await storeData("authToken", authToken);
       
       // Store user ID and role for backup
       await storeData("userId", userData._id);
       await storeData("userRole", userRole);
+
+      // Store user data in secure storage
+      await storeData("user", JSON.stringify(userData));
       
       // Verify storage worked
       const storedToken = await getData("authToken");

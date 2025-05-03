@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Button, useTheme, ActivityIndicator, Badge } from 'react-native-paper';
+import { Button, useTheme, ActivityIndicator, Badge, Avatar } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
@@ -18,16 +18,28 @@ const EditProfileScreen = ({ navigation }) => {
 
   const [userId, setUserId] = useState('');
   const [patient, setPatient] = useState(null);
-  const [firstName, setFirstName] = useState('');
-  const [middleInitial, setMiddleInitial] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [gender, setGender] = useState('');
+  
+  // Replace simple state with field validators
+  const [firstName, setFirstName] = useState(createFieldValidator());
+  const [middleInitial, setMiddleInitial] = useState(createFieldValidator());
+  const [lastName, setLastName] = useState(createFieldValidator());
+  const [contactNumber, setContactNumber] = useState(createFieldValidator());
+  const [email, setEmail] = useState(createFieldValidator());
+  const [gender, setGender] = useState(createFieldValidator());
+  const [streetAddress, setStreetAddress] = useState(createFieldValidator());
+  const [barangayAddress, setBarangayAddress] = useState(createFieldValidator());
+  const [cityAddress, setCityAddress] = useState(createFieldValidator());
+  const [zipCodeField, setZipCodeField] = useState(createFieldValidator());
+  const [provinceField, setProvinceField] = useState(createFieldValidator());
+  const [regionField, setRegionField] = useState(createFieldValidator());
+  
   const [address, setAddress] = useState({
     street: '',
     barangay: '',
-    city: ''
+    city: '',
+    region: '',
+    province: '',
+    zipCode: ''
   });
   const [profileImage, setProfileImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -62,6 +74,18 @@ const EditProfileScreen = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    axios.get(`https://psgc.gitlab.io/api/regions/`)
+      .then(res => {
+        const formattedRegions = res.data.map((element) => ({
+          label: element.name,
+          value: element.code
+        }));
+        setRegionArr(formattedRegions);
+      })
+      .catch(err => console.log('Error fetching regions:', err));
+  }, []);
+
+  useEffect(() => {
     const fetchPatientData = async () => {
       if (userId) {
         setLoading(true);
@@ -74,18 +98,29 @@ const EditProfileScreen = ({ navigation }) => {
             setProfileImage(`${ip.address}/${patientData.patient_image}`);
           }
           
-          setFirstName(patientData.patient_firstName || '');
-          setMiddleInitial(patientData.patient_middleInitial || '');
-          setLastName(patientData.patient_lastName || '');
-          setContactNumber(patientData.patient_contactNumber || '');
-          setEmail(patientData.patient_email || '');
-          setGender(patientData.patient_gender || '');
+          // Update validator objects with initial values
+          setFirstName(createFieldValidator(patientData.patient_firstName || ''));
+          setMiddleInitial(createFieldValidator(patientData.patient_middleInitial || ''));
+          setLastName(createFieldValidator(patientData.patient_lastName || ''));
+          setContactNumber(createFieldValidator(patientData.patient_contactNumber || ''));
+          setEmail(createFieldValidator(patientData.patient_email || ''));
+          setGender(createFieldValidator(patientData.patient_gender || ''));
           
           if (patientData.patient_address) {
+            setStreetAddress(createFieldValidator(patientData.patient_address.street || ''));
+            setBarangayAddress(createFieldValidator(patientData.patient_address.barangay || ''));
+            setCityAddress(createFieldValidator(patientData.patient_address.city || ''));
+            setZipCodeField(createFieldValidator(patientData.patient_address.zipCode || ''));
+            setProvinceField(createFieldValidator(patientData.patient_address.province || ''));
+            setRegionField(createFieldValidator(patientData.patient_address.region || ''));
+            
             setAddress({
               street: patientData.patient_address.street || '',
               barangay: patientData.patient_address.barangay || '',
-              city: patientData.patient_address.city || ''
+              city: patientData.patient_address.city || '',
+              region: patientData.patient_address.region || '',
+              province: patientData.patient_address.province || '',
+              zipCode: patientData.patient_address.zipCode || ''
             });
           }
         } catch (error) {
@@ -98,6 +133,128 @@ const EditProfileScreen = ({ navigation }) => {
     };
     fetchPatientData();
   }, [userId]);
+
+  useEffect(() => {
+    if (patient?.patient_address) {
+      const patientAddress = patient.patient_address;
+      
+      // Find region in regionArr
+      const foundRegion = regionArr.find(r => 
+        r.label.toLowerCase() === patientAddress.region?.toLowerCase()
+      );
+      
+      if (foundRegion) {
+        setRegion(foundRegion);
+        setRegionField(createFieldValidator(foundRegion));
+        
+        // Fetch cities for region
+        if (foundRegion.value) {
+          // Check if NCR
+          const isNCR = foundRegion.label.includes('National Capital Region') || foundRegion.label === 'NCR';
+          
+          if (isNCR) {
+            // For NCR, directly fetch cities
+            axios.get(`https://psgc.gitlab.io/api/regions/${foundRegion.value}/cities-municipalities`)
+              .then(res => {
+                const formattedCities = res.data.map(element => ({
+                  label: element.name,
+                  value: element.code
+                }));
+                setCityArr(formattedCities);
+                
+                // Find city in cityArr
+                const foundCity = formattedCities.find(c => 
+                  c.label.toLowerCase() === patientAddress.city?.toLowerCase()
+                );
+                
+                if (foundCity) {
+                  setCity(foundCity);
+                  setCityAddress(createFieldValidator(foundCity));
+                  
+                  // Fetch barangays for the selected city
+                  fetchBarangays(foundCity.value);
+                }
+              })
+              .catch(err => console.log('Error fetching cities:', err));
+          } else {
+            // For non-NCR regions, fetch provinces first
+            axios.get(`https://psgc.gitlab.io/api/regions/${foundRegion.value}/provinces`)
+              .then(res => {
+                const formattedProvinces = res.data.map(element => ({
+                  label: element.name,
+                  value: element.code
+                }));
+                setProvinceArr(formattedProvinces);
+                
+                // Find province in provinceArr
+                const foundProvince = formattedProvinces.find(p => 
+                  p.label.toLowerCase() === patientAddress.province?.toLowerCase()
+                );
+                
+                if (foundProvince) {
+                  setProvince(foundProvince);
+                  setProvinceField(createFieldValidator(foundProvince));
+                  
+                  // Fetch cities for the selected province
+                  axios.get(`https://psgc.gitlab.io/api/provinces/${foundProvince.value}/cities-municipalities`)
+                    .then(res => {
+                      const formattedCities = res.data.map(element => ({
+                        label: element.name,
+                        value: element.code
+                      }));
+                      setCityArr(formattedCities);
+                      
+                      // Find city in cityArr
+                      const foundCity = formattedCities.find(c => 
+                        c.label.toLowerCase() === patientAddress.city?.toLowerCase()
+                      );
+                      
+                      if (foundCity) {
+                        setCity(foundCity);
+                        setCityAddress(createFieldValidator(foundCity));
+                        
+                        // Fetch barangays for the selected city
+                        fetchBarangays(foundCity.value);
+                      }
+                    })
+                    .catch(err => console.log('Error fetching cities:', err));
+                }
+              })
+              .catch(err => console.log('Error fetching provinces:', err));
+          }
+        }
+      }
+      
+      // Set zipCode
+      if (patientAddress.zipCode) {
+        setZipCodeField(createFieldValidator(patientAddress.zipCode));
+      }
+    }
+  }, [patient, regionArr]);
+
+  const fetchBarangays = (cityCode) => {
+    axios.get(`https://psgc.gitlab.io/api/cities-municipalities/${cityCode}/barangays`)
+      .then(res => {
+        const formattedBarangays = res.data.map((element) => ({
+          label: element.name,
+          value: element.code
+        }));
+        setBarangayArr(formattedBarangays);
+        
+        // Find barangay in barangayArr if patient data is loaded
+        if (patient?.patient_address?.barangay) {
+          const foundBarangay = formattedBarangays.find(b => 
+            b.label.toLowerCase() === patient.patient_address.barangay.toLowerCase()
+          );
+          
+          if (foundBarangay) {
+            setBarangay(foundBarangay);
+            setBarangayAddress(createFieldValidator(foundBarangay));
+          }
+        }
+      })
+      .catch(err => console.log('Error fetching barangays:', err));
+  };
 
   const pickImage = async () => {
     try {
@@ -167,7 +324,284 @@ const EditProfileScreen = ({ navigation }) => {
     }
   };
 
+  const handleFieldChange = (field, setField, validationFn, ...args) => (value) => {
+    const updatedField = field.setValue(value);
+    
+    // Check if the field is empty after trimming whitespace
+    if (value && value.trim() === '') {
+      const fieldName = getFieldNameFromSetter(setField);
+      updatedField.setError(`${fieldName} cannot be only spaces.`);
+    } else {
+      const error = validationFn ? validationFn(value, ...args) : null;
+      updatedField.setError(error);
+    }
+    
+    setField({...updatedField});
+  };
+
+  const getFieldNameFromSetter = (setterFn) => {
+    const fnName = setterFn.name || '';
+    
+    if (fnName.startsWith('set')) {
+      const fieldName = fnName.substring(3);
+      return fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+    }
+    
+    return 'Field';
+  };
+
+  const handleFirstNameChange = (value) => {
+    const updatedField = firstName.setValue(value);
+    if (value && value.trim() === '') {
+      updatedField.setError("First name cannot be only spaces.");
+    } else {
+      const error = validateFirstName(value);
+      if (!error && value.length < 2) {
+        updatedField.setError("First name must be at least 2 characters.");
+      } else if (!error && value.length > 50) {
+        updatedField.setError("First name cannot exceed 50 characters.");
+      } else {
+        updatedField.setError(error);
+      }
+    }
+    setFirstName({...updatedField});
+  };
+
+  const handleMiddleInitialChange = (value) => {
+    const updatedField = middleInitial.setValue(value);
+    if (value && value.length > 1) {
+      updatedField.setError("Middle initial should be a single character.");
+    } else {
+      const error = validateMiddleInitial(value);
+      updatedField.setError(error);
+    }
+    setMiddleInitial({...updatedField});
+  };
+
+  const handleLastNameChange = (value) => {
+    const updatedField = lastName.setValue(value);
+    if (value && value.trim() === '') {
+      updatedField.setError("Last name cannot be only spaces.");
+    } else {
+      const error = validateLastName(value);
+      if (!error && value.length < 2) {
+        updatedField.setError("Last name must be at least 2 characters.");
+      } else if (!error && value.length > 50) {
+        updatedField.setError("Last name cannot exceed 50 characters.");
+      } else {
+        updatedField.setError(error);
+      }
+    }
+    setLastName({...updatedField});
+  };
+
+  const handleContactNumberChange = (value) => {
+    const updatedField = contactNumber.setValue(value);
+    const error = validateContactNumber(value);
+    
+    if (!error && (value.length < 10 || value.length > 11)) {
+      updatedField.setError("Contact number should be 10-11 digits.");
+    } else {
+      updatedField.setError(error);
+    }
+    setContactNumber({...updatedField});
+  };
+
+  const handleGenderChange = (item) => {
+    const updatedField = {...gender, touched: true, value: item.value};
+    const error = validateGender(item.value);
+    updatedField.setError(error);
+    setGender(updatedField);
+  };
+
+  const handleStreetChange = (value) => {
+    handleFieldChange(streetAddress, setStreetAddress, validateStreet)(value);
+    setAddress(prev => ({...prev, street: value}));
+  };
+  
+  const handleBarangayChange = (item) => {
+    setBarangay(item);
+    setAddress(prev => ({ ...prev, barangay: item.label }));
+    
+    const updatedBarangayField = barangayAddress.setValue(item);
+    updatedBarangayField.setTouched(true);
+    setBarangayAddress({...updatedBarangayField});
+  };
+  
+  const handleCityChange = (item) => {
+    setCity(item);
+    setAddress(prev => ({ ...prev, city: item.label }));
+    
+    const updatedCityField = cityAddress.setValue(item);
+    updatedCityField.setTouched(true);
+    setCityAddress({...updatedCityField});
+    
+    fetchBarangays(item.value);
+  };
+
+  const handleProvinceChange = (item) => {
+    setCity({});
+    setCityArr([]);
+    setBarangay({});
+    setBarangayArr([]);
+    
+    setProvince(item);
+    setAddress(prev => ({ ...prev, province: item.label }));
+    
+    const updatedProvinceField = provinceField.setValue(item);
+    updatedProvinceField.setTouched(true);
+    setProvinceField({...updatedProvinceField});
+    
+    axios.get(`https://psgc.gitlab.io/api/provinces/${item.value}/cities-municipalities`)
+      .then(res => {
+        const formattedCities = res.data.map(element => ({
+          label: element.name,
+          value: element.code
+        }));
+        setCityArr(formattedCities);
+      })
+      .catch(err => {
+        console.log('Error fetching cities:', err);
+        setCityArr([]);
+      });
+  };
+
+  const handleRegionChange = (item) => {
+    setProvince({});
+    setProvinceArr([]);
+    setCity({});
+    setCityArr([]);
+    setBarangay({});
+    setBarangayArr([]);
+    
+    setRegion(item);
+    setAddress(prev => ({ ...prev, region: item.label }));
+    
+    const updatedRegionField = regionField.setValue(item);
+    updatedRegionField.setTouched(true);
+    setRegionField({...updatedRegionField});
+    
+    const isNCR = item.label.includes('National Capital Region') || item.label === 'NCR';
+    
+    if (isNCR) {
+      axios.get(`https://psgc.gitlab.io/api/regions/${item.value}/cities-municipalities`)
+        .then(res => {
+          const formattedCities = res.data.map(element => ({
+            label: element.name,
+            value: element.code
+          }));
+          setCityArr(formattedCities);
+        })
+        .catch(err => {
+          console.log('Error fetching cities:', err);
+          setCityArr([]);
+        });
+    } else {
+      axios.get(`https://psgc.gitlab.io/api/regions/${item.value}/provinces`)
+        .then(res => {
+          const formattedProvinces = res.data.map((element) => ({
+            label: element.name,
+            value: element.code
+          }));
+          setProvinceArr(formattedProvinces);
+        })
+        .catch(err => {
+          console.log('Error fetching provinces:', err);
+          setProvinceArr([]);
+        });
+    }
+  };
+
+  const handleZipCodeChange = (value) => {
+    const updatedField = zipCodeField.setValue(value);
+    setZipCodeField({...updatedField});
+    setAddress(prev => ({ ...prev, zipCode: value }));
+  };
+
+  const isFieldDisabled = () => {
+    return daysRemaining > 0;
+  };
+
+  // Add validation functions for address fields
+  const validateAddress = (value) => {
+    if (!value) return "This field is required";
+    if (typeof value === 'string' && value.trim() === '') return "This field is required";
+    if (typeof value === 'object' && (!value.label || value.label.trim() === '')) return "This field is required";
+    return null;
+  };
+
   const handleSave = async () => {
+    setFirstName({...firstName, touched: true});
+    setLastName({...lastName, touched: true});
+    setMiddleInitial({...middleInitial, touched: true});
+    setContactNumber({...contactNumber, touched: true});
+    setGender({...gender, touched: true});
+    setStreetAddress({...streetAddress, touched: true});
+    setRegionField({...regionField, touched: true});
+    setCityAddress({...cityAddress, touched: true});
+    setBarangayAddress({...barangayAddress, touched: true});
+    setZipCodeField({...zipCodeField, touched: true});
+    
+    // Check if any required address fields are empty
+    if (!region.value) {
+      setRegionField({...regionField, touched: true, error: "Region is required"});
+    }
+    
+    if (!city.value) {
+      setCityAddress({...cityAddress, touched: true, error: "City/Municipality is required"});
+    }
+    
+    if (!barangay.value) {
+      setBarangayAddress({...barangayAddress, touched: true, error: "Barangay is required"});
+    }
+    
+    if (!(region.label?.includes('National Capital Region') || region.label === 'NCR') && !province.value) {
+      setProvinceField({...provinceField, touched: true, error: "Province is required"});
+    }
+    
+    if (!zipCodeField.value) {
+      setZipCodeField({...zipCodeField, touched: true, error: "ZIP Code is required"});
+    }
+    
+    // Check for validation errors and empty required fields
+    if (
+      firstName.error || 
+      lastName.error || 
+      middleInitial.error || 
+      contactNumber.error || 
+      gender.error || 
+      streetAddress.error ||
+      regionField.error ||
+      cityAddress.error ||
+      barangayAddress.error || 
+      zipCodeField.error ||
+      !region.value ||
+      !city.value ||
+      !barangay.value ||
+      (!province.value && !(region.label?.includes('National Capital Region') || region.label === 'NCR')) ||
+      !zipCodeField.value
+    ) {
+      Alert.alert(
+        'Validation Error', 
+        'Please complete all required address fields before saving.'
+      );
+      return;
+    }
+    
+    if (daysSinceLastUpdate < 30) {
+      Alert.alert(
+        'Update Restricted',
+        `You can only update your profile every 30 days. Please try again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`
+      );
+      return;
+    }
+    
+    if (!showConfirmDialog) {
+      setShowConfirmDialog(true);
+      return;
+    }
+    
+    setShowConfirmDialog(false);
     setIsSubmitting(true);
     
     try {
@@ -209,16 +643,36 @@ const EditProfileScreen = ({ navigation }) => {
     }
   };
 
-  const renderInput = (label, value, onChangeText) => (
+  const renderInput = (label, field, onChangeText, keyboardType = 'default') => (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        value={value}
-        style={styles.input}
+        value={field.value}
+        style={[
+          styles.input,
+          field.touched && field.error ? styles.inputError : {},
+          isFieldDisabled() && styles.disabledInput
+        ]}
         onChangeText={onChangeText}
+        onBlur={() => {
+          if (!field.touched) {
+            const updatedField = {...field, touched: true};
+            if (label === 'First Name') setFirstName(updatedField);
+            else if (label === 'Middle Initial') setMiddleInitial(updatedField);
+            else if (label === 'Last Name') setLastName(updatedField);
+            else if (label === 'Contact Number') setContactNumber(updatedField);
+            else if (label === 'Street') setStreetAddress(updatedField);
+            else if (label === 'ZIP Code') setZipCodeField(updatedField);
+          }
+        }}
         placeholder={`Enter ${label}`}
-        placeholderTextColor={theme.colors.onSurfaceVariant}
+        placeholderTextColor={isFieldDisabled() ? '#aaa' : theme.colors.onSurfaceVariant}
+        editable={!isFieldDisabled()}
+        keyboardType={keyboardType}
       />
+      {field.touched && field.error && (
+        <Text style={styles.errorText}>{field.error}</Text>
+      )}
     </View>
   );
 
@@ -265,22 +719,24 @@ const EditProfileScreen = ({ navigation }) => {
       textAlign: 'center',
       flex: 2,
     },
-    profileSection: {
-      flexDirection: 'row',
+    profileImageContainer: {
       alignItems: 'center',
       marginBottom: 24,
-      paddingHorizontal: 4,
     },
-    imageContainer: {
-      marginRight: 16,
+    imagePickerButton: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: '#f0f0f0',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
       position: 'relative',
     },
     profileImage: {
       width: 120,
       height: 120,
       borderRadius: 60,
-      borderWidth: 2,
-      borderColor: theme.colors.primary,
     },
     profileImageTouchable: {
       width: 120,
@@ -291,60 +747,34 @@ const EditProfileScreen = ({ navigation }) => {
 
     loadingOverlay: {
       position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      right: 0,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: sd.colors.blue,
       justifyContent: 'center',
       alignItems: 'center',
-      borderRadius: 60,
+      borderWidth: 2,
+      borderColor: '#fff',
     },
-    profileActions: {
-      flex: 1,
-      paddingLeft: 8,
-    },
-    actionButtonContainer: {
+    changePasswordButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 10,
+      backgroundColor: '#f5f5f5',
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: '#e0e0e0',
     },
-    uploadButton: {
-      flex: 1,
-      borderRadius: 8,
-    },
-    uploadButtonContent: {
-      height: 45,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    uploadButtonLabel: {
-      fontFamily: sd.fonts.medium,
+    changePasswordText: {
       fontSize: 14,
+      fontFamily: sd.fonts.medium,
+      color: sd.colors.blue,
     },
-    badgeIcon: {
+    passwordIcon: {
       marginRight: 8,
-      backgroundColor: theme.colors.primaryContainer,
-      width: 26,
-      height: 26,
-      borderRadius: 13,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    uploadHint: {
-      fontFamily: sd.fonts.regular,
-      fontSize: 12,
-      color: theme.colors.outline,
-      marginTop: 4,
-    },
-    sectionContainer: {
-      marginBottom: 24,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontFamily: sd.fonts.bold,
-      color: theme.colors.primary,
-      marginBottom: 16,
     },
     inputContainer: {
       marginBottom: 16,
@@ -364,19 +794,45 @@ const EditProfileScreen = ({ navigation }) => {
       fontFamily: sd.fonts.regular,
       color: theme.colors.onSurface,
     },
+    dropdown: {
+      height: 50,
+      borderColor: theme.colors.outline,
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurfaceVariant,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+      fontFamily: sd.fonts.regular,
+      color: theme.colors.onSurface,
+    },
     buttonContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginTop: 20,
       marginBottom: 30,
     },
-    cancelButton: {
-      flex: 1,
-      marginRight: 8,
-    },
     saveButton: {
       flex: 1,
       marginLeft: 8,
+    },
+    disabledButton: {
+      backgroundColor: '#e0e0e0',
     },
     loadingContainer: {
       flex: 1,
@@ -554,19 +1010,35 @@ const EditProfileScreen = ({ navigation }) => {
 
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Address</Text>
-          {renderInput('Street', address.street, (text) => setAddress({...address, street: text}))}
-          {renderInput('Barangay', address.barangay, (text) => setAddress({...address, barangay: text}))}
-          {renderInput('City', address.city, (text) => setAddress({...address, city: text}))}
+          {renderInput('Street', streetAddress, handleStreetChange)}
+          {renderDropdown('Region', regionField, regionArr, handleRegionChange, region)}
+          
+          {region.value && !(region.label.includes('National Capital Region') || region.label === 'NCR') && (
+            renderDropdown('Province', provinceField, provinceArr, handleProvinceChange, province, !region.value)
+          )}
+          
+          {renderDropdown('City/Municipality', cityAddress, cityArr, handleCityChange, city, !region.value)}
+          {renderDropdown('Barangay', barangayAddress, barangayArr, handleBarangayChange, barangay, !city.value)}
+          {renderInput('ZIP Code', zipCodeField, handleZipCodeChange, 'numeric')}
         </View>
 
         
         <View style={styles.buttonContainer}>
           <Button
             mode="contained"
-            onPress={handleSave}
+            onPress={() => {
+              if (daysRemaining > 0) {
+                Alert.alert(
+                  'Update Restricted',
+                  `You can only update your profile every 30 days. Please try again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`
+                );
+              } else {
+                setShowConfirmDialog(true);
+              }
+            }}
             loading={isSubmitting}
-            disabled={isSubmitting}
-            style={styles.saveButton}
+            disabled={isSubmitting || daysRemaining > 0}
+            style={[styles.saveButton, daysRemaining > 0 && styles.disabledButton]}
           >
             Save Changes
           </Button>

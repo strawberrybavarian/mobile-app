@@ -44,9 +44,7 @@ const LandingPage = ({ navigation }) => {
               <Text style={styles.createButtonText}>SIGN UP</Text>
             </TouchableOpacity>  
 
-            <TouchableWithoutFeedback>
-              <Text style={styles.troubleSigningInText}>Trouble signing in?</Text>
-            </TouchableWithoutFeedback>
+
           </View>
         </View>
       </View>

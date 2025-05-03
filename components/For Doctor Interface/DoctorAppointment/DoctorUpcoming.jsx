@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { View, Alert } from 'react-native';
 import { useFocusEffect, } from '@react-navigation/native';
 import axios from 'axios';
 import { getData } from '../../storageUtility';
@@ -97,9 +97,43 @@ const DoctorUpcoming = () => {
     }
   };
 
+  // Add this function to handle status updates
+  const updateAppointmentStatus = async (appointmentId, newStatus) => {
+    try {
+      await axios.put(`${ip.address}/api/appointments/${appointmentId}/status`, { 
+        status: newStatus 
+      });
+      
+      // Update the local state to reflect the change
+      setAllAppointments(prevAppointments => 
+        prevAppointments.map(appt => 
+          appt._id === appointmentId ? {...appt, status: newStatus} : appt
+        )
+      );
+      
+      // Show success message
+      Alert.alert('Success', `Appointment marked as ${newStatus}`);
+      
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      Alert.alert('Error', 'Failed to update appointment status');
+    }
+  };
+
   // Filter appointments based on selected status
   const filterAppointmentsByStatus = (status) => {
-    return allAppointments.filter(appointment => appointment.status === status);
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (status === 'today') {
+      // Show today's scheduled appointments
+      return allAppointments.filter(appointment => {
+        const appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
+        return appointmentDate === today && appointment.status === 'Scheduled';
+      });
+    } else {
+      // For other statuses (Upcoming, Ongoing, Completed), filter by status directly
+      return allAppointments.filter(appointment => appointment.status === status);
+    }
   };
 
   return (

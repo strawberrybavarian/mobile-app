@@ -449,8 +449,39 @@ const EditDoctorProfile = () => {
             disabled={isSubmitting}
             style={styles.saveButton}
           >
-            Save Changes
+            <Text style={styles.cancelButtonText}>Cancel</Text>
           </Button>
+          
+          <TouchableOpacity
+            style={[styles.saveButton, isFieldDisabled() && styles.disabledButton]}
+            onPress={() => {
+              if (daysRemaining > 0) {
+                Alert.alert(
+                  'Update Restricted',
+                  `You can only update your profile every 30 days. Please try again in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}.`
+                );
+              } else {
+                formik.validateForm().then(errors => {
+                  if (Object.keys(errors).length === 0) {
+                    setShowConfirmDialog(true);
+                  } else {
+                    Alert.alert('Validation Error', 'Please correct all errors before saving.');
+                    // Set all fields as touched to show errors
+                    const touchedFields = {};
+                    Object.keys(formik.values).forEach(key => touchedFields[key] = true);
+                    formik.setTouched(touchedFields);
+                  }
+                });
+              }
+            }}
+            disabled={isSubmitting || isFieldDisabled()}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="white" size="small" />
+            ) : (
+              <Text style={styles.saveButtonText}>Save Profile</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </KeyboardAwareScrollView>
 

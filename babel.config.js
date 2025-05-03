@@ -12,6 +12,8 @@ module.exports = function(api) {
         "@": "./",
         "tailwind.config": "./tailwind.config.js"
       }
-    }]]
+    }],
+    "@babel/plugin-proposal-export-namespace-from"
+  ]
   };
 };

@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Dialog, Portal, Button, useTheme } from 'react-native-paper';
-import { ip } from '@/ContentExport';
-import { useUser } from '@/UserContext';
-import { storeData } from '@/components/storageUtility';
-import sd from "@/utils/styleDictionary";
+import { ip } from '../../../ContentExport';
+import { useUser } from '../../../UserContext';
+import { storeData } from '../../storageUtility';
+import sd from '../../../utils/styleDictionary';
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const EmailVerificationPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { userId, role } = route.params || {};
+  const { userId, role, email, isTwoFactor } = route.params || {};
   const { login } = useUser();
   const theme = useTheme();
 
@@ -92,74 +93,67 @@ const EmailVerificationPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Log what we're sending
-      console.log("Sending verification data:", {
-        userId,
-        role,
-        otp: enteredCode
-      });
+      // Select the correct endpoint based on verification type
+      const endpoint = isTwoFactor 
+        ? `${ip.address}/api/verify-2fa` 
+        : `${ip.address}/api/verify-email-otp`;
       
-      const response = await axios.post(`${ip.address}/api/verify-email-otp`, {
-        userId: userId,
-        role: role,
-        otp: enteredCode,
-      });
-
-      // Inside handleSubmit of EmailVerificationPage
+      // FIXED: Add role to the 2FA payload as well
+      const payload = isTwoFactor 
+        ? { userId, role, code: enteredCode } // Include role here
+        : { userId, role, otp: enteredCode };
+      
+      console.log(`Sending ${isTwoFactor ? '2FA' : 'OTP'} verification to ${endpoint}:`, payload);
+      
+      const response = await axios.post(endpoint, payload);
+      console.log("Verification response:", response.data);
+      
       if (response.data.verified) {
-        console.log("Email verification successful");
+        console.log(`${isTwoFactor ? '2FA' : 'Email'} verification successful`);
         const { user, role, token } = response.data;
         
         try {
-          // Store auth data directly first for redundancy
+          // Store auth data
           await storeData("authToken", token);
           await storeData("userId", user._id);
           await storeData("userRole", role);
           
-          // Then update the context
+          // Update login context
           const loginSuccess = await login(user, role, token);
           
           if (loginSuccess) {
-            console.log("Login successful after verification");
-            
-            // Use reset instead of navigate to clear the navigation stack
-            if (role === 'Patient') {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'ptnmain' }],
-              });
-            } else if (role === 'Doctor') {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'doctormain' }],
-              });
-            }
+            // Navigate based on role
+            navigation.reset({
+              index: 0,
+              routes: [{ name: role === 'Patient' ? 'ptnmain' : 'doctormain' }],
+            });
           } else {
-            console.error("Failed to login after verification");
-            showDialog('Error', 'Failed to complete login after verification');
+            showDialog('Error', 'Failed to complete login after verification.');
           }
-        } catch (storageError) {
-          console.error("Storage error:", storageError);
+        } catch (error) {
+          console.error("Error in login process:", error);
           showDialog('Error', 'Failed to save your session. Please try signing in again.');
         }
       } else {
         setAttempts(attempts + 1);
         if (attempts + 1 >= 3) {
           await axios.post(`${ip.address}/api/logout`);
-          showDialog('3 Failed Attempts', 'Your session has been destroyed. Please log in again.', () => navigation.navigate('SigninPage'));
+          showDialog('Too Many Attempts', 'Your session has been destroyed. Please log in again.', 
+            () => navigation.navigate('SigninPage'));
         } else {
-          showDialog('Invalid Code', 'The code you entered is incorrect. Please try again.');
+          showDialog('Invalid Code', `The ${isTwoFactor ? 'authentication' : 'verification'} code you entered is incorrect. Please try again.`);
         }
       }
     } catch (error) {
-      console.error('Error during OTP verification:', error);
+      console.error(`Error during ${isTwoFactor ? '2FA' : 'OTP'} verification:`, error);
       
-      // Add more detailed error logging
       if (error.response) {
         console.error('Error details:', error.response.status, error.response.data);
-        showDialog('Verification Failed', error.response.data.message || 'Invalid or expired code. Please try again.');
+        showDialog('Verification Failed', 
+          error.response.data.message || 
+          `Invalid or expired ${isTwoFactor ? 'authentication' : 'verification'} code. Please try again.`);
       } else {
-        showDialog('Error', 'A network error occurred during verification.');
+        showDialog('Error', 'A network error occurred. Please check your connection and try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -167,10 +161,29 @@ const EmailVerificationPage = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <FontAwesome5 name="arrow-left" size={20} color={theme.colors.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>
+          {isTwoFactor ? 'Two-Factor Authentication' : 'Email Verification'}
+        </Text>
+        <View style={{width: 40}} />
+      </View>
+      
       <View style={styles.content}>
-        <Text style={styles.title}>Enter OTP Code</Text>
-        <Text style={styles.subheading}>Please enter the 6-digit code sent to your email.</Text>
+        <Text style={styles.title}>
+          {isTwoFactor ? 'Enter Authentication Code' : 'Enter OTP Code'}
+        </Text>
+        <Text style={styles.subheading}>
+          {isTwoFactor 
+            ? 'Please enter the 6-digit code from your authenticator app.'
+            : 'Please enter the 6-digit code sent to your email.'}
+        </Text>
         
         <View style={styles.codeContainer}>
           {code.map((digit, index) => (
@@ -206,14 +219,19 @@ const EmailVerificationPage = () => {
           onPress={handleSubmit} 
           disabled={isSubmitting}
         >
-          <Text style={[
-            styles.submitButtonText,
-            { color: theme.colors.onPrimary, fontFamily: sd.fonts.medium }
-          ]}>
-            {isSubmitting ? 'Verifying...' : 'Verify Code'}
-          </Text>
+          {isSubmitting ? (
+            <ActivityIndicator color={theme.colors.onPrimary} size="small" />
+          ) : (
+            <Text style={[
+              styles.submitButtonText,
+              { color: theme.colors.onPrimary, fontFamily: sd.fonts.medium }
+            ]}>
+              {isTwoFactor ? 'Verify Authentication' : 'Verify Code'}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
+      
       <Portal>
         <Dialog visible={visible} onDismiss={hideDialog}>
           <Dialog.Title>{dialogTitle}</Dialog.Title>
@@ -237,11 +255,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    marginTop: 40, // Account for status bar
+  },
+  backButton: {
+    padding: 10,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontFamily: sd.fonts.medium,
+    color: '#333',
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingBottom: 90,
   },
   title: {
     fontSize: 30,
@@ -287,6 +324,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 20,
     height: 50,
   },

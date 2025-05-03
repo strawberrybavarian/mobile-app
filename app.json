@@ -16,27 +16,62 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.hpmanagementpatient"
+      "bundleIdentifier": "com.teamhortons.molinocareapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/pictures/molinologo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.hpmanagementpatient"
+      "package": "com.teamhortons.molinocareapp",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ],
+      "useNextNotificationsApi": true,
+      "notification": {
+        "icon": "./assets/notification-icon.png",
+        "color": "#0066CC",
+        "androidCollapsedTitle": "MolinoCare",
+        "iosDisplayInForeground": true
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/pictures/molinologo.png"
     },
     "plugins": [
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/pictures/molinologo.png",
+          "color": "#ffffff"
+        }
+      ]
     ],
+    "owner": "strawberry_bavarian",
+    "notification": {
+      "icon": "./assets/pictures/molinologo.png",
+      "color": "#ffffff",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "Updates from MolinoCare"
+    },
     "extra": {
       "eas": {
-        "projectId": "4750c497-c0c6-4d53-83ef-25ae9e0ce760"
+        "projectId": "e74098e5-867e-49ba-855b-b38ea1f5105c"
       }
     },
-    "owner": "strawberry-bavarian"
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

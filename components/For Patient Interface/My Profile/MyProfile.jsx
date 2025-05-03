@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, Alert, View, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, Alert, View, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -21,38 +21,28 @@ const MyProfile = () => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [isAccountModalVisible, setAccountModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
   const { logout } = useUser(); // Use the logout function from UserContext
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const id = await getData('userId');
-        id ? setUserId(id) : console.log('User not found');
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchUserId();
-  }, []);
+    if (lastRefreshTimestamp > 0) {
+      // If we get a refresh signal from parent, re-fetch user data
+      fetchUserData();
+    }
+  }, [lastRefreshTimestamp]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = () => {
-        if (userId) {
-          axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
-            .then(res => {
-              const { patient_firstName, patient_lastName } = res.data.thePatient;
-              setFirstName(patient_firstName);
-              setLastName(patient_lastName);
-            })
-            .catch(err => console.log(err));
-        }
-      };
-      fetchData();
-    }, [userId])
-  );
+  const fetchUserData = useCallback(() => {
+    if (userId) {
+      axios.get(`${ip.address}/api/patient/api/onepatient/${userId}`)
+        .then(res => {
+          const { patient_firstName, patient_lastName } = res.data.thePatient;
+          setFirstName(patient_firstName);
+          setLastName(patient_lastName);
+        })
+        .catch(err => console.log(err));
+    }
+  }, [userId]);
 
 
   // In your component:
@@ -90,46 +80,71 @@ const handleLogout = () => {
   );
 };
 
-  const renderSettingOption = (icon, label, onPress = () => {}) => (
+  const navigateToViewProfile = () => {
+    navigation.navigate("viewprofile", {
+      onGoBack: () => {
+        // Trigger refresh when returning from ViewProfile
+        if (refreshMaster) {
+          refreshMaster();
+        }
+      }
+    });
+  };
 
+  const renderSettingOption = (icon, label, onPress = () => {}) => (
+    <TouchableOpacity 
+      activeOpacity={0.7} 
+      onPress={onPress}
+      style={{
+        marginVertical: 8,
+      }}
+    >
       <Card
-        mode='elevated'
-        onPressIn={onPress}
         style={{ 
-          width: '100%', 
-          padding: 5,
-          paddingBottom : 10, 
-          marginVertical: 10,
+          width: '100%',
           backgroundColor: 'white',
+          borderRadius: 12,
+          elevation: 2,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
         }}
       >
-        <Card.Content>
+        <Card.Content style={{ paddingVertical: 16 }}>
           <View style={styles.settingOptionContainer}>
-            <FontAwesome name={icon} size={18} style={styles.iconStyle} />
+            <FontAwesome name={icon} size={20} style={[styles.iconStyle, { marginRight: 12 }]} />
             <Text style={styles.textProfile}>{label}</Text>
-            <Entypo name='chevron-right' size={20} color={sd.colors.blue} />
+            <Entypo name="chevron-right" size={20} color={sd.colors.blue} />
           </View>
         </Card.Content>
       </Card>
-
+    </TouchableOpacity>
   );
 
   return (
     <>
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView 
+        style={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[sd.colors.blue]}
+            tintColor={sd.colors.blue}
+            title="Pull to refresh..."
+            titleColor={sd.colors.blue}
+          />
+        }
+      >
         <View style={styles.settingsContainer}>
           <Text style={styles.settingsTitle}> Settings </Text>
-          {renderSettingOption("user", "Account", () => {navigation.navigate("viewprofile")})}
+          {renderSettingOption("user", "Account", navigateToViewProfile)}
           {renderSettingOption("book", "Medical Records", ()=> {navigation.navigate('medicalrecords')})}
           {renderSettingOption("history", "Activity Logs", () => {navigation.navigate("auditpatient")})} 
           {renderSettingOption("sign-out", "Logout", handleLogout)}
         </View>
       </ScrollView>
-
-      {/* <ViewProfile 
-        isVisible={isAccountModalVisible} 
-        closeModal={() => setAccountModalVisible(false)} 
-      /> */}
     </>
   );
 };
@@ -228,7 +243,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 10,
-    //borderBottomWidth: 1,
     borderColor: "#E0E0E0",
   },
   settingOptionContainer: {
@@ -236,7 +250,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconStyle: {
-    //marginRight: 10,
     color: sd.colors.blue,
     flex: 1,
   },

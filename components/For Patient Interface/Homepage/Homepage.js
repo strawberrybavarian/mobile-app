@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback} from 'react';
 import { 
     View, 
     Text, 
@@ -10,7 +10,8 @@ import {
     Image, 
     Dimensions,
     FlatList,
-    RefreshControl
+    RefreshControl,
+    StyleSheet
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -19,6 +20,7 @@ import { getData } from '../../storageUtility';
 import styles from './HomepageStyles';
 import sd from '../../../utils/styleDictionary';
 import { FontAwesome5 } from '@expo/vector-icons';
+
 
 const { width } = Dimensions.get('window');
 
@@ -252,6 +254,27 @@ const Homepage = () => {
 
     const AnimatedServiceButton = ({ service, icon }) => {
         const scaleValue = useRef(new Animated.Value(1)).current;
+        const opacityValue = useRef(new Animated.Value(0)).current;
+        const translateYValue = useRef(new Animated.Value(20)).current;
+        
+        useEffect(() => {
+            // Staggered entrance animation
+            Animated.sequence([
+                Animated.delay(index * 100), // Stagger based on index
+                Animated.parallel([
+                    Animated.timing(opacityValue, {
+                        toValue: 1,
+                        duration: 400,
+                        useNativeDriver: true
+                    }),
+                    Animated.timing(translateYValue, {
+                        toValue: 0,
+                        duration: 400,
+                        useNativeDriver: true
+                    })
+                ])
+            ]).start();
+        }, []);
         
         const onPressIn = () => {
             Animated.spring(scaleValue, {
@@ -284,7 +307,13 @@ const Homepage = () => {
                 <Animated.View
                     style={[
                         styles.optionBox,
-                        { transform: [{ scale: scaleValue }] }
+                        { 
+                            transform: [
+                                { scale: scaleValue },
+                                { translateY: translateYValue }
+                            ],
+                            opacity: opacityValue
+                        }
                     ]}
                 >
                     {service.imageUrl ? (
@@ -516,7 +545,7 @@ const Homepage = () => {
 
                 <Text style={styles.sectionTitle}>How can we help you today?</Text>
                 
-                {isLoading ? (
+                                {isLoading ? (
                     <ActivityIndicator size="small" color={sd.colors.blue} />
                 ) : (
                     <View style={styles.optionsContainer}>
@@ -527,6 +556,127 @@ const Homepage = () => {
                                 icon={getServiceIcon(service)}
                             />
                         ))}
+                    </View>
+                )}
+                
+                {/* News navigation arrows - move outside the services map */}
+                {news.length > 1 && (
+                    <TouchableOpacity 
+                        style={[styles.carouselArrow, styles.carouselArrowRight]}
+                        activeOpacity={0.7}
+                        onPress={goToNextSlide}
+                    >
+                        <FontAwesome5 name="chevron-right" size={18} color="white" />
+                    </TouchableOpacity>
+                )}
+                
+                {/* Pagination dots - move outside the services map */}
+                {news.length > 1 && (
+                    <View style={styles.paginationContainer}>
+                        {news.map((_, index) => (
+                            <View 
+                                key={index}
+                                style={[
+                                    styles.paginationDot,
+                                    index === activeNewsIndex && styles.activePaginationDot
+                                ]} 
+                            />
+                        ))}
+                    </View>
+                )}
+
+                <View style={styles.sectionSpacing} />
+
+                <Text style={styles.sectionTitle}>Medical Specialties</Text>
+                
+                {isLoadingSpecialties ? (
+                    <ActivityIndicator size="small" color={sd.colors.secondary} />
+                ) : (
+                    <Animated.View style={{ opacity: fadeAnim.specialties, transform: [{ translateY: fadeAnim.specialties.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0]
+                    })}] }}>
+                        <View style={styles.optionsContainer}>
+                            {specialties.map((specialty, index) => (
+                                <AnimatedSpecialtyButton
+                                    key={specialty._id || `specialty-${index}`}
+                                    specialty={specialty}
+                                    index={index}
+                                />
+                            ))}
+                        </View>
+                    </Animated.View>
+                )}
+
+                <View style={styles.sectionSpacing} />
+
+                <View style={styles.sectionDivider} />
+
+                <Text style={styles.sectionTitle}>Our Medical Services</Text>
+
+                {isLoading ? (
+                    <ActivityIndicator size="small" color={sd.colors.blue} />
+                ) : (
+                    <Animated.View style={{ opacity: fadeAnim.services, transform: [{ translateY: fadeAnim.services.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0]
+                    })}] }}>
+                        <View style={styles.optionsContainer}>
+                            {services.map((service, index) => (
+                                <AnimatedServiceButton
+                                    key={service._id || `service-${index}`}
+                                    service={service}
+                                    icon={getServiceIcon(service)}
+                                    index={index}
+                                />
+                            ))}
+                        </View>
+                    </Animated.View>
+                )}
+
+                <View style={styles.sectionSpacing} />
+
+                <View style={styles.sectionDivider} />
+                
+                <View style={doctorStyles.sectionHeaderRow}>
+                    <Text style={styles.sectionTitle}>Our Medical Professionals</Text>
+                    <TouchableOpacity 
+                        style={doctorStyles.viewAllButton}
+                        onPress={() => {
+                            // Navigate to the DoctorSpecialty tab by setting index to 2
+                            navigation.navigate('ptnmain', { 
+                                setActiveTab: 'Doctor Specialty'
+                            });
+                        }}
+                    >
+                        <Text style={doctorStyles.viewAllText}>View All</Text>
+                    </TouchableOpacity>
+                </View>
+                
+                {isLoadingDoctors ? (
+                    <View style={doctorStyles.loadingContainer}>
+                        <ActivityIndicator size="small" color={sd.colors.blue} />
+                        <Text style={doctorStyles.loadingText}>Loading doctors...</Text>
+                    </View>
+                ) : doctors.length > 0 ? (
+                    <Animated.View style={{ opacity: fadeAnim.doctors, transform: [{ translateY: fadeAnim.doctors.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0]
+                    })}] }}>
+                        <FlatList
+                            horizontal
+                            data={doctors}
+                            renderItem={renderDoctorCard}
+                            keyExtractor={item => item._id}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={doctorStyles.doctorsList}
+                            snapToAlignment="start"
+                            decelerationRate="fast"
+                        />
+                    </Animated.View>
+                ) : (
+                    <View style={doctorStyles.emptyContainer}>
+                        <Text style={doctorStyles.emptyText}>No doctors available</Text>
                     </View>
                 )}
                 
@@ -550,6 +700,71 @@ const Homepage = () => {
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
+
+const doctorStyles = StyleSheet.create({
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        marginVertical: 5, // Reduced from 10
+    },
+    viewAllButton: {
+        padding: 4, // Reduced from 6
+    },
+    viewAllText: {
+        color: sd.colors.blue,
+        fontSize: 14,
+        fontFamily: sd.fonts.medium,
+    },
+    doctorsList: {
+        paddingHorizontal: 16,
+        paddingVertical: 5, // Reduced from 10
+    },
+    doctorCard: {
+        width: 145,
+        height: 205,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        marginRight: 10,
+        padding: 0, // Remove padding so image touches edges
+        alignItems: 'center',
+        overflow: 'hidden', // Ensures image corners are clipped if card is rounded
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    doctorImage: {
+        width: '100%',
+        height: 110, // or whatever fits your card height
+        borderRadius: 0, // Remove the circle
+        marginBottom: 8,
+        resizeMode: 'cover', // Make sure the image covers the area
+    },
+    doctorInfo: {
+        alignItems: 'center',
+        paddingTop: 4, // Reduced from 6
+    },
+    doctorName: {
+        fontSize: 14,
+        fontFamily: sd.fonts.semiBold,
+        textAlign: 'center',
+        marginBottom: 2, // Reduced from 4
+        color: '#212121',
+    },
+    loadingContainer: {
+        height: 140, // Reduced from 160
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        height: 140, // Reduced from 160
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default Homepage;

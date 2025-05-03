@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     width: "100%",
     top: 1,
     backgroundColor: 'rgba(182, 178, 178, 0.288)',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     paddingLeft: 10,
     paddingRight: 50,
   },
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 1)',
     borderRadius: 50,
     marginHorizontal: 10,
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   magnifyIcon: {
     width: 20,

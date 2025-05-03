@@ -4,15 +4,22 @@ import sd from '../../../utils/styleDictionary';
 const styles = StyleSheet.create({
   //container
   mainContainer: {
-    height: '100%',
-    backgroundColor: '#f8f8f8',
-  },
-
-  scrollContainer: {
     flex: 1,
     backgroundColor: '#f8f8f8',
   },
 
+  // New style for the ScrollView content
+  scrollContent: {
+    flexGrow: 1,
+    padding: 16,
+    paddingTop: 8,
+    paddingBottom: 60
+  },
+
+  // Replace scrollContainer with appointmentsContainer
+  appointmentsContainer: {
+    marginTop: 5,
+  },
 
   //header
   header: {
@@ -51,30 +58,36 @@ const styles = StyleSheet.create({
 
   // appointments
   cont: {
-    padding: 16,
+    marginTop: 10,
   },
   cardContainer: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    marginBottom: 16,
+    marginBottom: 15,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 3,
+    elevation: 2,
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    backgroundColor: '#fff',
   },
   dateContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 8,
     marginRight: 16,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    minWidth: 60,
   },
   monthText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: sd.fonts.medium,
     color: '#555',
   },
@@ -85,9 +98,9 @@ const styles = StyleSheet.create({
   },
   divider: {
     width: 1,
-    height: '100%',
-    backgroundColor: '#ddd',
-    marginHorizontal: 16,
+    height: '80%',
+    backgroundColor: '#eee',
+    marginHorizontal: 12,
   },
   infoContainer: {
     flex: 1,
@@ -95,19 +108,17 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 16,
     fontFamily: sd.fonts.semiBold,
-    color: '#007BFF',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   dateTime: {
     fontSize: 14,
     fontFamily: sd.fonts.regular,
     color: '#666',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   statusText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: sd.fonts.medium,
-    color: '#007BFF',
   },
   noAppointments: {
     fontSize: 16,
@@ -122,6 +133,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
+  },
+
+  // toggle styles
+  toggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 10,
+    padding: 3,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  toggleButtonActive: {
+    backgroundColor: '#fff',
+    ...sd.shadows.level1,
+  },
+  toggleText: {
+    fontSize: 14,
+    fontFamily: sd.fonts.regular,
+    color: '#666',
+  },
+  toggleTextActive: {
+    color: sd.colors.blue,
+    fontFamily: sd.fonts.medium,
   },
 });
 

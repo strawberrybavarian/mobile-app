@@ -1,49 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Linking } from 'react-native';
-import { Card, Button, Divider, Portal, Dialog, IconButton, ActivityIndicator, useTheme } from 'react-native-paper';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Linking, ActivityIndicator } from 'react-native';
+import { Card, Button, Divider, Portal, Dialog, IconButton, useTheme } from 'react-native-paper';
 import { FontAwesome5, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import { ip } from '../../../../../ContentExport';
 import sd from '../../../../../utils/styleDictionary';
-
-// Placeholder lab result when no records exist
-const placeholderLabResult = {
-  _id: 'placeholder',
-  title: 'Complete Blood Count (CBC)',
-  date: new Date().toISOString(),
-  doctor: {
-    doctor_firstName: 'Sample',
-    doctor_lastName: 'Doctor'
-  },
-  file: {
-    path: 'samples/lab_result_sample.pdf',
-    filename: 'sample_cbc_result.pdf'
-  },
-  testType: 'Blood Test',
-  labLocation: 'Main Hospital Laboratory',
-  results: [
-    { name: 'Hemoglobin', value: '14.2 g/dL', normalRange: '13.5-17.5 g/dL', status: 'Normal' },
-    { name: 'White Blood Cell Count', value: '7.8 x10^9/L', normalRange: '4.5-11.0 x10^9/L', status: 'Normal' },
-    { name: 'Platelet Count', value: '250 x10^9/L', normalRange: '150-450 x10^9/L', status: 'Normal' }
-  ],
-  interpretation: 'All values are within normal ranges. No significant abnormalities detected.'
-};
 
 const LabResult = ({patient}) => {
   const theme = useTheme();
   const [labResults, setLabResults] = useState([]);
   const [selectedLabResult, setSelectedLabResult] = useState(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (patient && patient.laboratoryResults && patient.laboratoryResults.length > 0) {
-      setLabResults(patient.laboratoryResults);
-      setShowPlaceholder(false);
-    } else {
-      setLabResults([]);
-      setShowPlaceholder(true);
+    if (patient) {
+      // Load actual lab results from patient data (no placeholders)
+      if (patient.laboratoryResults && patient.laboratoryResults.length > 0) {
+        setLabResults(patient.laboratoryResults);
+      } else {
+        setLabResults([]);
+      }
+      setLoading(false);
     }
   }, [patient]);
 
@@ -73,7 +51,6 @@ const LabResult = ({patient}) => {
   const openFile = async (fileUrl) => {
     if (!fileUrl) return;
     
-    setLoading(true);
     try {
       const fullUrl = fileUrl.startsWith('http') ? fileUrl : `${ip.address}/${fileUrl}`;
       const supported = await Linking.canOpenURL(fullUrl);
@@ -86,15 +63,11 @@ const LabResult = ({patient}) => {
     } catch (error) {
       console.error('Error opening file:', error);
       alert('Failed to open the file. Please try again later.');
-    } finally {
-      setLoading(false);
     }
   };
 
   const renderLabResultCards = () => {
-    const displayResults = showPlaceholder ? [placeholderLabResult] : labResults;
-    
-    return displayResults.map((labResult, index) => (
+    return labResults.map((labResult, index) => (
       <TouchableOpacity
         key={labResult._id || index}
         activeOpacity={0.7}
@@ -103,11 +76,6 @@ const LabResult = ({patient}) => {
       >
         <Card style={cardStyles.card}>
           <View style={cardStyles.contentWrapper}>
-            {showPlaceholder && (
-              <View style={cardStyles.placeholderBanner}>
-                <Text style={cardStyles.placeholderText}>Sample</Text>
-              </View>
-            )}
             <Card.Content style={cardStyles.contentContainer}>
               <View style={cardStyles.headerContainer}>
                 <View>
@@ -140,7 +108,9 @@ const LabResult = ({patient}) => {
                     <View>
                       <Text style={cardStyles.detailLabel}>Requested By</Text>
                       <Text style={cardStyles.detailText}>
-                        {`Dr. ${labResult.doctor.doctor_firstName || ''} ${labResult.doctor.doctor_lastName || ''}`}
+                        {`Dr. ${labResult.doctor.dr_firstName || labResult.doctor.doctor_firstName || ''} ${
+                          labResult.doctor.dr_middleInitial ? labResult.doctor.dr_middleInitial + '. ' : ''
+                        }${labResult.doctor.dr_lastName || labResult.doctor.doctor_lastName || ''}`}
                       </Text>
                     </View>
                   </View>
@@ -167,10 +137,21 @@ const LabResult = ({patient}) => {
 
   return (
     <View style={{ marginBottom: 20 }}>
-      {labResults.length > 0 || showPlaceholder ? (
+      {loading ? (
+        <View style={styles.emptyStateContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.emptyStateMessage}>Loading laboratory results...</Text>
+        </View>
+      ) : labResults.length > 0 ? (
         renderLabResultCards()
       ) : (
-        <Text style={styles.noLabResults}>No laboratory results found.</Text>
+        <View style={styles.emptyStateContainer}>
+          <FontAwesome5 name="flask" size={50} color="#CCCCCC" style={styles.emptyStateIcon} />
+          <Text style={styles.emptyStateTitle}>No Laboratory Results</Text>
+          <Text style={styles.emptyStateMessage}>
+            You don't have any laboratory results in your medical records yet.
+          </Text>
+        </View>
       )}
       
       <Portal>
@@ -203,7 +184,9 @@ const LabResult = ({patient}) => {
                     
                     {selectedLabResult.doctor && (
                       <Text style={modalStyles.doctorName}>
-                        Ordered by Dr. {selectedLabResult.doctor.doctor_firstName || ''} {selectedLabResult.doctor.doctor_lastName || ''}
+                        Ordered by Dr. {selectedLabResult.doctor.dr_firstName || selectedLabResult.doctor.doctor_firstName || ''} {
+                          selectedLabResult.doctor.dr_middleInitial ? selectedLabResult.doctor.dr_middleInitial + '. ' : ''
+                        }{selectedLabResult.doctor.dr_lastName || selectedLabResult.doctor.doctor_lastName || ''}
                       </Text>
                     )}
                   </View>
@@ -319,6 +302,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontStyle: 'italic'
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 30,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginVertical: 20,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    elevation: 2,
+  },
+  emptyStateIcon: {
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontFamily: sd.fonts.semiBold,
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptyStateMessage: {
+    fontFamily: sd.fonts.regular,
+    fontSize: 14,
+    color: '#757575',
+    textAlign: 'center',
   }
 });
 
@@ -333,7 +342,7 @@ const cardStyles = StyleSheet.create({
   },
   contentWrapper: {
     position: 'relative',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   contentContainer: {
     padding: 12,
@@ -403,9 +412,8 @@ const cardStyles = StyleSheet.create({
 const modalStyles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
-    maxHeight: '90%',
-    marginTop: 0,
-    marginBottom: 0,
+    margin: 0, // Remove margin
+    // maxHeight: '90%', // Keep this for height limitation
   },
   modalHeader: {
     flexDirection: 'row',
@@ -425,10 +433,12 @@ const modalStyles = StyleSheet.create({
   },
   scrollArea: {
     paddingHorizontal: 0,
+    paddingBottom: 0, // Ensure no padding at bottom
   },
   scrollContent: {
     padding: 24,
     paddingTop: 0,
+    paddingBottom: 8, // Add small padding at bottom
   },
   header: {
     marginBottom: 16,
@@ -552,6 +562,9 @@ const modalStyles = StyleSheet.create({
   actions: {
     padding: 16,
     justifyContent: 'center',
+    borderTopWidth: 1, // Add border for visual separation
+    borderTopColor: '#f0f0f0',
+    marginTop: 0, // Ensure no margin at top
   },
   closeModalButton: {
     width: '100%',

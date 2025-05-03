@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Pressable, Animated, View, Text } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Entypo from "@expo/vector-icons/Entypo";

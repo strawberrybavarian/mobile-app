@@ -1,4 +1,4 @@
-import sd from '@/utils/styleDictionary';
+import sd from '../../../utils/styleDictionary';
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import Modal from 'react-native-modal';

@@ -7,7 +7,9 @@ import {
   ScrollView, 
   KeyboardAvoidingView, 
   Platform,
-  Image
+  Image,
+  Keyboard,
+  KeyboardEvent
 } from 'react-native';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -29,6 +31,8 @@ const PatientChat = () => {
   const route = useRoute();
   const { userId } = route.params;
   const scrollViewRef = useRef(null);
+  const inputRef = useRef(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const navigation = useNavigation();
   
   const MEDICAL_SECRETARY_NAME = "Medical Secretary";
@@ -96,10 +100,16 @@ const PatientChat = () => {
   // Send message function
   const sendMessage = () => {
     if (message.trim() !== '' && socket) {
+      // Store the message text before clearing
+      const messageText = message.trim();
+      
+      // Clear the input immediately for better UX
+      setMessage('');
+      
       const messageData = {
         senderId: userId.toString(),
         senderModel: 'Patient',
-        message,
+        message: messageText, // Use stored message text
         receiverModel: 'Staff',
       };
 
@@ -108,10 +118,10 @@ const PatientChat = () => {
           setMessages((prevMessages) => [...prevMessages, response.data]);
         } else {
           console.error('Failed to send message:', response.message);
+          // If sending fails, restore the message to the input
+          setMessage(messageText);
         }
       });
-
-      setMessage('');
     }
   };
 
@@ -150,6 +160,44 @@ const PatientChat = () => {
     return groups;
   }, {});
 
+  // Add keyboard listeners
+  useEffect(() => {
+    const keyboardWillShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+    
+    const keyboardWillHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+    
+    return () => {
+      keyboardWillShowListener.remove();
+      keyboardWillHideListener.remove();
+    };
+  }, []);
+
+  // Mark chat notifications as read
+  useEffect(() => {
+    if (userId) {
+      const markChatNotificationsRead = async () => {
+        try {
+          // Use a direct approach without relying on chatWithUser
+          await markChatNotificationsAsRead(null, userId, 'Patient', 'Staff');
+        } catch (error) {
+          // console.error('Error marking chat notifications as read:', error);
+        }
+      };
+      
+      markChatNotificationsRead();
+    }
+  }, [userId]);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -172,15 +220,19 @@ const PatientChat = () => {
       </View>
 
       <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : null}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
       >
         {/* Chat Messages */}
         <ScrollView
           style={styles.chatContainer}
           ref={scrollViewRef}
           onContentSizeChange={scrollToBottom}
+          contentContainerStyle={{
+            paddingBottom: 20, // Add extra padding at the bottom
+          }}
+          keyboardShouldPersistTaps="handled"
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
@@ -257,8 +309,9 @@ const PatientChat = () => {
         </ScrollView>
 
         {/* Message Input */}
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { paddingBottom: Platform.OS === 'ios' ? Math.max(24, keyboardHeight ? 34 : 0) : 16 }]}>
           <TextInput
+            ref={inputRef}
             style={styles.input}
             placeholder="Type your message..."
             value={message}
@@ -271,6 +324,9 @@ const PatientChat = () => {
             dense
             multiline
             maxLength={500}
+            onFocus={() => {
+              setTimeout(() => scrollToBottom(), 100);
+            }}
           />
           <TouchableOpacity
             style={[
@@ -337,6 +393,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidView: {
     flex: 1,
+    width: '100%',
   },
   // Chat container
   chatContainer: {

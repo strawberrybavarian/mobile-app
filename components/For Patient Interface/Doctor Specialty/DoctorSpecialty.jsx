@@ -16,13 +16,14 @@ import { getData } from '../../storageUtility';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { ip } from '../../../ContentExport';
-import styles from './DoctorSpecialtyStyles';
+// import { getData } from '../../storageUtility';
 import sd from '../../../utils/styleDictionary';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Checkbox, Menu, Divider } from 'react-native-paper';
 
 const DoctorSpecialty = ({ preSelectedSpecialty, specialties: propSpecialties, recommendedDoctors }) => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { serviceData, isServiceAppointment } = route.params || {};
   const [isLoading, setIsLoading] = useState(false);
   // User data states
@@ -43,7 +44,6 @@ const DoctorSpecialty = ({ preSelectedSpecialty, specialties: propSpecialties, r
   
   const [refreshing, setRefreshing] = useState(false); // Add refreshing state
   
-  const navigation = useNavigation();
 
   // Fetch doctors and specialties
   const fetchData = async () => {

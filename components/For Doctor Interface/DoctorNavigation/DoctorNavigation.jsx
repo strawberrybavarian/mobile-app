@@ -67,7 +67,7 @@ const DoctorNavigation = ({ activeTab, onTabChange }) => {
                     },
                   ]}
                 >
-                  Home
+                  Dashboard
                 </Text>
               </View>
             </Animated.View>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   
     backgroundColor: '#ffffff',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     elevation: 5,
     shadowOffset: { width: 0, height: 50 },
     shadowColor: 'black',

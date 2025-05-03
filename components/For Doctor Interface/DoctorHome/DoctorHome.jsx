@@ -1,32 +1,42 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image, ScrollView, TextInput, RefreshControl } from 'react-native';
 import { DoctorHomeStyles } from './DoctorHomeStyles';
 import Carousel from "react-native-reanimated-carousel";
 import sd from '../../../utils/styleDictionary';
 import { Card, useTheme, Divider, FAB, ActivityIndicator } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
-import { ip } from '@/ContentExport';
-import { getData } from '@/components/storageUtility';
+import { ip } from '../../../ContentExport';
+import { getData } from '../../storageUtility';
 import DoctorPosts from './DoctorHomeComponents/DoctorPosts';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
-const DoctorHome = () => {
+const DoctorHome = ({ refreshMaster, lastRefreshTimestamp, isRefreshing }) => {
   const [doctorId, setDoctorId] = useState(null);
   const [doctor, setDoctor] = useState({});
   const [todayAppointments, setTodayAppointments] = useState(0);
   const [pendingAppointments, setPendingAppointments] = useState(0);
+  const [completedAppointments, setCompletedAppointments] = useState(0);
+  const [upcomingAppointments, setUpcomingAppointments] = useState(0);
   const [loading, setLoading] = useState(true);
-
+  const [refreshing, setRefreshing] = useState(false);
+  const [categorizedAppointments, setCategorizedAppointments] = useState({
+    today: [],
+    pending: [],
+    completed: [],
+    upcoming: [],
+    ongoing: []
+  });
+ 
   const navigation = useNavigation();
   const [announcement, setAnnouncement] = useState('');
   const [announcementsList, setAnnouncementsList] = useState([]);
-
+  
   const theme = useTheme();  
   const styles = DoctorHomeStyles(theme);
-
+   
   // Fetch and set the doctor ID
   useEffect(() => {
     const fetchDoctorId = async () => {
@@ -51,28 +61,63 @@ const DoctorHome = () => {
     }
   }, [doctorId]);
 
+  // Add this to refresh posts when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      if (doctorId) {
+        fetchAnnouncements(doctorId);
+      }
+    }, [doctorId])
+  );
+
+  // Watch for changes in lastRefreshTimestamp
+  useEffect(() => {
+    if (lastRefreshTimestamp && !isRefreshing && !refreshing) {
+      // Refresh data when master refresh timestamp changes
+      if (doctorId) {
+        fetchAppointmentCounts(doctorId);
+        fetchAnnouncements(doctorId);
+        fetchDoctor(doctorId);
+      }
+    }
+  }, [lastRefreshTimestamp]);
+
   const fetchAppointmentCounts = async (id) => {
     setLoading(true);
     try {
-      // Get today's date in YYYY-MM-DD format
       const today = new Date().toISOString().split('T')[0];
       
-      // Fetch all appointments for the doctor
-      const response = await axios.get(`${ip.address}/api/doctor/appointments/${id}`);
+      const response = await axios.get(`${ip.address}/api/doctor/${id}/appointments`);
       
       if (response.data && response.data.appointments) {
-        // Count today's appointments
-        const todayCount = response.data.appointments.filter(
+        const appointments = response.data.appointments;
+        
+        // Count appointments by status
+        const todayCount = appointments.filter(
           appointment => appointment.date.split('T')[0] === today
         ).length;
         
-        // Count pending appointments
-        const pendingCount = response.data.appointments.filter(
+        const pendingCount = appointments.filter(
           appointment => appointment.status === 'Pending'
         ).length;
         
+        const completedCount = appointments.filter(
+          appointment => appointment.status === 'Completed'
+        ).length;
+        
+        const upcomingCount = appointments.filter(appointment => {
+          const appointmentDate = appointment.date.split('T')[0];
+          return appointmentDate > today;
+        }).length;
+        
+        // Set counts
         setTodayAppointments(todayCount);
         setPendingAppointments(pendingCount);
+        setCompletedAppointments(completedCount);
+        setUpcomingAppointments(upcomingCount);
+        
+        // Categorize appointments for display
+        setCategorizedAppointments(categorizeAppointments(appointments));
       }
     } catch (error) {
       console.error('Error fetching appointment counts:', error);
@@ -85,29 +130,104 @@ const DoctorHome = () => {
     fetchAnnouncements(doctorId);
   };
 
-  const fetchDoctor = (id) => {
-    axios
-      .get(`${ip.address}/api/doctor/one/${id}`)
-      .then((res) => {
-        console.log('Doctor fetched:', res.data);
-        setDoctor(res.data?.doctor);
-      })
-      .catch((err) => console.error('Error fetching doctor:', err));
-  };
+  const fetchDoctor = useCallback((id) => {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(`${ip.address}/api/doctor/one/${id}`)
+        .then((res) => {
+          console.log('Doctor fetched:', res.data);
+          setDoctor(res.data?.doctor);
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Error fetching doctor:', err);
+          reject(err);
+        });
+    });
+  }, []);
 
-  const fetchAnnouncements = (id) => {
-    axios
-      .get(`${ip.address}/api/doctor/api/post/getallpost/${id}`)
-      .then((res) => {
-        console.log('Announcements fetched:', res.data);
-        setAnnouncementsList(res.data?.posts.reverse());
-      })
-      .catch((err) => console.error('Error fetching announcements:', err));
-  };
+  const fetchAnnouncements = useCallback((id) => {
+    return new Promise((resolve, reject) => {
+      axios
+        .get(`${ip.address}/api/doctor/api/post/getallpost/${id}`)
+        .then((res) => {
+          console.log('Announcements fetched:', res.data);
+          setAnnouncementsList(res.data?.posts.reverse());
+          resolve();
+        })
+        .catch((err) => {
+          console.error('Error fetching announcements:', err);
+          reject(err);
+        });
+    });
+  }, []);
 
   const handleViewAppointments = (type) => {
     // Navigate to appointments screen with filter
     navigation.navigate('doctorappointments', { filter: type });
+  };
+
+  // Implement the onRefresh callback for pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (doctorId) {
+        await Promise.all([
+          fetchAnnouncements(doctorId),
+          fetchDoctor(doctorId),
+          fetchAppointmentCounts(doctorId)
+        ]);
+      }
+      
+      // Call the master refresh to update all tabs
+      if (refreshMaster && typeof refreshMaster === 'function') {
+        refreshMaster('Home data updated');
+      }
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [doctorId, refreshMaster]);
+
+  const categorizeAppointments = (appointments) => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    return {
+      today: appointments.filter(appointment => 
+        appointment.date.split('T')[0] === today
+      ).map(formatAppointment),
+      
+      pending: appointments.filter(appointment => 
+        appointment.status === 'Pending'
+      ).map(formatAppointment),
+      
+      completed: appointments.filter(appointment => 
+        appointment.status === 'Completed'
+      ).map(formatAppointment),
+      
+      upcoming: appointments.filter(appointment => {
+        const appointmentDate = appointment.date.split('T')[0];
+        return appointmentDate > today;
+      }).map(formatAppointment),
+      
+      ongoing: appointments.filter(appointment => 
+        appointment.status === 'Ongoing'
+      ).map(formatAppointment)
+    };
+  };
+
+  // Helper function to format appointment for display
+  const formatAppointment = (appointment) => {
+    return {
+      id: appointment._id,
+      appointmentId: appointment.appointment_ID,
+      patientName: `${appointment.patient.patient_firstName} ${appointment.patient.patient_lastName}`,
+      date: new Date(appointment.date).toLocaleDateString(),
+      time: appointment.time,
+      status: appointment.status,
+      reason: appointment.reason
+    };
   };
 
   return (  
@@ -118,6 +238,16 @@ const DoctorHome = () => {
       >
         <ScrollView 
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing || isRefreshing}
+              onRefresh={onRefresh}
+              colors={[theme.colors.primary]}
+              tintColor={theme.colors.primary}
+              title="Pull to refresh"
+              titleColor={theme.colors.primary}
+            />
+          }
         >
           {/* Status Cards */}
           <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>  
@@ -200,7 +330,6 @@ const DoctorHome = () => {
           onPress={() =>
             navigation.navigate('drpost', { 
               doctorId, 
-              fetchPosts: () => fetchAnnouncements(doctorId),
               drimg: doctor?.dr_image,
             })
           }
