@@ -4,7 +4,7 @@ import { Modal, Button, Portal, Badge } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from 'react-native-paper';
 import { DoctorHomeStyles } from '../DoctorHomeStyles';
-import { ip } from '@/ContentExport';
+import { ip } from '../../../../ContentExport';
 import axios from 'axios';
 
 const PostModal = ({ visible, onClose, doctorId, fetchPosts }) => {

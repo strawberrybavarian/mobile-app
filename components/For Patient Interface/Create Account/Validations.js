@@ -2,18 +2,45 @@ function capitalizeWords(text) {
     return text.replace(/\b[a-z]/g, char => char.toUpperCase());
 }
 
-export const validateFirstName = (text) => {
-    text = text.trim();
-    if (!text){
-        return "First Name is required";
+export const createFieldValidator = (initialValue = '') => {
+  return {
+    value: initialValue,
+    touched: false,
+    error: null,
+    setValue: function(newValue) {
+      this.value = newValue;
+      return this;
+    },
+    setTouched: function(isTouched = true) {
+      this.touched = isTouched;
+      return this;
+    },
+    setError: function(errorMessage) {
+      this.error = errorMessage;
+      return this;
+    },
+    reset: function() {
+      this.value = initialValue;
+      this.touched = false;
+      this.error = null;
+      return this;
     }
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;
-    if (!regex.test(text)){
-        return "First Name must be at least 2 characters long and contain only letters.";
-    }
+  };
+};
 
-    return null; // Return null if validation passes
-}
+// Update firstName validation
+export const validateFirstName = (text) => {
+  if (!text || text.trim() === '') {
+    return "First name is required.";
+  }
+  
+  // Check if name contains only letters, spaces, and en dashes
+  if (!/^[a-zA-Z\s\–]+$/.test(text)) {
+    return "First name should contain only letters and en dashes.";
+  }
+  
+  return null;
+};
 
 export const validateMiddleInitial = (text) => {
     text = text.trim(); // Removes any leading or trailing whitespace
@@ -29,31 +56,37 @@ export const validateMiddleInitial = (text) => {
     return null; // Validation passes
 };
 
+// Update lastName validation
 export const validateLastName = (text) => {
-    text = text.trim();
-    if (!text){
-        return "Last Name is required";
-    }
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;
-    if (!regex.test(text)){
-        return "Last Name must be at least 2 characters long and contain only letters.";
-    }
+  if (!text || text.trim() === '') {
+    return "Last name is required.";
+  }
 
-    return null; // Return null if validation passes
-}
+  if (text.length < 2) {
+    return "Last name must be at least 2 characters long.";
+  }
+  
+  // Check if name contains only letters, spaces, and en dashes
+  if (!/^[a-zA-Z\s\–]+$/.test(text)) {
+    return "Last name should contain only letters and en dashes.";
+  }
+  
+  return null;
+};
 
+// Update contactNumber validation
 export const validateContactNumber = (text) => {
-    text = text.trim();
-    if (!text){
-        return "Contact number is required.";
-    }
-    const regex = /^09\d{9}$/;
-    if (!regex.test(text)){
-        return "Contact number must be 11 digits long and begin with 09.";
-    }
-
-    return null; // Return null if validation passes
-}
+  if (!text || text.trim() === '') {
+    return "Contact number is required.";
+  }
+  
+  // Check if the contact number is valid (adjust regex as needed for your region)
+  if (!/^[0-9+\s-]{7,15}$/.test(text.trim())) {
+    return "Please enter a valid contact number.";
+  }
+  
+  return null;
+};
 
 export const validateDob = (dob) => {
     if (!dob) {
@@ -83,10 +116,9 @@ export const validateDob = (dob) => {
     return null; // Return null if validation passes
 };
 
-
 export const validateGender = (text) => {
     if (!text){
-        return "Gender is required";
+        return "Gender is required.";
     }
 
     return null; // Return null if validation passes
@@ -94,11 +126,11 @@ export const validateGender = (text) => {
 
 export const validateAddress = (text) => {
     if (!text){
-        return "Address is required";
+        return "Address is required.";
     }
 
     return null; // Return null if validation passes
-}
+};
 
 export const validateEmail = ( text) => {
     text = text.trim();
@@ -115,7 +147,7 @@ export const validateEmail = ( text) => {
 export const validatePassword = (text) => {
     text = text.trim();
     if (!text){
-        return "Password is required";
+        return "Password is required.";
     }
     if (text.length < 8){
         return "Password must be at least 8 characters long.";
@@ -156,5 +188,70 @@ export const validateLicenseNo = (text) => {
     return null; // Return null if validation passes
 
 }
+
+export const validateRegion = (region) => {
+  if (!region || !region.value) {
+    return "Region is required.";
+  }
+  return null;
+};
+
+export const validateProvince = (province, regionLabel) => {
+  // Province is only required when region is not NCR
+  if (regionLabel !== 'NCR' && (!province || !province.value)) {
+    return "Province is required.";
+  }
+  return null;
+};
+
+export const validateCity = (city) => {
+  if (!city || !city.value) {
+    return "City is required.";
+  }
+  return null;
+};
+
+export const validateBarangay = (barangay) => {
+  if (!barangay || !barangay.value) {
+    return "Barangay is required.";
+  }
+  return null;
+};
+
+// Update street validation
+export const validateStreet = (text) => {
+  if (!text || text.trim() === '') {
+    return "Street address is required.";
+  }
+  return null;
+};
+
+// Update zipCode validation
+export const validateZipCode = (text) => {
+  if (!text || text.trim() === '') {
+    return "ZIP code is required.";
+  }
+  
+  // ZIP codes in Philippines are typically 4 digits
+  if (!/^\d{4}$/.test(text.trim())) {
+    return "Please enter a valid 4-digit ZIP code.";
+  }
+  
+  return null;
+};
+
+// Add this new validation function for nationality
+export const validateNationality = (text) => {
+  if (!text || text.trim() === '') {
+    return "Nationality is required.";
+  }
+  
+  // Check if nationality contains only letters, spaces, and hyphens
+  if (!/^[a-zA-Z\s\-]+$/.test(text)) {
+    return "Nationality should contain only letters, spaces, and hyphens.";
+  }
+  
+  return null;
+};
 
 

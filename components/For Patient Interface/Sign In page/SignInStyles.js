@@ -39,7 +39,7 @@ export const SignInStyles = (theme) => StyleSheet.create({
     marginTop: 50,
   },
   title: {
-    fontSize: 45,
+    fontSize: sd.fontSizes.xxl,
     fontFamily: "Poppins-SemiBold",
     lineHeight: 55,
     color: theme.colors.primary,
@@ -66,11 +66,13 @@ export const SignInStyles = (theme) => StyleSheet.create({
     fontSize: sd.fontSizes.medium,
     fontFamily: sd.fonts.light,
     paddingLeft: 10,
-    top: 2,
+    paddingVertical: 12, // Add vertical padding to center text better
+    textAlignVertical: 'center', // Explicitly set vertical text alignment
     color: theme.colors.onSurface,
   },
   iconContainer: {
     padding: 10,
+    alignSelf: 'center',
   },
   dropdownContainer: {
     height: 50,

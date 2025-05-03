@@ -3,22 +3,64 @@ import { View, Text, TextInput, ScrollView, Image, StyleSheet, Pressable, Alert,
 import { Button, Badge, Avatar, useTheme } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import { ip } from '@/ContentExport';
+import { ip } from '../../../../ContentExport';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import sd from '@/utils/styleDictionary';
 
 const DrPostScreen = ({ navigation, route }) => {
-    const { doctorId, fetchPosts, drimg } = route.params || {};
+    const { doctorId, drimg } = route.params || {};
     const [content, setContent] = useState("");
     const [selectedImages, setSelectedImages] = useState([]);
+    const [wordCount, setWordCount] = useState(0);
     const theme = useTheme();
     const styles = createStyles(theme);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+  
+    // Add keyboard listeners
+    useEffect(() => {
+      const keyboardDidShowListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        (e) => {
+          setKeyboardHeight(e.endCoordinates.height);
+        }
+      );
+      
+      const keyboardDidHideListener = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        () => {
+          setKeyboardHeight(0);
+        }
+      );
+
+      // Auto focus the TextInput on component mount
+      setTimeout(() => {
+        if (contentInputRef.current) {
+          contentInputRef.current.focus();
+        }
+      }, 100);
+
+      return () => {
+        keyboardDidShowListener.remove();
+        keyboardDidHideListener.remove();
+      };
+    }, []);
+    
+    const contentInputRef = React.useRef(null);
+
+    const calculateWordCount = (text) => {
+      const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+      return words.length;
+    };
   
     const handleImagePick = async () => {
+      // Dismiss keyboard before opening image picker
+      Keyboard.dismiss();
+      
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
       });
+      
       if (result?.assets) {
         const newImages = result.assets.map((asset) => asset.uri);
         setSelectedImages((prev) => [...prev, ...newImages]);
@@ -26,10 +68,11 @@ const DrPostScreen = ({ navigation, route }) => {
     };
   
     const handlePostSubmit = async () => {
-        if (content === "") {
-          Alert.alert("Content is empty!");
-          return;
-        }
+      // Check if content is empty
+      if (content.trim() === "") {
+        Alert.alert("Error", "Post content cannot be empty.");
+        return;
+      }
       
         try {
           const formData = new FormData();

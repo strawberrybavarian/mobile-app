@@ -16,22 +16,27 @@ const TwoFactorAuth = ({ visible, hideModal, onSuccess, onCancel }) => {
   const [secret, setSecret] = useState('');
   const [loading, setLoading] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchUserData = async () => {
       try {
         const id = await getData('userId');
         if (id) {
           setUserId(id);
         }
+        
+        // Check if 2FA is enabled
+        const enabled = await getData('twoFactorEnabled');
+        setTwoFactorEnabled(enabled === 'true');
       } catch (error) {
-        console.error('Error fetching user ID:', error);
+        console.error('Error fetching user data:', error);
       }
     };
     
     if (visible) {
-      fetchUserId();
+      fetchUserData();
     }
   }, [visible]);
 
@@ -63,6 +68,62 @@ const TwoFactorAuth = ({ visible, hideModal, onSuccess, onCancel }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const disableTwoFactor = async () => {
+    Alert.alert(
+      "Disable Two-Factor Authentication",
+      "This will reduce the security of your account. Are you sure you want to continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Disable",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              console.log("Disabling 2FA for user:", userId);
+              // API call to disable 2FA - fixed endpoint and parameters
+              const response = await axios.post(`${ip.address}/api/patient/api/disable-2fa`, { 
+                userId: userId
+              });
+              
+              if (response.data && (response.data.success || response.data.message === '2FA disabled successfully')) {
+                // Update user settings
+                await storeData('twoFactorEnabled', 'false');
+                setTwoFactorEnabled(false);
+                
+                // Notify parent component
+                if (onSuccess) {
+                  onSuccess();
+                }
+                
+                Alert.alert(
+                  "Success", 
+                  "Two-factor authentication has been turned off for your account.",
+                  [{ text: "OK", onPress: hideModal }]
+                );
+              } else {
+                Alert.alert("Error", "Failed to disable two-factor authentication. Please try again.");
+              }
+            } catch (error) {
+              console.error('Error disabling 2FA:', error.response || error);
+              
+              // Improved error message handling
+              let errorMessage = 'Failed to disable two-factor authentication. Please try again.';
+              if (error.response) {
+                console.log("Error response data:", error.response.data);
+                errorMessage = error.response.data?.message || errorMessage;
+              }
+              
+              Alert.alert("Error", errorMessage);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const copySecretToClipboard = async () => {
@@ -132,61 +193,93 @@ const TwoFactorAuth = ({ visible, hideModal, onSuccess, onCancel }) => {
   const renderIntroScreen = () => (
     <View style={styles.contentContainer}>
       <View style={styles.iconContainer}>
-        <FontAwesome5 name="shield-alt" size={60} color={theme.colors.primary} />
+        <FontAwesome5 
+          name={twoFactorEnabled ? "shield-check" : "shield-alt"} 
+          size={60} 
+          color={twoFactorEnabled ? "#4CAF50" : theme.colors.primary} 
+        />
       </View>
       
-      <Text style={styles.title}>Two-Factor Authentication</Text>
-      <Text style={styles.subtitle}>Add an extra layer of security to your appointments</Text>
-      
-      <View style={styles.infoContainer}>
-        <View style={styles.infoItem}>
-          <View style={styles.stepNumberBadge}>
-            <Text style={styles.stepNumber}>1</Text>
-          </View>
-          <View style={styles.stepTextContainer}>
-            <Text style={styles.stepTitle}>Download an authenticator app</Text>
-            <Text style={styles.stepDescription}>
-              Download Google Authenticator, Authy, or any other authenticator app on your device.
+      {twoFactorEnabled ? (
+        <>
+          <Text style={styles.title}>Two-Factor Authentication Enabled</Text>
+          <Text style={styles.subtitle}>Your account is currently protected with two-factor authentication</Text>
+          
+          <View style={styles.successInfoContainer}>
+            <Text style={styles.successInfoText}>
+              When you book appointments, you'll need to enter a verification code from your authenticator app.
             </Text>
           </View>
-        </View>
-        
-        <View style={styles.infoItem}>
-          <View style={styles.stepNumberBadge}>
-            <Text style={styles.stepNumber}>2</Text>
+          
+          <Button 
+            mode="contained"
+            onPress={disableTwoFactor}
+            loading={loading}
+            disabled={loading}
+            style={[styles.button, {backgroundColor: '#ff3b30'}]}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+            icon="shield-off"
+          >
+            Disable Two-Factor Authentication
+          </Button>
+        </>
+      ) : (
+        <>
+          <Text style={styles.title}>Two-Factor Authentication</Text>
+          <Text style={styles.subtitle}>Add an extra layer of security to your appointments</Text>
+          
+          <View style={styles.infoContainer}>
+            <View style={styles.infoItem}>
+              <View style={styles.stepNumberBadge}>
+                <Text style={styles.stepNumber}>1</Text>
+              </View>
+              <View style={styles.stepTextContainer}>
+                <Text style={styles.stepTitle}>Download an authenticator app</Text>
+                <Text style={styles.stepDescription}>
+                  Download Google Authenticator, Authy, or any other authenticator app on your device.
+                </Text>
+              </View>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <View style={styles.stepNumberBadge}>
+                <Text style={styles.stepNumber}>2</Text>
+              </View>
+              <View style={styles.stepTextContainer}>
+                <Text style={styles.stepTitle}>Scan QR code</Text>
+                <Text style={styles.stepDescription}>
+                  Scan the QR code with your authenticator app to set up your account.
+                </Text>
+              </View>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <View style={styles.stepNumberBadge}>
+                <Text style={styles.stepNumber}>3</Text>
+              </View>
+              <View style={styles.stepTextContainer}>
+                <Text style={styles.stepTitle}>Enter verification code</Text>
+                <Text style={styles.stepDescription}>
+                  Enter the 6-digit code from your authenticator app to verify your setup.
+                </Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.stepTextContainer}>
-            <Text style={styles.stepTitle}>Scan QR code</Text>
-            <Text style={styles.stepDescription}>
-              Scan the QR code with your authenticator app to set up your account.
-            </Text>
-          </View>
-        </View>
-        
-        <View style={styles.infoItem}>
-          <View style={styles.stepNumberBadge}>
-            <Text style={styles.stepNumber}>3</Text>
-          </View>
-          <View style={styles.stepTextContainer}>
-            <Text style={styles.stepTitle}>Enter verification code</Text>
-            <Text style={styles.stepDescription}>
-              Enter the 6-digit code from your authenticator app to verify your setup.
-            </Text>
-          </View>
-        </View>
-      </View>
-      
-      <Button 
-        mode="contained"
-        onPress={generateQrCode}
-        loading={loading}
-        disabled={loading}
-        style={styles.button}
-        contentStyle={styles.buttonContent}
-        labelStyle={styles.buttonLabel}
-      >
-        Get Started
-      </Button>
+          
+          <Button 
+            mode="contained"
+            onPress={generateQrCode}
+            loading={loading}
+            disabled={loading}
+            style={styles.button}
+            contentStyle={styles.buttonContent}
+            labelStyle={styles.buttonLabel}
+          >
+            Get Started
+          </Button>
+        </>
+      )}
     </View>
   );
 

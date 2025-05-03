@@ -1,10 +1,19 @@
 import { StyleSheet, StatusBar, Platform, ActivityIndicator, View } from 'react-native';
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native"; // Added import
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from 'expo-font';
 import { CardStyleInterpolators, TransitionSpecs } from '@react-navigation/stack';
 import { lightTheme as theme } from './utils/theme';
+import React, { useEffect, useState } from 'react';
+import * as ExpoNotifications from 'expo-notifications';
 
+import NotificationHandler from './services/NotificationHandler';
+import { setupNotificationChannels } from './utils/setupNotificationChannels'; // Added import
+import { NotificationProvider } from './contexts/NotificationContext'; // Added import
+import ForgotPasswordPage from './components/For Patient Interface/Sign In page/ForgotPasswordPage'; // Added import
+import TestNotifications from './components/NotificationTest';
+// Create navigation ref
+export const navigationRef = createNavigationContainerRef(); // Added line
 // Import components
 import SigninPage from './components/For Patient Interface/Sign In page/SigninPage';
 import MyProfile from './components/For Patient Interface/My Profile/MyProfile';
@@ -44,8 +53,6 @@ import AuditPatient from './components/For Patient Interface/My Profile/AuditPat
 import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { UserProvider, useUser } from './UserContext';
-import { navigationRef } from './RootNavigation';
-import React from 'react';
 import BookServices from './components/For Patient Interface/Book Appointment/BookServices';
 import EditProfileScreen from './components/For Patient Interface/My Profile/EditProfileScreen';
 import DoctorAvailability from './components/For Doctor Interface/Doctor Profile/DoctorAvailability';
@@ -72,13 +79,17 @@ const AppContent = () => {
   };
   
   return (
-    <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator initialRouteName={getInitialRoute()} screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='landingpage' component={LandingPage} />
-        <Stack.Screen name='SigninPage' component={SigninPage} />
-        <Stack.Screen name='createaccount' component={CreateAccount}/>
-        <Stack.Screen name='createDoctorAccount' component={CreateAccountDoctor}/>
-        <Stack.Screen name='emailverification' component={EmailVerificationPage}/>
+    <>
+      {user && <NotificationHandler />}
+      <NavigationContainer ref={navigationRef}>
+        <Stack.Navigator initialRouteName={getInitialRoute()} screenOptions={{ headerShown: false }}>
+          <Stack.Screen name = "notiftest" component={TestNotifications} />
+          <Stack.Screen name='landingpage' component={LandingPage} />
+          <Stack.Screen name='SigninPage' component={SigninPage} />
+          <Stack.Screen name='createaccount' component={CreateAccount}/>
+          <Stack.Screen name='createDoctorAccount' component={CreateAccountDoctor}/>
+          <Stack.Screen name='emailverification' component={EmailVerificationPage}/>
+          <Stack.Screen name='ForgotPasswordPage' component={ForgotPasswordPage}/>
 
         {/* Patient */}
         <Stack.Screen name='home' component={Homepage}/>
@@ -164,6 +175,7 @@ const AppContent = () => {
         <Stack.Screen name='draudit' component={AuditDoctor} />
       </Stack.Navigator>   
     </NavigationContainer>
+    </>
   );
 };
 
@@ -190,6 +202,22 @@ export default function App() {
     'Poppins-SemiBoldItalic': require('./assets/fonts/Poppins-SemiBoldItalic.ttf'),
   });
 
+  // const [fontLoaded, setFontLoaded] = useState(false);
+
+  useEffect(() => {
+    // Set up notification handler and channels
+    ExpoNotifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        priority: 'high'
+      }),
+    });
+    
+    setupNotificationChannels();
+  }, []);
+
   if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -199,15 +227,17 @@ export default function App() {
   }
 
   return (
-    <>
-      <StatusBar hidden={true}/>
-      <SafeAreaProvider>
-        <PaperProvider theme={theme}>
-          <UserProvider>
-            <AppContent />
-          </UserProvider>
-        </PaperProvider>
-      </SafeAreaProvider>
+    <><UserProvider>
+    <NotificationProvider>
+        <StatusBar hidden={true}/>
+        <SafeAreaProvider>
+          <PaperProvider theme={theme}>
+            
+              <AppContent />
+            
+          </PaperProvider>
+        </SafeAreaProvider>
+      </NotificationProvider></UserProvider>
     </>
   );
 }
@@ -217,4 +247,4 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   }
-});
+})

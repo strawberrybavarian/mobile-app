@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'flex-start',
     backgroundColor: '#ffffff',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     elevation: 5,
     shadowOffset: { width: 0, height: 50 },
     shadowColor: 'black',

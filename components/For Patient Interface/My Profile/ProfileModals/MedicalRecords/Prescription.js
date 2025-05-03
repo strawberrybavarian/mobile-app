@@ -343,7 +343,7 @@ const cardStyles = StyleSheet.create({
   },
   contentWrapper: {
     position: 'relative',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   contentContainer: {
     padding: 12,
@@ -547,7 +547,7 @@ const modalStyles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#f0f0f0',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   medicationHeader: {
     flexDirection: 'row',

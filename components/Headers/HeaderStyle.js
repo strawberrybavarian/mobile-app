@@ -54,4 +54,37 @@ export default headerStyles = (theme) => StyleSheet.create({
     height: 50,
     fontSize: 15,
   },
+  notificationButton: {
+    padding: 10,
+    marginLeft: 'auto',
+    zIndex: 2,
+  },
+  bellContainer: {
+    position: 'relative',
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 12,
+    height: 12,
+    backgroundColor: '#FF3B30',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    zIndex: 999,
+    // Add shadow for better visibility
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
 });

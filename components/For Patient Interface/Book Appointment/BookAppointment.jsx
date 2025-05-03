@@ -20,7 +20,7 @@ import { formatTime } from '../../../utils/formatTime';
 import { useTheme } from 'react-native-paper';
 import BookAppointmentStyles from './BookAppointmentStyles';
 import { Entypo } from '@expo/vector-icons';
-import { useUser } from '@/UserContext';
+import { useUser } from '../../../UserContext';
 import { storeData } from '../../storageUtility';
 import { useRoute } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
@@ -57,7 +57,10 @@ const BookAppointment = ({ navigation, route }) => {
   );
   const [showDateModal, setShowDateModal] = useState(false);
   const [loadingTimes, setLoadingTimes] = useState(false);
-
+// Add these state variables after other useState declarations
+const [announcements, setAnnouncements] = useState([]);
+const [announcementsModalVisible, setAnnouncementsModalVisible] = useState(false);
+const [loadingAnnouncements, setLoadingAnnouncements] = useState(false);
   const appointmentTypeText = selectedService ? selectedService.name : "Consultation";
   const appointmentCategoryText = selectedService ? selectedService.category : "General";
 
@@ -196,7 +199,6 @@ useEffect(() => {
       };
   
       fetchAppointments(); // Invoke the async function
-      console.log('xxx:', availableTimes);
     } else {
       setAvailableTimes([]); // Reset if no date selected
       setLoading(false); // Ensure loading state is set to false
@@ -744,41 +746,41 @@ return (
 };
 
 // Replace the response interceptor with this more forgiving version:
-const responseInterceptor = axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (
-      error.response &&
-      error.response.status === 401 &&
-      !error.config.url.includes('/api/verify-token') &&
-      !error.config.url.includes('/createappointment') && // Don't logout during appointment creation
-      !error.config._isRetry // Prevent infinite retry loops
-    ) {
-      console.log("401 error detected in non-appointment endpoint");
+// const responseInterceptor = axios.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     if (
+//       error.response &&
+//       error.response.status === 401 &&
+//       !error.config.url.includes('/api/verify-token') &&
+//       !error.config.url.includes('/createappointment') && // Don't logout during appointment creation
+//       !error.config._isRetry // Prevent infinite retry loops
+//     ) {
+//       console.log("401 error detected in non-appointment endpoint");
       
-      try {
-        // Try to refresh token first
-        const storedToken = await getData('authToken');
-        const userId = await getData('userId');
+//       try {
+//         // Try to refresh token first
+//         const storedToken = await getData('authToken');
+//         const userId = await getData('userId');
         
-        if (storedToken && userId) {
-          // Mark this request as a retry
-          error.config._isRetry = true;
+//         if (storedToken && userId) {
+//           // Mark this request as a retry
+//           error.config._isRetry = true;
           
-          // Try the request again with the existing token
-          return axios(error.config);
-        } else {
-          console.log("No stored credentials for refresh, logging out");
-          logout();
-        }
-      } catch (refreshErr) {
-        console.log("Token refresh failed:", refreshErr);
-        // Don't auto-logout on every error
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+//           // Try the request again with the existing token
+//           return axios(error.config);
+//         } else {
+//           console.log("No stored credentials for refresh, logging out");
+//           logout();
+//         }
+//       } catch (refreshErr) {
+//         console.log("Token refresh failed:", refreshErr);
+//         // Don't auto-logout on every error
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 
 export default BookAppointment;

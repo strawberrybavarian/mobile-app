@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "633595267790",
+    "project_id": "molinocareapp",
+    "storage_bucket": "molinocareapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633595267790:android:39372ff740cdef532e5e9f",
+        "android_client_info": {
+          "package_name": "com.teamhortons.molinocareapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD1ZLJmM5fxg6rBVeyQ0ezIdc6FVjqbs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

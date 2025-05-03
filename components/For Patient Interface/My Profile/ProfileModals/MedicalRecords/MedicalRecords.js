@@ -1,4 +1,4 @@
-import { StyleSheet, Text, Alert, View, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, Alert, View, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -10,7 +10,6 @@ import { ip } from '../../../../../ContentExport';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getData } from '../../../../storageUtility';
 import sd from '../../../../../utils/styleDictionary';
-import { SegmentedButtons } from 'react-native-paper';
 import styles from './MedicalRecordsStyles';
 import MedicalHistory from './MedicalHistory';
 import Prescription from './Prescription';
@@ -21,10 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const MedicalRecords = () => {
     const [userId, setUserId] = useState('');
     const [patient, setPatient] = useState(null);
-    const [medicalHistory, setMedicalHistory] = useState(null);
-    const [prescriptions, setPrescriptions] = useState(null);
-    const [immunizations, setImmunizations] = useState(null);
     const [value, setValue] = useState('Medical History');
+    const [showDropdown, setShowDropdown] = useState(false);
     const navigation = useNavigation();
 
     // Fetch user ID from storage
@@ -58,15 +55,36 @@ const MedicalRecords = () => {
         }, [userId, value])
     );
 
+    // Define the options for our dropdown
+    const recordOptions = [
+        {
+            value: 'Medical History',
+            label: 'Patient History',
+            icon: 'notes-medical'
+        },
+        {
+            value: 'Immunizations',
+            label: 'Immunizations',
+            icon: 'syringe'
+        },
+        {
+            value: 'LabResult',
+            label: 'Laboratory',
+            icon: 'flask'
+        }
+    ];
+
+    // Get the current selected option label
+    const selectedOption = recordOptions.find(option => option.value === value);
 
     return (
         <>
-        <SafeAreaView style = {styles.mainContainer}>
-            <ScrollView style = {styles.scrollContainer}>
-                <View style = {styles.headerContainer}>
-                    <Entypo name = 'chevron-thin-left' size = {18} color = {sd.colors.black} style = {[styles.backIcon, {flex:1}]} onPress = {() => navigation.goBack()} />
-                    <Text style = {styles.headerText}>Medical Records</Text>
-                    <View style = {{flex:1}}></View>
+        <SafeAreaView style={styles.mainContainer}>
+            <ScrollView style={styles.scrollContainer}>
+                <View style={styles.headerContainer}>
+                    <Entypo name="chevron-thin-left" size={18} color={sd.colors.black} style={[styles.backIcon, {flex:1}]} onPress={() => navigation.goBack()} />
+                    <Text style={styles.headerText}>Medical Records</Text>
+                    <View style={{flex:1}}></View>
                 </View>
                 <SegmentedButtons
                     value = {value}
@@ -104,26 +122,63 @@ const MedicalRecords = () => {
                     style = {{marginVertical: 10}}
                 />
                 {value === 'Medical History' ? (
-                    <MedicalHistory 
-                        patient = {patient}
-                    />
-                ) : 
-                value === 'Prescriptions' ? (
-                    <Prescription
-                        patient = {patient}
-                    />
-                ) : 
-                value === 'Immunizations' ? (
-                    <Immunization
-                        patient = {patient}
-                    />
-                ) : 
-                value === 'LabResult' ? (
-                    <LabResult
-                        patient={patient}
-                    />
+                    <MedicalHistory patient={patient} />
+                ) : value === 'Prescriptions' ? (
+                    <Prescription patient={patient} />
+                ) : value === 'Immunizations' ? (
+                    <Immunization patient={patient} />
+                ) : value === 'LabResult' ? (
+                    <LabResult patient={patient} />
                 ) : (null)}
             </ScrollView>
+            
+            {/* Dropdown Modal */}
+            <Modal
+                visible={showDropdown}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowDropdown(false)}
+            >
+                <TouchableOpacity 
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowDropdown(false)}
+                >
+                    <View style={styles.dropdownMenu}>
+                        {recordOptions.map((option) => (
+                            <TouchableOpacity
+                                key={option.value}
+                                style={[
+                                    styles.dropdownItem,
+                                    value === option.value && styles.dropdownItemActive
+                                ]}
+                                onPress={() => {
+                                    setValue(option.value);
+                                    setShowDropdown(false);
+                                }}
+                            >
+                                <FontAwesome5 
+                                    name={option.icon} 
+                                    size={16}
+                                    color={value === option.value ? sd.colors.blue : sd.colors.gray} 
+                                    style={styles.dropdownItemIcon}
+                                />
+                                <Text 
+                                    style={[
+                                        styles.dropdownItemText,
+                                        value === option.value && styles.dropdownItemTextActive
+                                    ]}
+                                >
+                                    {option.label}
+                                </Text>
+                                {value === option.value && (
+                                    <FontAwesome5 name="check" size={14} color={sd.colors.blue} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
         </>
     )

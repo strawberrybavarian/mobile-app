@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button, useTheme } from 'react-native-paper';
-import axios from 'axios'; // Added missing axios import
+import axios from 'axios';
 import CancelAppointmentModal from './CancelAppointmentModal';
-import RescheduleModal from './RescheduleAppointmentModal';
+import RescheduleAppointmentModal from './RescheduleAppointmentModal';
 import { getData } from '../../storageUtility';
 import { ip } from '../../../ContentExport';
 import sd from '../../../utils/styleDictionary';
 
 const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
-  const theme = useTheme(); // Access the theme using the useTheme hook
+  const theme = useTheme();
   const [isCancelModalVisible, setCancelModalVisible] = useState(false);
   const [isRescheduleModalVisible, setRescheduleModalVisible] = useState(false);
-  const [isButtonVisible, setIsButtonVisible] = useState(false);
+  const [isCancelButtonVisible, setCancelButtonVisible] = useState(false);
+  const [isRescheduleButtonVisible, setRescheduleButtonVisible] = useState(false);
   const styles = DetailStyles(theme);
 
+  // Determine if this is a service appointment (no doctor)
+  const isServiceAppointment = !appointmentData?.doctor && appointmentData?.appointment_type;
+
   useEffect(() => {
-    if (appointmentData && (appointmentData.status === 'Pending' || appointmentData.status === 'Scheduled')) {
-      setIsButtonVisible(true);
-    } else {
-      setIsButtonVisible(false);
+    if (appointmentData) {
+      if (appointmentData.status === 'Rescheduled') {
+        // Show both buttons for Rescheduled appointments
+        setCancelButtonVisible(true);
+        setRescheduleButtonVisible(true);
+      } 
+      // Show only cancel button for Scheduled and Pending appointments
+      else if (appointmentData.status === 'Scheduled' || appointmentData.status === 'Pending') {
+        setCancelButtonVisible(true);
+        setRescheduleButtonVisible(false);
+      } 
+      // Hide both buttons for other statuses
+      else {
+        setCancelButtonVisible(false);
+        setRescheduleButtonVisible(false);
+      }
     }
   }, [appointmentData]);
 
@@ -29,13 +45,33 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
 
   const handleCancel = async (cancelReason) => {
     try {
-      const userId = await getData('userId');
-      if (userId) {
-        await axios.put(`${ip.address}/api/patient/${appointmentData._id}/updateappointment`, { cancelReason });
-        closeModal();
+      // Validate reason exists
+      if (!cancelReason?.trim()) {
+        Alert.alert('Error', 'Please provide a reason for cancellation');
+        return;
+      }
+      
+      console.log('Canceling appointment:', appointmentData._id);
+      
+      // FIXED: Added missing 'api' segment in the URL
+      const response = await axios.put(
+        `${ip.address}/api/patient/${appointmentData._id}/updateappointment`, 
+        { 
+          cancelReason, 
+          status: 'Cancelled'  // Important: Include status change
+        }
+      );
+      
+      if (response.status === 200) {
+        Alert.alert(
+          'Success', 
+          'Your appointment has been cancelled successfully.',
+          [{ text: 'OK', onPress: () => closeModal() }]
+        );
       }
     } catch (error) {
-      console.error(error);
+      console.error('Cancel appointment error:', error);
+      Alert.alert('Error', 'Failed to cancel appointment. Please try again.');
     }
   };
 
@@ -83,6 +119,108 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
     </View>
   );
 
+  // Function to render appropriate cards based on appointment type
+  const renderAppointmentDetails = () => {
+    const commonCards = [
+      <InfoCard
+        key="date"
+        icon="event"
+        title="Date"
+        value={new Date(appointmentData.date).toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        })}
+      />
+    ];
+
+    // Add time if available
+    if (appointmentData.time) {
+      commonCards.push(
+        <InfoCard 
+          key="time" 
+          icon="schedule" 
+          title="Time" 
+          value={appointmentData.time} 
+        />
+      );
+    }
+
+    // Add appropriate provider information
+    if (isServiceAppointment) {
+      // For service appointments
+      commonCards.push(
+        <InfoCard
+          key="service"
+          icon="medical-services"
+          title="Service"
+          value={appointmentData.appointment_type?.appointment_type}
+        />,
+        <InfoCard
+          key="category"
+          icon="category"
+          title="Category"
+          value={appointmentData.appointment_type?.category || "General Service"}
+        />
+      );
+    } else {
+      // For doctor appointments
+      commonCards.push(
+        <InfoCard
+          key="doctor"
+          icon="person"
+          title="Doctor"
+          value={appointmentData.doctor ? 
+            `Dr. ${appointmentData.doctor.dr_firstName} ${appointmentData.doctor.dr_lastName}` : 
+            'Not assigned yet'}
+        />,
+        <InfoCard
+          key="type"
+          icon="medical-services"
+          title="Appointment Type"
+          value={appointmentData.appointment_type?.appointment_type || 'Consultation'}
+        />
+      );
+    }
+
+    // Add status information
+    commonCards.push(
+      <InfoCard 
+        key="status" 
+        icon="info" 
+        title="Status" 
+        value={appointmentData.status} 
+      />
+    );
+
+    // Add medium if available (for doctor appointments)
+    if (!isServiceAppointment && appointmentData.medium) {
+      commonCards.push(
+        <InfoCard
+          key="medium"
+          icon="video-call"
+          title="Medium"
+          value={appointmentData.medium}
+        />
+      );
+    }
+
+    // Add reason if available
+    if (appointmentData.reason) {
+      commonCards.push(
+        <InfoCard 
+          key="reason" 
+          icon="comment" 
+          title={isServiceAppointment ? "Service Request Details" : "Primary Concern"} 
+          value={appointmentData.reason} 
+        />
+      );
+    }
+
+    return commonCards;
+  };
+
   return (
     <Modal
       isVisible={isVisible}
@@ -100,46 +238,20 @@ const AppointmentDetails = ({ appointmentData, closeModal, isVisible }) => {
       <View style={[styles.modalContainer, { backgroundColor: theme.colors.surface }]}>
         <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
           <Text style={[styles.headerTitle, { color: theme.colors.onPrimary || '#fff' }]}>
-             Appointment Details
+             {isServiceAppointment ? 'Service Appointment' : 'Doctor Appointment'}
           </Text>
-          <View style={[styles.headerBadge, { backgroundColor: theme.colors.primaryContainer || '#0056b3' }]}>
+          <View style={[styles.headerBadge, { 
+            backgroundColor: isServiceAppointment ? '#8E24AA' : theme.colors.primaryContainer 
+          }]}>
             <Text style={[styles.headerBadgeText, { color: theme.colors.onBackground || '#fff' }]}>
-              ID: {appointmentData._id}
+              ID: {appointmentData.appointment_ID || appointmentData._id}
             </Text>
           </View>
         </View>
 
         <ScrollView style={styles.scrollContainer}>
           <View style={styles.detailsGrid}>
-            <InfoCard
-              icon="event"
-              title="Date"
-              value={new Date(appointmentData.date).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            />
-            <InfoCard icon="schedule" title="Time" value={appointmentData.time} />
-            <InfoCard
-              icon="person"
-              title="Doctor"
-              value={`Dr. ${appointmentData.doctor.dr_firstName} ${appointmentData.doctor.dr_lastName}`}
-            />
-            <InfoCard
-              icon="medical-services"
-              title="Appointment Type"
-              value={appointmentData.appointment_type?.appointment_type}
-            />
-            <InfoCard 
-              icon="info" 
-              title="Status" 
-              value={appointmentData.status} 
-            />
-            {appointmentData.reason && (
-              <InfoCard icon="comment" title="Primary Concern" value={appointmentData.reason} />
-            )}
+            {renderAppointmentDetails()}
           </View>
         </ScrollView>
 
@@ -227,10 +339,7 @@ const DetailStyles = (theme) => StyleSheet.create({
   headerBadgeText: {
     fontSize: 12, // Reduced from 14
     fontFamily: sd.fonts.medium,
-    color: theme.colors.onBackground || '#fff',
   },
-
-  // Details Grid
   detailsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -269,8 +378,6 @@ const DetailStyles = (theme) => StyleSheet.create({
     fontSize: 14, // Reduced from 16
     fontFamily: sd.fonts.semiBold, // Changed from bold
   },
-
-  // Action Buttons
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',

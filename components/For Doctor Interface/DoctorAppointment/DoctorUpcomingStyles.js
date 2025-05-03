@@ -9,6 +9,8 @@ export default DoctorUpcomingStyles = (theme) => StyleSheet.create({
   scrollContainer: {
     backgroundColor: '#FFFFFF',
     height: '100%',
+    paddingBottom: 60,
+
   },
   cont: {
     flexDirection: 'column',

@@ -1,41 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Card, Button, Divider, Portal, Dialog, IconButton, useTheme } from 'react-native-paper';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import sd from '../../../../../utils/styleDictionary';
 
-// Placeholder immunization when no records exist
-const placeholderImmunization = {
-  _id: 'placeholder',
-  vaccineName: 'COVID-19 Vaccine',
-  dateAdministered: new Date().toISOString(),
-  doseNumber: 2,
-  totalDoses: 2,
-  lotNumber: 'ABC123456',
-  siteOfAdministration: 'Left Arm',
-  routeOfAdministration: 'Intramuscular',
-  notes: 'Patient tolerated the vaccine well. No immediate adverse reactions.',
-  administeredBy: {
-    doctor_firstName: 'Sample',
-    doctor_lastName: 'Doctor'
-  }
-};
-
+// Add loading state
 const Immunization = ({patient}) => {
   const theme = useTheme();
   const [immunizations, setImmunizations] = useState([]);
   const [selectedImmunization, setSelectedImmunization] = useState(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [showPlaceholder, setShowPlaceholder] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Add this helper function to get vaccine badge color like the web version
+  const getVaccineBadgeColor = (name) => {
+    if (!name) return '#2196F3'; // Default blue
+    
+    const vaccineName = name.toLowerCase();
+    if (vaccineName.includes('covid') || vaccineName.includes('coronavirus')) return '#F44336'; // Red
+    if (vaccineName.includes('flu') || vaccineName.includes('influenza')) return '#FFC107'; // Yellow
+    if (vaccineName.includes('hep') || vaccineName.includes('hepatitis')) return '#03A9F4'; // Light blue
+    if (vaccineName.includes('tetanus') || vaccineName.includes('tdap')) return '#9E9E9E'; // Gray
+    if (vaccineName.includes('mmr') || vaccineName.includes('measles')) return '#4CAF50'; // Green
+    return '#2196F3'; // Default blue
+  };
 
   useEffect(() => {
-    if (patient && patient.immunizations && patient.immunizations.length > 0) {
-      setImmunizations(patient.immunizations);
-      setShowPlaceholder(false);
-    } else {
-      setImmunizations([]);
-      setShowPlaceholder(true);
+    if (patient) {
+      if (patient.immunizations && patient.immunizations.length > 0) {
+        setImmunizations(patient.immunizations);
+      } else {
+        setImmunizations([]);
+      }
+      setLoading(false);
     }
   }, [patient]);
 
@@ -83,9 +81,7 @@ const Immunization = ({patient}) => {
   };
 
   const renderImmunizationCards = () => {
-    const displayImmunizations = showPlaceholder ? [placeholderImmunization] : immunizations;
-    
-    return displayImmunizations.map((immunization, index) => (
+    return immunizations.map((immunization, index) => (
       <TouchableOpacity
         key={immunization._id || index}
         activeOpacity={0.7}
@@ -94,11 +90,6 @@ const Immunization = ({patient}) => {
       >
         <Card style={cardStyles.card}>
           <View style={cardStyles.contentWrapper}>
-            {showPlaceholder && (
-              <View style={cardStyles.placeholderBanner}>
-                <Text style={cardStyles.placeholderText}>Sample</Text>
-              </View>
-            )}
             <Card.Content style={cardStyles.contentContainer}>
               <View style={cardStyles.headerContainer}>
                 <View>
@@ -108,6 +99,11 @@ const Immunization = ({patient}) => {
                   <Text style={cardStyles.title}>
                     {immunization.vaccineName || immunization.immunizationName}
                   </Text>
+                  <View style={[cardStyles.badge, {backgroundColor: getVaccineBadgeColor(immunization.vaccineName || immunization.immunizationName)}]}>
+                    <Text style={cardStyles.badgeText}>
+                      Dose {immunization.doseNumber || '1'}
+                    </Text>
+                  </View>
                 </View>
                 <MaterialIcons name="keyboard-arrow-right" size={24} color={theme.colors.primary} />
               </View>
@@ -142,7 +138,9 @@ const Immunization = ({patient}) => {
                     <Text style={cardStyles.detailLabel}>Administered By</Text>
                     <Text style={cardStyles.detailText}>
                       {immunization.administeredBy ? 
-                        `Dr. ${immunization.administeredBy.doctor_firstName || ''} ${immunization.administeredBy.doctor_lastName || ''}` : 
+                        `Dr. ${immunization.administeredBy.dr_firstName || immunization.administeredBy.doctor_firstName || ''} ${
+                          immunization.administeredBy.dr_middleInitial ? immunization.administeredBy.dr_middleInitial + '. ' : ''
+                        }${immunization.administeredBy.dr_lastName || immunization.administeredBy.doctor_lastName || ''}` : 
                         'Healthcare Provider'}
                     </Text>
                   </View>
@@ -157,10 +155,21 @@ const Immunization = ({patient}) => {
 
   return (
     <View style={{ marginBottom: 20 }}>
-      {immunizations.length > 0 || showPlaceholder ? (
+      {loading ? (
+        <View style={styles.emptyStateContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.emptyStateMessage}>Loading immunization records...</Text>
+        </View>
+      ) : immunizations.length > 0 ? (
         renderImmunizationCards()
       ) : (
-        <Text style={styles.noImmunizations}>No immunization records found.</Text>
+        <View style={styles.emptyStateContainer}>
+          <FontAwesome5 name="syringe" size={50} color="#CCCCCC" style={styles.emptyStateIcon} />
+          <Text style={styles.emptyStateTitle}>No Immunization Records Found</Text>
+          <Text style={styles.emptyStateMessage}>
+            You don't have any immunization records at this time.
+          </Text>
+        </View>
       )}
       
       <Portal>
@@ -251,7 +260,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
     fontStyle: 'italic'
-  }
+  },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 30,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    marginVertical: 20,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    elevation: 2,
+  },
+  emptyStateIcon: {
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontFamily: sd.fonts.semiBold,
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptyStateMessage: {
+    fontFamily: sd.fonts.regular,
+    fontSize: 14,
+    color: '#757575',
+    textAlign: 'center',
+  },
 });
 
 const cardStyles = StyleSheet.create({
@@ -265,7 +300,7 @@ const cardStyles = StyleSheet.create({
   },
   contentWrapper: {
     position: 'relative',
-    overflow: 'hidden',
+    // overflow: 'hidden',
   },
   contentContainer: {
     padding: 12,
@@ -329,15 +364,26 @@ const cardStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: sd.fonts.medium,
     color: '#333',
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  badgeText: {
+    color: 'white',
+    fontSize: 11,
+    fontFamily: sd.fonts.medium,
   }
 });
 
 const modalStyles = StyleSheet.create({
   dialog: {
     borderRadius: 16,
-    maxHeight: '90%',
-    marginTop: 0,
-    marginBottom: 0,
+    margin: 0, // Remove margin
+    // maxHeight: '90%', // Keep this for height limitation
   },
   modalHeader: {
     flexDirection: 'row',
@@ -357,10 +403,12 @@ const modalStyles = StyleSheet.create({
   },
   scrollArea: {
     paddingHorizontal: 0,
+    paddingBottom: 0, // Ensure no padding at bottom
   },
   scrollContent: {
     padding: 24,
     paddingTop: 0,
+    paddingBottom: 8, // Add small padding at bottom
   },
   header: {
     marginBottom: 16,
@@ -431,6 +479,9 @@ const modalStyles = StyleSheet.create({
   actions: {
     padding: 16,
     justifyContent: 'center',
+    borderTopWidth: 1, // Add border for visual separation
+    borderTopColor: '#f0f0f0',
+    marginTop: 0, // Ensure no margin at top
   },
   closeModalButton: {
     width: '100%',

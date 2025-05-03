@@ -280,9 +280,6 @@ const styles = StyleSheet.create({
     borderColor: '#2196F3',
   },
   submitButton: {
-    flex: 1,
-    marginLeft: 8,
-    backgroundColor: '#2196F3',
   },
   buttonLabel: {
     fontSize: 14,

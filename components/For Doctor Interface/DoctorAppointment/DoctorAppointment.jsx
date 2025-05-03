@@ -364,7 +364,7 @@ const createStyles = (theme) => StyleSheet.create({
     fontFamily: sd.fonts.semiBold,
     color: theme.colors.primary,
   },
-  filterContainer: {
+  filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },

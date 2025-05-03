@@ -16,11 +16,10 @@ export default EditProfileStyles = (theme) => StyleSheet.create({
     paddingBottom: 20, // Add padding at the bottom for better spacing
   },
   modalTitle: {
-    fontSize: 20,
-    fontFamily: sd.fonts.bold,
-    color: theme.colors.primary,
-    textAlign: 'center', // Center the title for consistency
-    marginBottom: 20,
+    fontSize: 18,
+    fontFamily: sd.fonts.semiBold,
+    color: '#2196F3',
+    marginBottom: 16,
   },
   inputContainer: {
     marginBottom: 16,
@@ -41,15 +40,16 @@ export default EditProfileStyles = (theme) => StyleSheet.create({
     color: theme.colors.onSurface,
   },
   imageContainer: {
+    position: 'relative',
     alignItems: 'center',
     marginBottom: 20,
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 2,
-    borderColor: theme.colors.primary,
+    borderColor: '#F0F0F0',
   },
   imageBadge: {
     position: 'absolute',
@@ -79,5 +79,92 @@ export default EditProfileStyles = (theme) => StyleSheet.create({
   saveButton: {
     flex: 1,
     marginLeft: 8,
+  },
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', 
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  profileImageTouchable: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#2196F3',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  avatarContainer: {
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  modalView: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  previewImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    marginBottom: 20,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  modalCancelButton: {
+    backgroundColor: '#F2F2F2',
+  },
+  modalUploadButton: {
+    backgroundColor: '#2196F3',
+  },
+  modalCancelText: {
+    color: '#333',
+    fontSize: 14,
+    fontFamily: sd.fonts.medium,
+  },
+  modalUploadText: {
+    color: 'white',
+    fontSize: 14,
+    fontFamily: sd.fonts.medium,
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });

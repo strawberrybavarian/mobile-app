@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,9 +7,10 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  ScrollView,
   Platform,
   Alert,
-  Keyboard,  // Import Keyboard API
+  Keyboard,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -20,20 +21,22 @@ import { Dropdown } from "react-native-element-dropdown";
 import { SignInStyles } from "./SignInStyles";
 import { useTheme } from "react-native-paper";
 import sd from "../../../utils/styleDictionary";
-import { useUser } from "@/UserContext";
+import { useUser } from "../../../UserContext";
 
 const SigninPage = ({ navigation }) => {
   const [passwordVisible, setPasswordVisible] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("Patient");
   const [rememberMe, setRememberMe] = useState(false);
   const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  
   const [passwordError, setPasswordError] = useState("");
   const [roleError, setRoleError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -41,8 +44,29 @@ const SigninPage = ({ navigation }) => {
   const theme = useTheme();
   const styles = SignInStyles(theme);
 
+  const dropdownRef = useRef(null)
+
+  const validateEmail = (email) => {
+    if (!email || email.trim() === '') {
+      return "Email cannot be empty";
+    }
+    
+    // Check for any whitespace
+    if (/\s/.test(email)) {
+      return "Email cannot contain spaces";
+    }
+    
+    // Check email format
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    
+    return ""; // Valid email
+  };
+
   useEffect(() => {
-    !email ? setEmailError("Email cannot be empty") : setEmailError("");
+    setEmailError(validateEmail(email));
     !password ? setPasswordError("Password cannot be empty") : setPasswordError("");
     !role ? setRoleError("Please select a role") : setRoleError("");
   }, [email, password, role]);
@@ -78,24 +102,25 @@ const SigninPage = ({ navigation }) => {
       
       console.log("Server response:", response.status);
       
-      // Handle email verification flow
-      if (response.data.emailVerificationRequired) {
-        console.log("Email verification required");
-        navigation.navigate("emailverification", { 
-          userId: response.data.userId, 
-          role: response.data.role,
-          email: normalizedEmail // Pass email for display purposes
-        });
-        return;
-      }
-      
       // Handle two-factor authentication flow
       if (response.data.twoFactorRequired) {
         console.log("Two-factor authentication required");
         navigation.navigate("emailverification", { 
           userId: response.data.userId, 
           role: response.data.role,
-          isTwoFactor: true
+          isTwoFactor: true // Important flag to identify 2FA
+        });
+        return;
+      }
+
+      // Handle email verification flow
+      if (response.data.emailVerificationRequired) {
+        console.log("Email verification required");
+        navigation.navigate("emailverification", { 
+          userId: response.data.userId, 
+          role: response.data.role,
+          email: normalizedEmail, // Pass email for display purposes
+          isTwoFactor: false // Explicitly mark as not 2FA
         });
         return;
       }
@@ -234,122 +259,170 @@ await storeData("userPassword", password);
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -200}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Adjust offset for iOS/Android
       >
-        <View style={styles.mainContainer}>
-          <View style={styles.headerContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.navigate("landingpage")}
-            >
-              <FontAwesome5 name="chevron-left" size={15} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerTitleContainer}
-              onPress={() => navigation.navigate("landingpage")}
-            >
-              <Text style={styles.headerTitle}>Sign up instead</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Sign In to Your</Text>
-            <Text style={styles.title}>Account</Text>
-          </View>
-
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.inputField}
-                placeholder="Email"
-                placeholderTextColor={theme.colors.onSurfaceVariant}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoCompleteType="email"
-                textContentType="emailAddress"
-                blurOnSubmit={false}
-                onSubmitEditing={() => Keyboard.dismiss()}
-              />
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.mainContainer}>
+            <View style={styles.headerContainer}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.navigate("landingpage")}
+              >
+                <FontAwesome5 name="chevron-left" size={15} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.headerTitleContainer}
+                onPress={() => navigation.navigate("createaccount")}
+              >
+                <Text style={styles.headerTitle}>Sign up instead</Text>
+              </TouchableOpacity>
             </View>
-            {emailError && isErrorVisible && (
-              <Text style={styles.errorMessage}>{emailError}</Text>
-            )}
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.inputField}
-                placeholder="Password"
-                placeholderTextColor={theme.colors.onSurfaceVariant}
-                secureTextEntry={passwordVisible}
-                value={password}
-                onChangeText={setPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoCompleteType="password"
-                textContentType="password"
-                blurOnSubmit={true}
-                onSubmitEditing={() => Keyboard.dismiss()}
-              />
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Sign In to Your</Text>
+              <Text style={styles.title}>Account</Text>
+            </View>
 
-              <View style={styles.iconContainer}>
-                <TouchableWithoutFeedback onPress={togglePasswordVisibility}>
-                  <FontAwesome5
-                    name={passwordVisible ? "eye-slash" : "eye"}
-                    size={15}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                </TouchableWithoutFeedback>
+            <View style={styles.formContainer}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputField}
+                  placeholder="Email"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  value={email}
+                  onChangeText={(text) => {
+                    // Remove whitespace automatically as user types
+                    const noWhitespaceText = text.replace(/\s/g, '');
+                    setEmail(noWhitespaceText);
+                  }}
+                  onBlur={() => setEmailTouched(true)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoCompleteType="email"
+                  textContentType="emailAddress"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+              </View>
+              {emailError && (isErrorVisible || emailTouched) && (
+                <Text style={styles.errorMessage}>{emailError}</Text>
+              )}
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputField}
+                  placeholder="Password"
+                  placeholderTextColor={theme.colors.onSurfaceVariant}
+                  secureTextEntry={passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoCompleteType="password"
+                  textContentType="password"
+                  blurOnSubmit={true}
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                />
+
+                <View style={styles.iconContainer}>
+                  <TouchableWithoutFeedback onPress={togglePasswordVisibility}>
+                    <FontAwesome5
+                      name={passwordVisible ? "eye-slash" : "eye"}
+                      size={15}
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  </TouchableWithoutFeedback>
+                </View>
+              </View>
+              {passwordError && isErrorVisible && (
+                <Text style={styles.errorMessage}>{passwordError}</Text>
+              )}
+
+              <View style={{width: '100%', marginVertical: 10}}>
+                <TouchableOpacity 
+                  activeOpacity={0.7}
+                  style={[
+                    styles.inputContainer,
+                    {height: 50, paddingHorizontal: 10},
+                    role && {borderColor: theme.colors.primary, borderWidth: 1}
+                  ]}
+                  onPress={() => {
+                    Keyboard.dismiss();
+                    // Use a timeout to ensure keyboard is dismissed before dropdown opens
+                    setTimeout(() => {
+                      if (dropdownRef.current) {
+                        dropdownRef.current.open();
+                      }
+                    }, 100);
+                  }}
+                >
+                  <Text 
+                    style={[
+                      styles.inputField, 
+                      {
+                        color: role ? theme.colors.onSurface : theme.colors.onSurfaceVariant
+                      }
+                    ]}
+                  >
+                    {role || "Select Role"}
+                  </Text>
+                  <View style={styles.iconContainer}>
+                    <FontAwesome5 
+                      name="chevron-down" 
+                      size={15} 
+                      color={theme.colors.onSurfaceVariant}
+                    />
+                  </View>
+                </TouchableOpacity>
+                
+                {roleError && isErrorVisible && (
+                  <Text style={styles.errorMessage}>{roleError}</Text>
+                )}
+                
+                <Dropdown
+                  ref={dropdownRef}
+                  style={[styles.dropdown, {position: 'absolute', opacity: 0, height: 0}]}
+                  data={[
+                    { label: "Patient", value: "Patient" },
+                    { label: "Doctor", value: "Doctor" },
+                  ]}
+                  labelField="label"
+                  valueField="value"
+                  value={role}
+                  onChange={(item) => {
+                    setRole(item.value);
+                    Keyboard.dismiss();
+                  }}
+                  itemTextStyle={{fontFamily: sd.fonts.regular, fontSize: sd.fontSizes.medium}}
+                />
               </View>
             </View>
-            {passwordError && isErrorVisible && (
-              <Text style={styles.errorMessage}>{passwordError}</Text>
-            )}
 
-            <View style={styles.dropdownContainer}>
-              <Dropdown
-                style={styles.dropdown}
-                data={[
-                  { label: "Patient", value: "Patient" },
-                  { label: "Doctor", value: "Doctor" },
-                ]}
-                labelField="label"
-                valueField="value"
-                placeholder="Select Role"
-                fontFamily={sd.fonts.light}
-                placeholderStyle={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontSize: sd.fontSizes.medium,
-                }}
-                value={role}
-                onChange={(item) => {
-                  setRole(item.value);
+            <View style={styles.signInButtonContainer}>
+              <TouchableOpacity 
+                style={[styles.signInButton, isSubmitting && styles.disabledButton]} 
+                onPress={(e) => {
                   Keyboard.dismiss();
+                  loginUser(e);
                 }}
-              />
+                disabled={isSubmitting}
+              >
+                <Text style={styles.signInText}>
+                  {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
+                </Text>
+              </TouchableOpacity>
             </View>
-            {roleError && isErrorVisible && (
-              <Text style={styles.errorMessage}>{roleError}</Text>
-            )}
-          </View>
 
-          <View style={styles.signInButtonContainer}>
-            <TouchableOpacity 
-              style={[styles.signInButton, isSubmitting && styles.disabledButton]} 
-              onPress={(e) => {
-                Keyboard.dismiss();
-                loginUser(e);
-              }}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.signInText}>
-                {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
-              </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('ForgotPasswordPage')}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
+
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );

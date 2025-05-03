@@ -1,153 +1,265 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Modal, Image, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Image, Alert, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import Modal from 'react-native-modal';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import { ip } from '../../../../../ContentExport';
+import { Button } from 'react-native-paper';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-const UploadImageModal = ({ isVisible, toggleModal, userId, setProfileImage }) => {
-  const [imageUri, setImageUri] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const UploadImageModal = ({ isVisible, toggleModal, userId, onImageUploadSuccess }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  
-
-  // Pick image from gallery
+  // Pick image from library
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission to access gallery is required!");
-      return;
-    }
-  
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 4],
-      quality: 1,
-    });
-  
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const selectedImageUri = result.assets[0].uri;
-      console.log(selectedImageUri); // Should log the image URI correctly
-      setImageUri(selectedImageUri);  // Set the image URI state for display and upload
-    }
-  };
-  
-
-  // Upload the image to the server
-  const handleUpload = async () => {
-    if (!imageUri) {
-      Alert.alert("No image selected!");
-      return;
-    }
-
-    setIsSubmitting(true);
-    const formData = new FormData();
-    formData.append('image', {
-      uri: imageUri,
-      type: 'image/jpeg', // Ensure this type matches the image format
-      name: 'profile.jpg', // Customize image name
-    });
-
     try {
-      const response = await axios.post(`${ip.address}/api/patient/api/${userId}/updateimage`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'We need media library access to upload photos.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
       });
 
-      console.log(response.data);
-
-      if (response.data.updatedPatient) {
-        Alert.alert("Image Uploaded", response.data.message);
-        setProfileImage(await response.data.updatedPatient.patient_image); // Update image in profile
-        toggleModal(); // Close modal
-      } else {
-        Alert.alert("Upload Failed", response.data.message);
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImage(result.assets[0].uri);
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
-      Alert.alert("An error occurred while uploading the image.");
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to select image.');
+    }
+  };
+
+  // Take photo with camera
+  const takePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'We need camera access to take photos.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      Alert.alert('Error', 'Failed to take photo.');
+    }
+  };
+
+  // Upload image to server
+  const uploadImage = async () => {
+    if (!selectedImage || !userId) {
+      Alert.alert('Error', 'Please select an image first.');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      // Create form data
+      const formData = new FormData();
+      const filename = selectedImage.split('/').pop();
+      
+      // Determine mime type
+      let type = 'image/jpeg';
+      if (filename) {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        if (ext === 'png') type = 'image/png';
+        if (ext === 'gif') type = 'image/gif';
+      }
+      
+      formData.append('image', {
+        uri: Platform.OS === 'android' ? selectedImage : selectedImage.replace('file://', ''),
+        name: filename || `upload-${Date.now()}.jpg`,
+        type,
+      });
+      
+      console.log('Uploading image for userId:', userId);
+      
+      // Send request to server
+      const response = await axios.post(
+        `${ip.address}/api/patient/api/${userId}/updateimage`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      
+      console.log('Upload response:', response.data);
+      
+      if (response.data.success) {
+        if (onImageUploadSuccess) {
+          onImageUploadSuccess(response.data.imagePath);
+        }
+        
+        setSelectedImage(null);
+        toggleModal();
+      } else {
+        throw new Error(response.data.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Upload Failed', 'An error occurred while uploading your image.');
     } finally {
-      setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
   return (
     <Modal
-      visible={isVisible}
-      onRequestClose={toggleModal}
-      animationType="slide"
-      transparent={true} // Set transparency
+      isVisible={isVisible}
+      onBackdropPress={toggleModal}
+      style={styles.modal}
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Upload Profile Image</Text>
-
-          <View style={styles.imageContainer}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.profileImage} />
-            ) : (
-              <Text>No image selected</Text>
-            )}
-            <TouchableOpacity onPress={pickImage} style={styles.pickImageButton}>
-              <Text style={styles.pickImageText}>Pick Image</Text>
-            </TouchableOpacity>
+      <View style={styles.modalContent}>
+        <Text style={styles.title}>Upload Profile Picture</Text>
+        
+        {/* Preview Selected Image */}
+        {selectedImage ? (
+          <View style={styles.previewContainer}>
+            <Image source={{ uri: selectedImage }} style={styles.previewImage} />
           </View>
-
-          <View style={styles.buttonContainer}>
-            <Button title="Upload" onPress={handleUpload} disabled={isSubmitting} />
-            <Button title="Cancel" onPress={toggleModal} />
+        ) : (
+          <View style={styles.placeholderContainer}>
+            <FontAwesome5 name="user-circle" size={80} color="#ccc" />
+            <Text style={styles.placeholderText}>Select an image</Text>
           </View>
+        )}
+        
+        {/* Button Container */}
+        <View style={styles.buttonsContainer}>
+          {/* Photo Source Buttons */}
+          <View style={styles.sourceButtons}>
+            <Button 
+              mode="contained" 
+              onPress={takePhoto}
+              disabled={isUploading}
+              style={styles.button}
+            >
+              Camera
+            </Button>
+            
+            <Button 
+              mode="contained" 
+              onPress={pickImage}
+              disabled={isUploading}
+              style={styles.button}
+            >
+              Gallery
+            </Button>
+          </View>
+          
+          {/* Upload Button */}
+          <Button
+            mode="contained"
+            onPress={uploadImage}
+            disabled={!selectedImage || isUploading}
+            loading={isUploading}
+            style={[styles.fullButton, !selectedImage && styles.disabledButton]}
+          >
+            Upload Photo
+          </Button>
+          
+          {/* Cancel Button */}
+          <Button
+            mode="outlined"
+            onPress={toggleModal}
+            disabled={isUploading}
+            style={styles.fullButton}
+          >
+            Cancel
+          </Button>
         </View>
       </View>
     </Modal>
   );
 };
 
-export default UploadImageModal;
+const styles = StyleSheet.create({
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    paddingBottom: 30,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  previewContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    overflow: 'hidden',
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  placeholderText: {
+    marginTop: 10,
+    color: '#666',
+  },
+  buttonsContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  sourceButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 15,
+  },
+  button: {
+    width: '48%',
+  },
+  fullButton: {
+    width: '100%',
+    marginVertical: 5,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  }
+});
 
-const styles = {
-    modalOverlay: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-    },
-    modalContent: {
-      width: '80%',
-      backgroundColor: 'white', // Modal content background
-      padding: 20,
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 20,
-    },
-    imageContainer: {
-      marginBottom: 20,
-      alignItems: 'center',
-    },
-    profileImage: {
-      width: 150,
-      height: 150,
-      borderRadius: 75,
-      marginBottom: 10,
-    },
-    pickImageButton: {
-      backgroundColor: '#007BFF',
-      padding: 10,
-      borderRadius: 5,
-    },
-    pickImageText: {
-      color: 'white',
-      fontWeight: 'bold',
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: '100%',
-    },
-  };
-  
+export default UploadImageModal;

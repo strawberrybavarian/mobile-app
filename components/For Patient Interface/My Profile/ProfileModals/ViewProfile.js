@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIn
 import { Button, Modal, Portal } from 'react-native-paper';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { getData } from '../../../storageUtility';
 import sd from '../../../../utils/styleDictionary';
@@ -11,7 +11,8 @@ import EditProfile from './EditProfile/EditProfile';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
 import TwoFactorModal from './Authentication/TwoFactorModal';
-import { ip } from '@/ContentExport';
+import { ip } from '../../../../ContentExport';
+import { maskEmail } from '@/utils/emailUtils';
 
 const ViewProfile = () => {
   const [userId, setUserId] = useState('');
@@ -25,6 +26,7 @@ const ViewProfile = () => {
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
+  const route = useRoute();
   const theme = useTheme();
 
   // Fetch user ID from storage
@@ -69,8 +71,26 @@ const ViewProfile = () => {
 
   // Two-Factor Authentication Functions
   const openTwoFactorModal = () => {
-    setTwoFactorModalVisible(true);
-    setTwoFactorSetupStep(1);
+    // Check if 2FA is already enabled
+    if (patient?.twoFactorEnabled) {
+      // Show confirmation dialog to disable 2FA
+      Alert.alert(
+        "Disable Two-Factor Authentication",
+        "Are you sure you want to disable two-factor authentication? This will make your account less secure.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Disable",
+            style: "destructive",
+            onPress: disableTwoFactor
+          }
+        ]
+      );
+    } else {
+      // Open the 2FA setup modal
+      setTwoFactorModalVisible(true);
+      setTwoFactorSetupStep(1);
+    }
   };
 
   const closeTwoFactorModal = () => {
@@ -131,38 +151,39 @@ const ViewProfile = () => {
   };
 
   const disableTwoFactor = async () => {
-    Alert.alert(
-      "Disable Two-Factor Authentication",
-      "Are you sure you want to disable two-factor authentication? This will make your account less secure.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Disable",
-          style: "destructive",
-          onPress: async () => {
-            setLoading(true);
-            try {
-              // API call to disable 2FA
-              const response = await axios.post(`${ip.address}/api/patient/api/twofactor/${userId}/disable`);
-              
-              if (response.data && response.data.success) {
-                // Update patient data to reflect disabled 2FA
-                setPatient({...patient, twoFactorEnabled: false});
-                Alert.alert("Success", "Two-factor authentication has been disabled for your account.");
-                closeTwoFactorModal();
-              } else {
-                Alert.alert("Error", "Failed to disable two-factor authentication. Please try again.");
-              }
-            } catch (error) {
-              console.error("Error disabling 2FA:", error);
-              Alert.alert("Error", "Failed to disable two-factor authentication. Please try again.");
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    setLoading(true);
+    try {
+      // Fix: Use the correct endpoint from user_routes.js
+      const response = await axios.post(`${ip.address}/api/disable-2fa`, {
+        userId: userId,
+        role: 'Patient' // Need to specify the role for the controller
+      });
+      
+      if (response.data) {
+        // Update patient data to reflect disabled 2FA
+        setPatient({...patient, twoFactorEnabled: false});
+        Alert.alert("Success", "Two-factor authentication has been disabled for your account.");
+      } else {
+        Alert.alert("Error", "Failed to disable two-factor authentication. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error disabling 2FA:", error);
+      let errorMessage = "Failed to disable two-factor authentication. Please try again.";
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      }
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    // Check if there's a refresh callback in the route params
+    if (route.params?.onGoBack) {
+      route.params.onGoBack();
+    }
+    navigation.goBack();
   };
 
   const textBox = (label, value) => (
@@ -236,7 +257,7 @@ const ViewProfile = () => {
       borderWidth: 1.5,
     },
     twoFactorEnabledButton: {
-      borderColor: theme.colors.secondary,
+      borderColor: theme.colors.primary,
     },
     infoCont: {
       backgroundColor: theme.colors.surface,
@@ -260,12 +281,14 @@ const ViewProfile = () => {
     },
   });
 
+  const maskedEmail = maskEmail(patient?.patient_email);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={{ flex: 1 }}>
+          <TouchableOpacity onPress={handleBack} style={{ flex: 1 }}>
             <Entypo name="chevron-small-left" size={30} color={theme.colors.primary} />
           </TouchableOpacity>
           <Text style={styles.headerText}>View Profile</Text>
@@ -302,7 +325,7 @@ const ViewProfile = () => {
                   </Button>
                   <Button
                     mode="outlined"
-                    textColor={patient.twoFactorEnabled ? theme.colors.secondary : theme.colors.primary}
+                    textColor={theme.colors.primary}
                     onPress={openTwoFactorModal}
                     style={[styles.button, styles.securityButton, patient.twoFactorEnabled && styles.twoFactorEnabledButton]}
                     icon={({color}) => (
@@ -321,7 +344,7 @@ const ViewProfile = () => {
               {textBox('Middle Initial', (patient.patient_middleInitial + '.'))}
               {textBox('Last Name', patient.patient_lastName)}
               {textBox('Contact Number', patient.patient_contactNumber)}
-              {textBox('Email Address', patient.patient_email)}
+              {textBox('Email Address', maskedEmail)}
               {textBox('Gender', patient.patient_gender)}
               {textBox('Address', (
                 patient.patient_address.street + ', ' +

@@ -152,6 +152,101 @@ const CreateAccountStyles = (theme) => StyleSheet.create({
         fontFamily: 'Poppins-LightItalic',
         fontSize: sd.fontSizes.small,
     },
+    modalContainer: {
+      backgroundColor: 'white',
+      margin: 20,
+      padding: 20,
+      borderRadius: 10,
+      maxHeight: '80%',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    scrollContainer: {
+      flex: 1, // Use flex: 1 instead of maxHeight to fill available space
+      marginBottom: 15, // Add margin to separate from buttons
+    },
+    modalContent: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontFamily: sd.fonts.bold || 'bold',
+      textAlign: 'center',
+      marginVertical: 15,
+      color: '#000',
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontFamily: sd.fonts.semibold || 'bold',
+      marginTop: 15,
+      marginBottom: 5,
+      color: '#000',
+    },
+    paragraph: {
+      fontSize: 14,
+      fontFamily: sd.fonts.regular || 'normal',
+      marginBottom: 10,
+      lineHeight: 20,
+      color: '#333',
+    },
+    listTitle: {
+      fontSize: 16,
+      fontFamily: sd.fonts.medium || 'medium',
+      marginTop: 10,
+      marginBottom: 5,
+      color: '#000',
+    },
+    listItem: {
+      fontSize: 14,
+      fontFamily: sd.fonts.regular || 'normal',
+      marginLeft: 10,
+      marginBottom: 5,
+      lineHeight: 20,
+      color: '#333',
+    },
+    modalButtonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginTop: 15,
+    },
+    modalButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 20,
+      borderRadius: 8,
+      minWidth: 120,
+      alignItems: 'center',
+      backgroundColor: '#e0e0e0',
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontFamily: sd.fonts.medium || 'medium',
+      color: '#000',
+      textAlign: 'center',
+    },
+    bottomSheetModal: {
+      margin: 0,
+      justifyContent: 'flex-end',
+    },
+    bottomSheetContainer: {
+      backgroundColor: 'white',
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 15,
+      height: '70%', // Fixed height instead of min/max
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    bottomSheetHandle: {
+      width: 40,
+      height: 5,
+      backgroundColor: '#DDDDDD',
+      borderRadius: 3,
+      alignSelf: 'center',
+      marginBottom: 10,
+    },
   });
 
   export default CreateAccountStyles;

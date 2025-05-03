@@ -9,7 +9,7 @@ export const DoctorSpecialtyStyles = StyleSheet.create({
         height: 193,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
-        overflow: 'hidden', // Clip child elements to prevent shadow from being visible on the sides
+        // overflow: 'hidden', // Clip child elements to prevent shadow from being visible on the sides
         elevation: 2, // Adjust the elevation value based on your preference
         shadowColor: 'black',
         shadowOffset: { width: 0, height: 5 }, // Shadow offset, adjust the height value for the desired distance
@@ -544,7 +544,7 @@ export const upperNavigationStyles = StyleSheet.create({
       borderBottomRightRadius: 12,
       padding: 10,
       backgroundColor: '#92A3FD',
-      overflow: 'hidden',
+      // overflow: 'hidden',
       height: 60,
       justifyContent: 'center',
     },

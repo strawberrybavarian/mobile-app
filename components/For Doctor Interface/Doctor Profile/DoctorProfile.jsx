@@ -11,12 +11,12 @@ import { ip } from '../../../ContentExport';
 import axios from 'axios';
 import sd from '../../../utils/styleDictionary';
 import { useUser } from '../../../UserContext';
-
 const DoctorProfile = () => {
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const navigation = useNavigation();
+  const { logout } = useUser(); // Get logout function from UserContext
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -30,14 +30,14 @@ const DoctorProfile = () => {
     fetchUserId();
   }, []);
 
-  const logout = () => {
-    axios.post(`${ip.address}/api/logout`)
-      .then((res) => {
-        console.log(res);
-        navigation.navigate('landingpage');
-      })
-      .catch((err) => console.error('Logout error:', err));
-  };
+  // const logout = () => {
+  //   axios.post(`${ip.address}/api/logout`)
+  //     .then((res) => {
+  //       console.log(res);
+  //       navigation.navigate('landingpage');
+  //     })
+  //     .catch((err) => console.error('Logout error:', err));
+  // };
 
   useFocusEffect(
     useCallback(() => {

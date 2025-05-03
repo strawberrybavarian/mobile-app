@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { Avatar, Card, useTheme, Button, Modal, Portal, IconButton, Menu } from 'react-native-paper';
-import { ip } from '@/ContentExport';
+import { ip } from '../../../../ContentExport';
 import { Entypo } from '@expo/vector-icons';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
@@ -260,7 +260,7 @@ const DoctorPosts = ({ posts, doctor, updatePostInState, refreshPosts }) => {
 const createStyles = (theme) =>
   StyleSheet.create({
     listContainer: {
-      padding: 10,
+      paddingHorizontal: 10,
     },
     card: {
       marginVertical: 10,
